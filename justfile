@@ -12,6 +12,10 @@ go:
 	go build -o ../target/go/wasm -ldflags="-r $(pwd)" wasm.go
 	echo "Generated in ./target/go/wasm"
 
+# Run a Go program, like `just go-run examples/simple.go`.
+go-run FILE:
+	GOPATH=$(pwd)/extension go run {{FILE}}
+
 # Generate cgo debug objects.
 debug-cgo:
 	cd extension && \
