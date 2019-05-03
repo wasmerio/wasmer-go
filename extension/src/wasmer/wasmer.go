@@ -23,7 +23,42 @@ type Instance struct {
 	instance *C.wasmer_instance_t
 }
 
-type Value int32
+type ValueType int
+
+const (
+	Type_I32 ValueType = iota
+	Type_I64
+	Type_F32
+	Type_F64
+)
+
+type Value_I32 int32
+type Value_I64 int64
+type Value_F32 float32
+type Value_F64 float64
+
+type Value struct {
+	Type ValueType
+	Value_I32
+	Value_I64
+	Value_F32
+	Value_F64
+}
+
+func (self Value) String() string {
+	switch (self.Type) {
+	case Type_I32:
+		return fmt.Sprintf("%d", self.Value_I32)
+	case Type_I64:
+		return fmt.Sprintf("%d", self.Value_I64)
+	case Type_F32:
+		return fmt.Sprintf("%f", self.Value_F32)
+	case Type_F64:
+		return fmt.Sprintf("%f", self.Value_F64)
+	default:
+		return ""
+	}
+}
 
 func NewInstance(bytes []byte) Instance {
 	var imports []C.wasmer_import_t = []C.wasmer_import_t{}
@@ -38,7 +73,7 @@ func NewInstance(bytes []byte) Instance {
 	)
 
 	if (C.WASMER_OK != compile_result) {
-		fmt.Println("Failed to compile the module.")
+		panic("Failed to compile the module.")
 	}
 
 	return Instance { instance }
@@ -71,8 +106,19 @@ func (self Instance) Call(function_name string) Value {
 	)
 
 	if (C.WASMER_OK != call_result) {
-		fmt.Println("Failed to call the `sum` function.")
+		panic("Failed to call the `sum` function.")
 	}
 
-	return (Value) (results[0].value[C.WASM_I32])
+	switch results[0].tag {
+	case C.WASM_I32:
+		return Value { Type: Type_I32, Value_I32: (Value_I32) (results[0].value[C.WASM_I32]) }
+	case C.WASM_I64:
+		return Value { Type: Type_I64, Value_I64: (Value_I64) (results[0].value[C.WASM_I64]) }
+	case C.WASM_F32:
+		return Value { Type: Type_F32, Value_F32: (Value_F32) (results[0].value[C.WASM_F32]) }
+	case C.WASM_F64:
+		return Value { Type: Type_F64, Value_F64: (Value_F64) (results[0].value[C.WASM_F64]) }
+	default:
+		panic("unreachable")
+	}
 }
