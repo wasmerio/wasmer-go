@@ -18,5 +18,6 @@ func main(){
 	instance := wasmer.NewInstance(bytes)
 	result := instance.Call("sum")
 
-	fmt.Println(fmt.Sprintf("Result is: %d", result))
+	fmt.Print("Result of `sum(1, 2)` is: ")
+	fmt.Println(result)
 }
