@@ -11,22 +11,21 @@ import (
 	"unsafe"
 )
 
-func Foo() {
-	var bytes []byte
-	var err error
+func ReadBytes(filename string) ([]byte, error) {
+	return ioutil.ReadFile(filename)
+}
 
-	bytes, err = ioutil.ReadFile("simple.wasm")
+func Validate(bytes []byte) bool {
+	return true == C.wasmer_validate((*C.uchar) (unsafe.Pointer(&bytes[0])), C.uint(len(bytes)))
+}
 
-	if err != nil {
-		fmt.Print(err)
-		return
-	}
+type Instance struct {
+	instance *C.wasmer_instance_t
+}
 
-	if (false == C.wasmer_validate((*C.uchar) (unsafe.Pointer(&bytes[0])), C.uint(len(bytes)))) {
-		fmt.Println("Module is invalid.")
-		return
-	}
+type Value int32
 
+func NewInstance(bytes []byte) Instance {
 	var imports []C.wasmer_import_t = []C.wasmer_import_t{}
 	var instance *C.wasmer_instance_t = nil
 
@@ -40,9 +39,12 @@ func Foo() {
 
 	if (C.WASMER_OK != compile_result) {
 		fmt.Println("Failed to compile the module.")
-		return
 	}
 
+	return Instance { instance }
+}
+
+func (self Instance) Call(function_name string) Value {
 	var parameter_one C.wasmer_value_t
 	parameter_one.tag = C.WASM_I32
 	parameter_one.value[C.WASM_I32] = 1
@@ -56,9 +58,12 @@ func Foo() {
 	var result_one C.wasmer_value_t
 	var results []C.wasmer_value_t = []C.wasmer_value_t{result_one}
 
+	var export_name = C.CString("sum")
+	defer C.free(unsafe.Pointer(export_name))
+
 	var call_result C.wasmer_result_t = C.wasmer_instance_call(
-		instance,
-		C.CString("sum"),
+		self.instance,
+		export_name,
 		(*C.wasmer_value_t) (unsafe.Pointer(&parameters[0])),
 		C.int(len(parameters)),
 		(*C.wasmer_value_t) (unsafe.Pointer(&results[0])),
@@ -67,9 +72,7 @@ func Foo() {
 
 	if (C.WASMER_OK != call_result) {
 		fmt.Println("Failed to call the `sum` function.")
-		return
 	}
 
-	fmt.Print("Result is: ")
-	fmt.Println(results[0].value[C.WASM_I32])
+	return (Value) (results[0].value[C.WASM_I32])
 }
