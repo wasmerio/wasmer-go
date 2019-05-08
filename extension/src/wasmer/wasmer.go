@@ -41,45 +41,58 @@ func NewInstance(bytes []byte) Instance {
 	return Instance { instance }
 }
 
-func (self Instance) Call(function_name string) Value {
-	var parameter_one C.wasmer_value_t
-	parameter_one.tag = C.WASM_I32
-	parameter_one.value[C.WASM_I32] = 1
+func (self Instance) Call(function_name string, arguments []Value) Value {
+	var wasm_arguments []C.wasmer_value_t = make([]C.wasmer_value_t, len(arguments))
 
-	var parameter_two C.wasmer_value_t
-	parameter_two.tag = C.WASM_I32
-	parameter_two.value[C.WASM_I32] = 2
+	for index, value := range arguments {
+		switch value.GetType() {
+		case Type_I32:
+			wasm_arguments[index].tag = C.WASM_I32
+			wasm_arguments[index].value[C.WASM_I32] = byte(value.ToI32())
+		case Type_I64:
+			wasm_arguments[index].tag = C.WASM_I64
+			wasm_arguments[index].value[C.WASM_I64] = byte(value.ToI64())
+		case Type_F32:
+			wasm_arguments[index].tag = C.WASM_F32
+			wasm_arguments[index].value[C.WASM_F32] = byte(value.ToF32())
+		case Type_F64:
+			wasm_arguments[index].tag = C.WASM_F64
+			wasm_arguments[index].value[C.WASM_F64] = byte(value.ToF64())
+		default:
+			panic("Unreachable")
+		}
+	}
+	
+	var wasm_result C.wasmer_value_t
+	var wasm_results []C.wasmer_value_t = []C.wasmer_value_t{wasm_result}
 
-	var parameters []C.wasmer_value_t = []C.wasmer_value_t{parameter_one, parameter_two}
-
-	var result_one C.wasmer_value_t
-	var results []C.wasmer_value_t = []C.wasmer_value_t{result_one}
-
-	var export_name = C.CString("sum")
-	//defer C.free(unsafe.Pointer(export_name))
+	var wasm_function_name = C.CString(function_name)
+	defer C.free(unsafe.Pointer(wasm_function_name))
 
 	var call_result C.wasmer_result_t = C.wasmer_instance_call(
 		self.instance,
-		export_name,
-		(*C.wasmer_value_t) (unsafe.Pointer(&parameters[0])),
-		C.int(len(parameters)),
-		(*C.wasmer_value_t) (unsafe.Pointer(&results[0])),
-		C.int(len(results)),
+		wasm_function_name,
+		(*C.wasmer_value_t) (unsafe.Pointer(&wasm_arguments[0])),
+		C.int(len(wasm_arguments)),
+		(*C.wasmer_value_t) (unsafe.Pointer(&wasm_results[0])),
+		C.int(len(wasm_results)),
 	)
 
 	if (C.WASMER_OK != call_result) {
 		panic("Failed to call the `sum` function.")
 	}
 
-	switch results[0].tag {
+	var result = wasm_results[0];
+
+	switch result.tag {
 	case C.WASM_I32:
-		return ValueI32(int32(results[0].value[C.WASM_I32]));
+		return ValueI32(int32(result.value[C.WASM_I32]));
 	case C.WASM_I64:
-		return ValueI64(int64(results[0].value[C.WASM_I64]));
+		return ValueI64(int64(result.value[C.WASM_I64]));
 	case C.WASM_F32:
-		return ValueF32(float32(results[0].value[C.WASM_F32]));
+		return ValueF32(float32(result.value[C.WASM_F32]));
 	case C.WASM_F64:
-		return ValueF64(float64(results[0].value[C.WASM_F64]));
+		return ValueF64(float64(result.value[C.WASM_F64]));
 	default:
 		panic("unreachable")
 	}
