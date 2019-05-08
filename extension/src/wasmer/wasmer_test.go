@@ -22,3 +22,11 @@ func TestValidate(t *testing.T) {
 		t.Error("Failed to validate the module.")
 	}
 }
+
+func TestValidateInvalid(t *testing.T) {
+	output := Validate([]byte{0, 1, 2, 3})
+
+	if output {
+		t.Error("Failed to invalidate the supposed module.")
+	}
+}
