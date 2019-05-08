@@ -24,7 +24,7 @@ debug-cgo:
 
 # Run the tests.
 test:
-	GOPATH=$(pwd)/extension go test wasmer
+	GOPATH=$(pwd)/extension go test wasmer -test.v
 
 # Local Variables:
 # mode: makefile
