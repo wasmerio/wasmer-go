@@ -22,6 +22,10 @@ debug-cgo:
 		go tool cgo wasmer.go && \
 		echo "Browse extension/src/wasmer/_obj/"
 
+# Run the tests.
+test:
+	GOPATH=$(pwd)/extension go test wasmer
+
 # Local Variables:
 # mode: makefile
 # End:
