@@ -8,6 +8,7 @@ import "C"
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"unsafe"
 )
 
@@ -19,10 +20,6 @@ func Validate(bytes []byte) bool {
 	return true == C.wasmer_validate((*C.uchar) (unsafe.Pointer(&bytes[0])), C.uint(len(bytes)))
 }
 
-type Instance struct {
-	instance *C.wasmer_instance_t
-}
-
 type ValueType int
 
 const (
@@ -32,32 +29,76 @@ const (
 	Type_F64
 )
 
-type Value_I32 int32
-type Value_I64 int64
-type Value_F32 float32
-type Value_F64 float64
-
 type Value struct {
-	Type ValueType
-	Value_I32
-	Value_I64
-	Value_F32
-	Value_F64
+	value uint64
+	ty ValueType
+}
+
+func ValueI32(value int32) Value {
+	return Value {
+		value: uint64(value),
+		ty: Type_I32,
+	};
+}
+
+func ValueI64(value int64) Value {
+	return Value {
+		value: uint64(value),
+		ty: Type_I64,
+	};
+}
+
+func ValueF32(value float32) Value {
+	return Value {
+		value: uint64(math.Float32bits(value)),
+		ty: Type_F32,
+	};
+}
+
+func ValueF64(value float64) Value {
+	return Value {
+		value: math.Float64bits(value),
+		ty: Type_F64,
+	};
+}
+
+func (self Value) GetType() ValueType {
+	return self.ty;
+}
+
+func (self Value) ToI32() int32 {
+	return int32(self.value);
+}
+
+func (self Value) ToI64() int64 {
+	return int64(self.value);
+}
+
+func (self Value) ToF32() float32 {
+	return math.Float32frombits(uint32(self.value));
+}
+
+func (self Value) ToF64() float64 {
+	return math.Float64frombits(self.value);
 }
 
 func (self Value) String() string {
-	switch (self.Type) {
+	switch (self.ty) {
 	case Type_I32:
-		return fmt.Sprintf("%d", self.Value_I32)
+		return fmt.Sprintf("%d", self.ToI32());
 	case Type_I64:
-		return fmt.Sprintf("%d", self.Value_I64)
+		return fmt.Sprintf("%d", self.ToI64())
 	case Type_F32:
-		return fmt.Sprintf("%f", self.Value_F32)
+		return fmt.Sprintf("%f", self.ToF32())
 	case Type_F64:
-		return fmt.Sprintf("%f", self.Value_F64)
+		return fmt.Sprintf("%f", self.ToF64())
 	default:
 		return ""
 	}
+}
+
+type Instance struct {
+	instance *C.wasmer_instance_t
 }
 
 func NewInstance(bytes []byte) Instance {
@@ -94,7 +135,7 @@ func (self Instance) Call(function_name string) Value {
 	var results []C.wasmer_value_t = []C.wasmer_value_t{result_one}
 
 	var export_name = C.CString("sum")
-	defer C.free(unsafe.Pointer(export_name))
+	//defer C.free(unsafe.Pointer(export_name))
 
 	var call_result C.wasmer_result_t = C.wasmer_instance_call(
 		self.instance,
@@ -111,13 +152,13 @@ func (self Instance) Call(function_name string) Value {
 
 	switch results[0].tag {
 	case C.WASM_I32:
-		return Value { Type: Type_I32, Value_I32: (Value_I32) (results[0].value[C.WASM_I32]) }
+		return ValueI32(int32(results[0].value[C.WASM_I32]));
 	case C.WASM_I64:
-		return Value { Type: Type_I64, Value_I64: (Value_I64) (results[0].value[C.WASM_I64]) }
+		return ValueI64(int64(results[0].value[C.WASM_I64]));
 	case C.WASM_F32:
-		return Value { Type: Type_F32, Value_F32: (Value_F32) (results[0].value[C.WASM_F32]) }
+		return ValueF32(float32(results[0].value[C.WASM_F32]));
 	case C.WASM_F64:
-		return Value { Type: Type_F64, Value_F64: (Value_F64) (results[0].value[C.WASM_F64]) }
+		return ValueF64(float64(results[0].value[C.WASM_F64]));
 	default:
 		panic("unreachable")
 	}
