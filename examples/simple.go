@@ -4,19 +4,25 @@ import (
 	"runtime"
 	"path"
 	"fmt"
-	"wasmer"
+	wasm "wasmer"
 )
 
 func main(){
 	_, filename, _, _ := runtime.Caller(0)
 	module_path := path.Join(path.Dir(filename), "simple.wasm")
 
-	bytes, _ := wasmer.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(module_path)
 
-	fmt.Println(fmt.Sprintf("Is module valid? %t", wasmer.Validate(bytes)))
+	fmt.Println(fmt.Sprintf("Is module valid? %t", wasm.Validate(bytes)))
 
-	instance := wasmer.NewInstance(bytes)
-	result := instance.Call("sum")
+	instance := wasm.NewInstance(bytes)
+	result := instance.Call(
+		"sum",
+		[]wasm.Value{
+			wasm.ValueI32(1),
+			wasm.ValueI32(2),
+		},
+	)
 
 	fmt.Print("Result of `sum(1, 2)` is: ")
 	fmt.Println(result)
