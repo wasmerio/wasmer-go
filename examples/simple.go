@@ -1,9 +1,9 @@
 package main
 
 import (
-	"runtime"
-	"path"
 	"fmt"
+	"path"
+	"runtime"
 	wasm "wasmer"
 )
 
