@@ -75,16 +75,20 @@ func (self Instance) Call(function_name string, arguments []Value) (Value, error
 		switch value.GetType() {
 		case Type_I32:
 			wasm_arguments[index].tag = C.WASM_I32
-			wasm_arguments[index].value[C.WASM_I32] = byte(value.ToI32())
+			pointer := (*int32) (unsafe.Pointer(&wasm_arguments[index].value))
+			*pointer = value.ToI32()
 		case Type_I64:
 			wasm_arguments[index].tag = C.WASM_I64
-			wasm_arguments[index].value[C.WASM_I64] = byte(value.ToI64())
+			pointer := (*int64) (unsafe.Pointer(&wasm_arguments[index].value))
+			*pointer = value.ToI64()
 		case Type_F32:
 			wasm_arguments[index].tag = C.WASM_F32
-			wasm_arguments[index].value[C.WASM_F32] = byte(value.ToF32())
+			pointer := (*float32) (unsafe.Pointer(&wasm_arguments[index].value))
+			*pointer = value.ToF32()
 		case Type_F64:
 			wasm_arguments[index].tag = C.WASM_F64
-			wasm_arguments[index].value[C.WASM_F64] = byte(value.ToF64())
+			pointer := (*float64) (unsafe.Pointer(&wasm_arguments[index].value))
+			*pointer = value.ToF64()
 		default:
 			panic("Unreachable")
 		}
@@ -119,13 +123,21 @@ func (self Instance) Call(function_name string, arguments []Value) (Value, error
 
 	switch result.tag {
 	case C.WASM_I32:
-		return ValueI32(int32(result.value[C.WASM_I32])), nil
+		pointer := (*int32) (unsafe.Pointer(&result.value))
+
+		return ValueI32(*pointer), nil
 	case C.WASM_I64:
-		return ValueI64(int64(result.value[C.WASM_I64])), nil
+		pointer := (*int64) (unsafe.Pointer(&result.value))
+
+		return ValueI64(*pointer), nil
 	case C.WASM_F32:
-		return ValueF32(float32(result.value[C.WASM_F32])), nil
+		pointer := (*float32) (unsafe.Pointer(&result.value))
+
+		return ValueF32(*pointer), nil
 	case C.WASM_F64:
-		return ValueF64(float64(result.value[C.WASM_F64])), nil
+		pointer := (*float64) (unsafe.Pointer(&result.value))
+
+		return ValueF64(*pointer), nil
 	default:
 		panic("unreachable")
 	}
