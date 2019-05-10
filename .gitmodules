@@ -1,0 +1,3 @@
+[submodule "extension/src/github.com/stretchr/testify"]
+	path = extension/src/github.com/stretchr/testify
+	url = https://github.com/stretchr/testify
