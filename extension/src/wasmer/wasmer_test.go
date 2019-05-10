@@ -83,3 +83,19 @@ func TestCallI64I64(t *testing.T) {
 	assert.Equal(t, ValueI64(7), output)
 	assert.NoError(t, err)
 }
+
+func TestCallF32F32(t *testing.T) {
+	instance, _ := NewInstance(GetBytes())
+	output, err := instance.Call("f32_f32", []Value{ValueF32(7.42)})
+
+	assert.Equal(t, ValueF32(7.42), output)
+	assert.NoError(t, err)
+}
+
+func TestCallF64F64(t *testing.T) {
+	instance, _ := NewInstance(GetBytes())
+	output, err := instance.Call("f64_f64", []Value{ValueF64(7.42)})
+
+	assert.Equal(t, ValueF64(7.42), output)
+	assert.NoError(t, err)
+}
