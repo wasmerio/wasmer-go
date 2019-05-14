@@ -12,15 +12,9 @@ func main(){
 	module_path := path.Join(path.Dir(filename), "simple.wasm")
 
 	bytes, _ := wasm.ReadBytes(module_path)
-
-	fmt.Println(fmt.Sprintf("Is module valid? %t", wasm.Validate(bytes)))
-
 	instance, _ := wasm.NewInstance(bytes)
-	result, _ := instance.Call(
-		"sum",
-		wasm.I32(1),
-		wasm.I32(2),
-	)
+
+	result, _ := instance.Exports["sum"](wasm.I32(1), wasm.I32(2))
 
 	fmt.Print("Result of `sum(1, 2)` is: ")
 	fmt.Println(result)
