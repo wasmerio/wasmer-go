@@ -12,6 +12,7 @@ const (
 	Type_I64
 	Type_F32
 	Type_F64
+	Type_Void
 )
 
 type Value struct {
@@ -47,6 +48,13 @@ func ValueF64(value float64) Value {
 	}
 }
 
+func ValueVoid() Value {
+	return Value {
+		value: 0,
+		ty: Type_Void,
+	}
+}
+
 func (self Value) GetType() ValueType {
 	return self.ty
 }
@@ -67,6 +75,10 @@ func (self Value) ToF64() float64 {
 	return math.Float64frombits(self.value)
 }
 
+func (self Value) ToVoid() interface {} {
+	return nil
+}
+
 func (self Value) String() string {
 	switch (self.ty) {
 	case Type_I32:
@@ -77,6 +89,8 @@ func (self Value) String() string {
 		return fmt.Sprintf("%f", self.ToF32())
 	case Type_F64:
 		return fmt.Sprintf("%f", self.ToF64())
+	case Type_Void:
+		return "void"
 	default:
 		return ""
 	}

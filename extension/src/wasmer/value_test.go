@@ -40,3 +40,11 @@ func TestValueF64(t *testing.T) {
 	assert.Equal(t, Type_F64, wasm_value.GetType())
 	assert.Equal(t, "7.420000", wasm_value.String())
 }
+
+func TestValueVoid(t *testing.T) {
+	wasm_value := ValueVoid()
+
+	assert.Equal(t, nil, wasm_value.ToVoid())
+	assert.Equal(t, Type_Void, wasm_value.GetType())
+	assert.Equal(t, "void", wasm_value.String())
+}
