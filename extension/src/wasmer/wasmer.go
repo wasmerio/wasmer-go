@@ -68,7 +68,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 	return Instance { instance }, nil
 }
 
-func (self Instance) Call(function_name string, arguments []Value) (Value, error) {
+func (self Instance) Call(function_name string, arguments ...Value) (Value, error) {
 	var wasm_exports *C.wasmer_exports_t = nil
 	C.wasmer_instance_exports(self.instance, &wasm_exports)
 
