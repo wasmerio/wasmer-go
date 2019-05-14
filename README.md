@@ -53,7 +53,7 @@ func main(){
 	instance, _ := wasm.NewInstance(bytes)
     
 	sum := instance.Exports["sum"]
-	result, _ := sum(wasm.I32(5), wasm.I32(37))
+	result, _ := sum(5, 37)
 
 	fmt.Println(result) // 42!
 }
