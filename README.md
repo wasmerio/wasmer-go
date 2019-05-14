@@ -51,11 +51,9 @@ import (
 func main(){
 	bytes, _ := wasm.ReadBytes("simple.wasm")
 	instance, _ := wasm.NewInstance(bytes)
-	result, _ := instance.Call(
-		"sum",
-        wasm.I32(5),
-        wasm.I32(37),
-	)
+    
+	sum := instance.Exports["sum"]
+	result, _ := sum(wasm.I32(5), wasm.I32(37))
 
 	fmt.Println(result) // 42!
 }
