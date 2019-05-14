@@ -140,7 +140,7 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 			pointer := (*float64) (unsafe.Pointer(&wasm_inputs[index].value))
 			*pointer = value.ToF64()
 		default:
-			panic("Unreachable")
+			panic(fmt.Sprintf("Invalid arguments type when calling the `%s` exported function.", function_name))
 		}
 	}
 	
