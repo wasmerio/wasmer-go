@@ -1,7 +1,6 @@
 package wasmer
 
 import (
-	"fmt"
 	"path"
 	"runtime"
 	"testing"
@@ -42,7 +41,7 @@ func TestInstantiateInvalidModule(t *testing.T) {
 
 func TestBasicSum(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("sum", I32(1), I32(2))
+	output, err := instance.Exports["sum"](I32(1), I32(2))
 
 	assert.Equal(t, I32(3), output)
 	assert.NoError(t, err)
@@ -51,20 +50,14 @@ func TestBasicSum(t *testing.T) {
 func TestCallUndefinedFunction(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
 	function_name := "foo"
-	output, err := instance.Call(function_name)
+	_, export_exists := instance.Exports[function_name]
 
-	assert.Equal(t, I32(0), output)
-	assert.EqualError(t, err, fmt.Sprintf("The instance has no exported function named `%s`.", function_name))
-
-	last_err, err := GetLastError()
-
-	assert.Equal(t, "error instantiating", last_err)
-	assert.NoError(t, err)
+	assert.Equal(t, false, export_exists)
 }
 
 func TestCallMissingArguments(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("sum", I32(1))
+	output, err := instance.Exports["sum"](I32(1))
 
 	assert.Equal(t, I32(0), output)
 	assert.EqualError(t, err, "Missing 1 argument(s) when calling the `sum` exported function; Expect 2 argument(s), given 1.")
@@ -72,7 +65,7 @@ func TestCallMissingArguments(t *testing.T) {
 
 func TestCallExtraArguments(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("sum", I32(1), I32(2), I32(3))
+	output, err := instance.Exports["sum"](I32(1), I32(2), I32(3))
 
 	assert.Equal(t, I32(0), output)
 	assert.EqualError(t, err, "Given 1 extra argument(s) when calling the `sum` exported function; Expect 2 argument(s), given 3.")
@@ -80,7 +73,7 @@ func TestCallExtraArguments(t *testing.T) {
 
 func TestCallArity0(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("arity_0")
+	output, err := instance.Exports["arity_0"]()
 
 	assert.Equal(t, I32(42), output)
 	assert.NoError(t, err)
@@ -88,7 +81,7 @@ func TestCallArity0(t *testing.T) {
 
 func TestCallI32I32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("i32_i32", I32(7))
+	output, err := instance.Exports["i32_i32"](I32(7))
 
 	assert.Equal(t, I32(7), output)
 	assert.NoError(t, err)
@@ -96,7 +89,7 @@ func TestCallI32I32(t *testing.T) {
 
 func TestCallI64I64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("i64_i64", I64(7))
+	output, err := instance.Exports["i64_i64"](I64(7))
 
 	assert.Equal(t, I64(7), output)
 	assert.NoError(t, err)
@@ -104,7 +97,7 @@ func TestCallI64I64(t *testing.T) {
 
 func TestCallF32F32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("f32_f32", F32(7.42))
+	output, err := instance.Exports["f32_f32"](F32(7.42))
 
 	assert.Equal(t, F32(7.42), output)
 	assert.NoError(t, err)
@@ -112,7 +105,7 @@ func TestCallF32F32(t *testing.T) {
 
 func TestCallF64F64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("f64_f64", F64(7.42))
+	output, err := instance.Exports["f64_f64"](F64(7.42))
 
 	assert.Equal(t, F64(7.42), output)
 	assert.NoError(t, err)
@@ -120,8 +113,7 @@ func TestCallF64F64(t *testing.T) {
 
 func TestCallI32I64F32F64F64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call(
-		"i32_i64_f32_f64_f64",
+	output, err := instance.Exports["i32_i64_f32_f64_f64"](
 		I32(1),
 		I64(2),
 		F32(3.4),
@@ -135,7 +127,7 @@ func TestCallI32I64F32F64F64(t *testing.T) {
 
 func TestCallBoolCastToI32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("bool_casted_to_i32")
+	output, err := instance.Exports["bool_casted_to_i32"]()
 
 	assert.Equal(t, I32(1), output)
 	assert.NoError(t, err)
@@ -143,7 +135,7 @@ func TestCallBoolCastToI32(t *testing.T) {
 
 func TestCallString(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("string")
+	output, err := instance.Exports["string"]()
 
 	assert.Equal(t, I32(1048576), output)
 	assert.NoError(t, err)
@@ -151,7 +143,7 @@ func TestCallString(t *testing.T) {
 
 func TestCallVoid(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
-	output, err := instance.Call("void")
+	output, err := instance.Exports["void"]()
 
 	assert.Equal(t, Void(), output)
 	assert.NoError(t, err)
