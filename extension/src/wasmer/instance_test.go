@@ -26,18 +26,6 @@ func GetInvalidBytes() []byte {
 	return bytes
 }
 
-func TestValidate(t *testing.T) {
-	output := Validate(GetBytes())
-
-	assert.True(t, output)
-}
-
-func TestValidateInvalid(t *testing.T) {
-	output := Validate(GetInvalidBytes())
-
-	assert.False(t, output)
-}
-
 func TestInstantiate(t *testing.T) {
 	instance, err := NewInstance(GetBytes())
 
