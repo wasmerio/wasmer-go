@@ -14,7 +14,8 @@ func main(){
 	bytes, _ := wasm.ReadBytes(module_path)
 	instance, _ := wasm.NewInstance(bytes)
 
-	result, _ := instance.Exports["sum"](wasm.I32(1), wasm.I32(2))
+	sum := instance.Exports["sum"]
+	result, _ := sum(1, 2)
 
 	fmt.Print("Result of `sum(1, 2)` is: ")
 	fmt.Println(result)
