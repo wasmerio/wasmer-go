@@ -15,8 +15,8 @@ func main(){
 
 	fmt.Println(fmt.Sprintf("Is module valid? %t", wasm.Validate(bytes)))
 
-	instance := wasm.NewInstance(bytes)
-	result := instance.Call(
+	instance, _ := wasm.NewInstance(bytes)
+	result, _ := instance.Call(
 		"sum",
 		[]wasm.Value{
 			wasm.ValueI32(1),
