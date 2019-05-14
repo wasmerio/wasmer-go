@@ -69,87 +69,168 @@ func NewInstance(bytes []byte) (Instance, error) {
 }
 
 func (self Instance) Call(function_name string, arguments []Value) (Value, error) {
-	var wasm_arguments []C.wasmer_value_t = make([]C.wasmer_value_t, len(arguments))
+	var wasm_exports *C.wasmer_exports_t = nil
+	C.wasmer_instance_exports(self.instance, &wasm_exports)
+
+	defer C.wasmer_exports_destroy(wasm_exports)
+
+	var number_of_exports int = int(C.wasmer_exports_len(wasm_exports))
+
+	if number_of_exports == 0 {
+		return ValueI32(0), NewExportedFunctionError(function_name, "The instance has no exports, cannot call the function `%s`.")
+	}
+
+	var wasm_function *C.wasmer_export_func_t = nil
+
+	for nth := 0; nth < number_of_exports; nth++ {
+		var wasm_export *C.wasmer_export_t = C.wasmer_exports_get(wasm_exports, C.int(nth))
+		var wasm_export_kind C.wasmer_import_export_kind = C.wasmer_export_kind(wasm_export)
+
+		if wasm_export_kind != C.WASM_FUNCTION {
+			continue
+		}
+
+		var wasm_export_name C.wasmer_byte_array = C.wasmer_export_name(wasm_export)
+
+		if int(wasm_export_name.bytes_len) != len(function_name) {
+			continue
+		}
+
+		if function_name == C.GoStringN((*C.char) (unsafe.Pointer(wasm_export_name.bytes)), (C.int) (wasm_export_name.bytes_len)) {
+			wasm_function = C.wasmer_export_to_func(wasm_export)
+
+			break
+		}
+	}
+
+	if wasm_function == nil {
+		return ValueI32(0), NewExportedFunctionError(function_name, "The instance has no exported function named `%s`.")
+	}
+
+	var wasm_function_inputs_arity C.uint
+
+	if C.wasmer_export_func_params_arity(wasm_function, &wasm_function_inputs_arity) != C.WASMER_OK {
+		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to read the input arity of the `%s` exported function.")
+	}
+
+	var wasm_function_outputs_arity C.uint
+
+	if C.wasmer_export_func_returns_arity(wasm_function, &wasm_function_outputs_arity) != C.WASMER_OK {
+		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to read the output arity of the `%s` exported function.")
+	}
+
+	var number_of_expected_arguments int = int(wasm_function_inputs_arity)
+	var number_of_given_arguments int = len(arguments)
+	var diff int = number_of_expected_arguments - number_of_given_arguments
+
+	if diff > 0 {
+		return ValueI32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Missing %d argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", diff, number_of_expected_arguments, number_of_given_arguments))
+	} else if diff < 0 {
+		return ValueI32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, number_of_expected_arguments, number_of_given_arguments))
+	}
+
+	var wasm_inputs []C.wasmer_value_t = make([]C.wasmer_value_t, wasm_function_inputs_arity)
 
 	for index, value := range arguments {
 		switch value.GetType() {
 		case Type_I32:
-			wasm_arguments[index].tag = C.WASM_I32
-			pointer := (*int32) (unsafe.Pointer(&wasm_arguments[index].value))
+			wasm_inputs[index].tag = C.WASM_I32
+			pointer := (*int32) (unsafe.Pointer(&wasm_inputs[index].value))
 			*pointer = value.ToI32()
 		case Type_I64:
-			wasm_arguments[index].tag = C.WASM_I64
-			pointer := (*int64) (unsafe.Pointer(&wasm_arguments[index].value))
+			wasm_inputs[index].tag = C.WASM_I64
+			pointer := (*int64) (unsafe.Pointer(&wasm_inputs[index].value))
 			*pointer = value.ToI64()
 		case Type_F32:
-			wasm_arguments[index].tag = C.WASM_F32
-			pointer := (*float32) (unsafe.Pointer(&wasm_arguments[index].value))
+			wasm_inputs[index].tag = C.WASM_F32
+			pointer := (*float32) (unsafe.Pointer(&wasm_inputs[index].value))
 			*pointer = value.ToF32()
 		case Type_F64:
-			wasm_arguments[index].tag = C.WASM_F64
-			pointer := (*float64) (unsafe.Pointer(&wasm_arguments[index].value))
+			wasm_inputs[index].tag = C.WASM_F64
+			pointer := (*float64) (unsafe.Pointer(&wasm_inputs[index].value))
 			*pointer = value.ToF64()
 		default:
 			panic("Unreachable")
 		}
 	}
 	
-	var wasm_result C.wasmer_value_t
-	var wasm_results []C.wasmer_value_t = []C.wasmer_value_t{wasm_result}
+	var wasm_outputs []C.wasmer_value_t = make([]C.wasmer_value_t, wasm_function_outputs_arity)
 
 	var wasm_function_name = C.CString(function_name)
 	defer C.free(unsafe.Pointer(wasm_function_name))
 
-	var wasm_argument_c_pointer *C.wasmer_value_t = nil
+	var wasm_input_c_pointer *C.wasmer_value_t = nil
 
-	if len(arguments) > 0 {
-		wasm_argument_c_pointer = (*C.wasmer_value_t) (unsafe.Pointer(&wasm_arguments[0]))
+	if wasm_function_inputs_arity > 0 {
+		wasm_input_c_pointer = (*C.wasmer_value_t) (unsafe.Pointer(&wasm_inputs[0]))
+	} else {
+		wasm_input_c_pointer = (*C.wasmer_value_t) (unsafe.Pointer(&wasm_inputs))
+	}
+
+	var wasm_output_c_pointer *C.wasmer_value_t = nil
+
+	if wasm_function_outputs_arity > 0 {
+		wasm_output_c_pointer = (*C.wasmer_value_t) (unsafe.Pointer(&wasm_outputs[0]))
+	} else {
+		wasm_output_c_pointer = (*C.wasmer_value_t) (unsafe.Pointer(&wasm_outputs))
 	}
 
 	var call_result C.wasmer_result_t = C.wasmer_instance_call(
 		self.instance,
 		wasm_function_name,
-		wasm_argument_c_pointer,
-		C.int(len(wasm_arguments)),
-		(*C.wasmer_value_t) (unsafe.Pointer(&wasm_results[0])),
-		C.int(len(wasm_results)),
+		wasm_input_c_pointer,
+		C.int(wasm_function_inputs_arity),
+		wasm_output_c_pointer,
+		C.int(wasm_function_outputs_arity),
 	)
 
 	if (C.WASMER_OK != call_result) {
 		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to call the `%s` exported function.")
 	}
 
-	var result = wasm_results[0];
+	if wasm_function_outputs_arity > 0 {
+		var result = wasm_outputs[0];
 
-	switch result.tag {
-	case C.WASM_I32:
-		pointer := (*int32) (unsafe.Pointer(&result.value))
+		switch result.tag {
+		case C.WASM_I32:
+			pointer := (*int32) (unsafe.Pointer(&result.value))
 
-		return ValueI32(*pointer), nil
-	case C.WASM_I64:
-		pointer := (*int64) (unsafe.Pointer(&result.value))
+			return ValueI32(*pointer), nil
+		case C.WASM_I64:
+			pointer := (*int64) (unsafe.Pointer(&result.value))
 
-		return ValueI64(*pointer), nil
-	case C.WASM_F32:
-		pointer := (*float32) (unsafe.Pointer(&result.value))
+			return ValueI64(*pointer), nil
+		case C.WASM_F32:
+			pointer := (*float32) (unsafe.Pointer(&result.value))
 
-		return ValueF32(*pointer), nil
-	case C.WASM_F64:
-		pointer := (*float64) (unsafe.Pointer(&result.value))
+			return ValueF32(*pointer), nil
+		case C.WASM_F64:
+			pointer := (*float64) (unsafe.Pointer(&result.value))
 
-		return ValueF64(*pointer), nil
-	default:
-		panic("unreachable")
+			return ValueF64(*pointer), nil
+		default:
+			panic("unreachable")
+		}
+	} else {
+		return ValueVoid(), nil
 	}
 }
 
 func GetLastError() (string, error) {
 	var error_length C.int = C.wasmer_last_error_length()
-	var error_message *C.char = nil
 
-	if -1 == C.wasmer_last_error_message(error_message, error_length) {
+	if error_length == 0 {
+		return "", nil
+	}
+
+	var error_message []C.char = make([]C.char, error_length)
+	var error_message_pointer *C.char = (*C.char) (unsafe.Pointer(&error_message[0]))
+
+	var error_result = C.wasmer_last_error_message(error_message_pointer, error_length)
+
+	if -1 == error_result {
 		return "", errors.New("Cannot read last error.")
 	}
 
-	return C.GoStringN(error_message, error_length), nil
+	return C.GoString(error_message_pointer), nil
 }
