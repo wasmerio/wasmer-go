@@ -53,8 +53,8 @@ func main(){
 	instance, _ := wasm.NewInstance(bytes)
 	result, _ := instance.Call(
 		"sum",
-        wasm.ValueI32(5),
-        wasm.ValueI32(37),
+        wasm.I32(5),
+        wasm.I32(37),
 	)
 
 	fmt.Println(result) // 42!

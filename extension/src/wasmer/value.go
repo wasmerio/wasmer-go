@@ -20,35 +20,35 @@ type Value struct {
 	ty ValueType
 }
 
-func ValueI32(value int32) Value {
+func I32(value int32) Value {
 	return Value {
 		value: uint64(value),
 		ty: Type_I32,
 	}
 }
 
-func ValueI64(value int64) Value {
+func I64(value int64) Value {
 	return Value {
 		value: uint64(value),
 		ty: Type_I64,
 	}
 }
 
-func ValueF32(value float32) Value {
+func F32(value float32) Value {
 	return Value {
 		value: uint64(math.Float32bits(value)),
 		ty: Type_F32,
 	}
 }
 
-func ValueF64(value float64) Value {
+func F64(value float64) Value {
 	return Value {
 		value: math.Float64bits(value),
 		ty: Type_F64,
 	}
 }
 
-func ValueVoid() Value {
+func Void() Value {
 	return Value {
 		value: 0,
 		ty: Type_Void,

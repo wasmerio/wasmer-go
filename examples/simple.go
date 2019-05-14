@@ -18,8 +18,8 @@ func main(){
 	instance, _ := wasm.NewInstance(bytes)
 	result, _ := instance.Call(
 		"sum",
-		wasm.ValueI32(1),
-		wasm.ValueI32(2),
+		wasm.I32(1),
+		wasm.I32(2),
 	)
 
 	fmt.Print("Result of `sum(1, 2)` is: ")

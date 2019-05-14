@@ -77,7 +77,7 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 	var number_of_exports int = int(C.wasmer_exports_len(wasm_exports))
 
 	if number_of_exports == 0 {
-		return ValueI32(0), NewExportedFunctionError(function_name, "The instance has no exports, cannot call the function `%s`.")
+		return I32(0), NewExportedFunctionError(function_name, "The instance has no exports, cannot call the function `%s`.")
 	}
 
 	var wasm_function *C.wasmer_export_func_t = nil
@@ -104,19 +104,19 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 	}
 
 	if wasm_function == nil {
-		return ValueI32(0), NewExportedFunctionError(function_name, "The instance has no exported function named `%s`.")
+		return I32(0), NewExportedFunctionError(function_name, "The instance has no exported function named `%s`.")
 	}
 
 	var wasm_function_inputs_arity C.uint
 
 	if C.wasmer_export_func_params_arity(wasm_function, &wasm_function_inputs_arity) != C.WASMER_OK {
-		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to read the input arity of the `%s` exported function.")
+		return I32(0), NewExportedFunctionError(function_name, "Failed to read the input arity of the `%s` exported function.")
 	}
 
 	var wasm_function_outputs_arity C.uint
 
 	if C.wasmer_export_func_returns_arity(wasm_function, &wasm_function_outputs_arity) != C.WASMER_OK {
-		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to read the output arity of the `%s` exported function.")
+		return I32(0), NewExportedFunctionError(function_name, "Failed to read the output arity of the `%s` exported function.")
 	}
 
 	var number_of_expected_arguments int = int(wasm_function_inputs_arity)
@@ -124,9 +124,9 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 	var diff int = number_of_expected_arguments - number_of_given_arguments
 
 	if diff > 0 {
-		return ValueI32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Missing %d argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", diff, number_of_expected_arguments, number_of_given_arguments))
+		return I32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Missing %d argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", diff, number_of_expected_arguments, number_of_given_arguments))
 	} else if diff < 0 {
-		return ValueI32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, number_of_expected_arguments, number_of_given_arguments))
+		return I32(0), NewExportedFunctionError(function_name, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, number_of_expected_arguments, number_of_given_arguments))
 	}
 
 	var wasm_inputs []C.wasmer_value_t = make([]C.wasmer_value_t, wasm_function_inputs_arity)
@@ -185,7 +185,7 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 	)
 
 	if (C.WASMER_OK != call_result) {
-		return ValueI32(0), NewExportedFunctionError(function_name, "Failed to call the `%s` exported function.")
+		return I32(0), NewExportedFunctionError(function_name, "Failed to call the `%s` exported function.")
 	}
 
 	if wasm_function_outputs_arity > 0 {
@@ -195,24 +195,24 @@ func (self Instance) Call(function_name string, arguments ...Value) (Value, erro
 		case C.WASM_I32:
 			pointer := (*int32) (unsafe.Pointer(&result.value))
 
-			return ValueI32(*pointer), nil
+			return I32(*pointer), nil
 		case C.WASM_I64:
 			pointer := (*int64) (unsafe.Pointer(&result.value))
 
-			return ValueI64(*pointer), nil
+			return I64(*pointer), nil
 		case C.WASM_F32:
 			pointer := (*float32) (unsafe.Pointer(&result.value))
 
-			return ValueF32(*pointer), nil
+			return F32(*pointer), nil
 		case C.WASM_F64:
 			pointer := (*float64) (unsafe.Pointer(&result.value))
 
-			return ValueF64(*pointer), nil
+			return F64(*pointer), nil
 		default:
 			panic("unreachable")
 		}
 	} else {
-		return ValueVoid(), nil
+		return Void(), nil
 	}
 }
 
