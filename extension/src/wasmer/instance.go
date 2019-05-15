@@ -79,7 +79,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 			var wasm_memory *C.wasmer_memory_t = nil
 
 			if C.wasmer_export_to_memory(wasm_export, &wasm_memory) != C.WASMER_OK {
-				return empty_instance, NewInstanceError("Failed when extracting the exported memory.")
+				return empty_instance, NewInstanceError("Failed to extract the exported memory.")
 			}
 
 			var wasm_memory_data *C.uint8_t = C.wasmer_memory_data(wasm_memory)
