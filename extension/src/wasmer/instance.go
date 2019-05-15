@@ -82,10 +82,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 				return empty_instance, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			var wasm_memory_data *C.uint8_t = C.wasmer_memory_data(wasm_memory)
-			var wasm_memory_data_length C.uint32_t = C.wasmer_memory_data_length(wasm_memory)
-
-			memory = NewMemory((*uint8)(wasm_memory_data), uint32(wasm_memory_data_length))
+			memory = NewMemory(wasm_memory)
 			has_memory = true
 
 		case C.WASM_FUNCTION:
