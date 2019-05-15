@@ -32,7 +32,7 @@ func main() {
 		memory[nth] = subject[nth]
 	}
 
-	// C-string terminate by NULL.
+	// C-string terminates by NULL.
 	memory[length_of_subject] = 0
 
 	// Run the `greet` function. Given the pointer to the subject.
