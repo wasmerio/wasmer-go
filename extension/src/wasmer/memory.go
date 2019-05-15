@@ -14,11 +14,11 @@ func NewMemory(data *uint8, length uint32) Memory {
 	return Memory{data, length}
 }
 
-func (self *Memory) GetLength() uint32 {
+func (self *Memory) Length() uint32 {
 	return self.length
 }
 
-func (self *Memory) GetData() []byte {
+func (self *Memory) Data() []byte {
 	var raw []byte
 	var header reflect.SliceHeader = *(*reflect.SliceHeader)(unsafe.Pointer(&raw))
 

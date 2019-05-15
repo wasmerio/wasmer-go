@@ -18,7 +18,7 @@ func main() {
 	result, _ := instance.Exports["return_hello"]()
 	pointer := result.ToI32()
 
-	memory := instance.Memory.GetData()
+	memory := instance.Memory.Data()
 
 	fmt.Println(string(memory[pointer : pointer+13]))
 
