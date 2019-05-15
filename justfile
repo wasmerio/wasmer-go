@@ -33,7 +33,7 @@ debug-cgo:
 
 # Run the tests.
 test:
-	GOPATH=$(pwd)/extension go test -ldflags="-r $(pwd)" wasmer -test.v
+	LD_LIBRARY_PATH=$(pwd)/extension GOPATH=$(pwd)/extension go test wasmer -test.v
 
 # Local Variables:
 # mode: makefile
