@@ -7,10 +7,19 @@ go:
 	#!/usr/bin/env bash
 	set -euo pipefail
 	cd extension
-	test -f libwasmer_runtime_c_api.dylib && rm libwasmer_runtime_c_api.dylib
-	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.dylib libwasmer_runtime_c_api.dylib
+	case "{{os()}}" in
+		"macos")
+			dylib_extension=".dylib"
+			;;
+		"windows")
+			dylib_extension=".dll"
+			;;
+		*)
+			dylib_extension=".so"
+	esac
+	test -f libwasmer_runtime_c_api.${dylib_extension} && rm libwasmer_runtime_c_api.${dylib_extension}
+	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
 	go build -o ../target/go/wasm -ldflags="-r $(pwd)" src/wasmer/*.go
-	echo "Generated in ./target/go/wasm"
 
 # Run a Go program, like `just go-run examples/simple.go`.
 go-run FILE:
