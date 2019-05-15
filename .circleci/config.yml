@@ -35,6 +35,7 @@ jobs:
           name: Compile and install the Go extension
           command: |
             export PATH="$HOME/.cargo/bin:$PATH"
+            git submodule update
             just go
 
       # Run the extension test suites.
