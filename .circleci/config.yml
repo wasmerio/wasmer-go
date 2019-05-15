@@ -53,7 +53,7 @@ workflows:
   build:
     jobs:
       # Run the `build-and-test` job for the `trying` and `staging` branches only, and all tags.
-      - build_and_test:
+      - build-and-test:
           filters:
             branches:
               only:
