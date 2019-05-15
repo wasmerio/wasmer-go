@@ -27,6 +27,7 @@ func GetInvalidBytes() []byte {
 
 func TestInstantiate(t *testing.T) {
 	instance, err := NewInstance(GetBytes())
+	defer instance.Close()
 
 	assert.NotNil(t, instance.instance)
 	assert.NoError(t, err)
@@ -34,6 +35,7 @@ func TestInstantiate(t *testing.T) {
 
 func TestInstantiateInvalidModule(t *testing.T) {
 	instance, err := NewInstance(GetInvalidBytes())
+	defer instance.Close()
 
 	assert.EqualError(t, err, "Failed to compile the module.")
 	assert.Nil(t, instance.instance)
@@ -41,6 +43,8 @@ func TestInstantiateInvalidModule(t *testing.T) {
 
 func TestBasicSum(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	sum := instance.Exports["sum"]
 	output, err := sum(1, 2)
 
@@ -55,6 +59,8 @@ func TestBasicSum(t *testing.T) {
 
 func TestCallUndefinedFunction(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	function_name := "foo"
 	_, export_exists := instance.Exports[function_name]
 
@@ -63,6 +69,8 @@ func TestCallUndefinedFunction(t *testing.T) {
 
 func TestCallMissingArguments(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["sum"](1)
 
 	assert.Equal(t, I32(0), output)
@@ -71,6 +79,8 @@ func TestCallMissingArguments(t *testing.T) {
 
 func TestCallExtraArguments(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["sum"](1, 2, 3)
 
 	assert.Equal(t, I32(0), output)
@@ -79,6 +89,8 @@ func TestCallExtraArguments(t *testing.T) {
 
 func TestCallArity0(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["arity_0"]()
 
 	assert.Equal(t, I32(42), output)
@@ -87,6 +99,8 @@ func TestCallArity0(t *testing.T) {
 
 func TestCallI32I32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	i32_i32 := instance.Exports["i32_i32"]
 
 	output, err := i32_i32(7)
@@ -123,6 +137,8 @@ func TestCallI32I32(t *testing.T) {
 
 func TestCallI64I64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	i64_i64 := instance.Exports["i64_i64"]
 
 	output, err := i64_i64(7)
@@ -165,6 +181,8 @@ func TestCallI64I64(t *testing.T) {
 
 func TestCallF32F32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	f32_f32 := instance.Exports["f32_f32"]
 
 	output, err := f32_f32(float32(7.42))
@@ -180,6 +198,8 @@ func TestCallF32F32(t *testing.T) {
 
 func TestCallF64F64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	f64_f64 := instance.Exports["f64_f64"]
 
 	output, err := f64_f64(7.42)
@@ -201,6 +221,8 @@ func TestCallF64F64(t *testing.T) {
 
 func TestCallI32I64F32F64F64(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["i32_i64_f32_f64_f64"](
 		1,
 		2,
@@ -215,6 +237,8 @@ func TestCallI32I64F32F64F64(t *testing.T) {
 
 func TestCallBoolCastToI32(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["bool_casted_to_i32"]()
 
 	assert.Equal(t, I32(1), output)
@@ -223,6 +247,8 @@ func TestCallBoolCastToI32(t *testing.T) {
 
 func TestCallString(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["string"]()
 
 	assert.Equal(t, I32(1048576), output)
@@ -231,6 +257,8 @@ func TestCallString(t *testing.T) {
 
 func TestCallVoid(t *testing.T) {
 	instance, _ := NewInstance(GetBytes())
+	defer instance.Close()
+
 	output, err := instance.Exports["void"]()
 
 	assert.Equal(t, Void(), output)

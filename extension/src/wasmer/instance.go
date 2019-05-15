@@ -291,3 +291,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 
 	return Instance { instance: instance, Exports: exports }, nil
 }
+
+func (self *Instance) Close() {
+	C.wasmer_instance_destroy(self.instance)
+}

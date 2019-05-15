@@ -13,6 +13,7 @@ func main(){
 
 	bytes, _ := wasm.ReadBytes(module_path)
 	instance, _ := wasm.NewInstance(bytes)
+	defer instance.Close()
 
 	sum := instance.Exports["sum"]
 	result, _ := sum(1, 2)
