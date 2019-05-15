@@ -18,7 +18,7 @@ func GetLastError() (string, error) {
 	}
 
 	var error_message []C.char = make([]C.char, error_length)
-	var error_message_pointer *C.char = (*C.char) (unsafe.Pointer(&error_message[0]))
+	var error_message_pointer *C.char = (*C.char)(unsafe.Pointer(&error_message[0]))
 
 	var error_result = C.wasmer_last_error_message(error_message_pointer, error_length)
 

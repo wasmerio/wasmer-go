@@ -17,41 +17,41 @@ const (
 
 type Value struct {
 	value uint64
-	ty ValueType
+	ty    ValueType
 }
 
 func I32(value int32) Value {
-	return Value {
+	return Value{
 		value: uint64(value),
-		ty: Type_I32,
+		ty:    Type_I32,
 	}
 }
 
 func I64(value int64) Value {
-	return Value {
+	return Value{
 		value: uint64(value),
-		ty: Type_I64,
+		ty:    Type_I64,
 	}
 }
 
 func F32(value float32) Value {
-	return Value {
+	return Value{
 		value: uint64(math.Float32bits(value)),
-		ty: Type_F32,
+		ty:    Type_F32,
 	}
 }
 
 func F64(value float64) Value {
-	return Value {
+	return Value{
 		value: math.Float64bits(value),
-		ty: Type_F64,
+		ty:    Type_F64,
 	}
 }
 
 func Void() Value {
-	return Value {
+	return Value{
 		value: 0,
-		ty: Type_Void,
+		ty:    Type_Void,
 	}
 }
 
@@ -75,12 +75,12 @@ func (self Value) ToF64() float64 {
 	return math.Float64frombits(self.value)
 }
 
-func (self Value) ToVoid() interface {} {
+func (self Value) ToVoid() interface{} {
 	return nil
 }
 
 func (self Value) String() string {
-	switch (self.ty) {
+	switch self.ty {
 	case Type_I32:
 		return fmt.Sprintf("%d", self.ToI32())
 	case Type_I64:

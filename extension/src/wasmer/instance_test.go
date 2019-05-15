@@ -1,10 +1,10 @@
 package wasmer
 
 import (
+	"github.com/stretchr/testify/assert"
 	"path"
 	"runtime"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func GetBytes() []byte {
@@ -231,7 +231,7 @@ func TestCallI32I64F32F64F64(t *testing.T) {
 	)
 
 	assert.Equal(t, Type_F64, output.GetType())
-	assert.Equal(t, 1 + 2 + 3.4 + 5.6, float64(int(output.ToF64() * 10000000)) / 10000000)
+	assert.Equal(t, 1+2+3.4+5.6, float64(int(output.ToF64()*10000000))/10000000)
 	assert.NoError(t, err)
 }
 

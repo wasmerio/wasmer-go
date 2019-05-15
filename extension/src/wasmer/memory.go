@@ -19,8 +19,8 @@ func (self *Memory) Length() uint32 {
 }
 
 func (self *Memory) Data() []byte {
-	var raw []byte
-	var header reflect.SliceHeader = *(*reflect.SliceHeader)(unsafe.Pointer(&raw))
+	var header reflect.SliceHeader
+	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
 
 	header.Data = uintptr(unsafe.Pointer(self.data))
 	header.Len = int(self.length)

@@ -1,10 +1,10 @@
 package wasmer
 
 import (
+	"github.com/stretchr/testify/assert"
 	"path"
 	"runtime"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestValidate(t *testing.T) {
