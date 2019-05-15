@@ -7,7 +7,7 @@ import (
 	wasm "wasmer"
 )
 
-func main(){
+func main() {
 	_, filename, _, _ := runtime.Caller(0)
 	module_path := path.Join(path.Dir(filename), "simple.wasm")
 
