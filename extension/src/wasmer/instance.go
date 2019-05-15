@@ -293,5 +293,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 }
 
 func (self *Instance) Close() {
-	C.wasmer_instance_destroy(self.instance)
+	if self.instance != nil {
+		C.wasmer_instance_destroy(self.instance)
+	}
 }
