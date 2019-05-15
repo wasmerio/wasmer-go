@@ -56,8 +56,6 @@ workflows:
       - build-and-test:
           filters:
             branches:
-              only:
-                - trying
-                - staging
+              only: /.*/
             tags:
               only: /.*/
