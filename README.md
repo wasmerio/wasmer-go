@@ -66,6 +66,13 @@ And then, finally, enjoy by running:
 $ go run examples/simple.wasm
 ```
 
+To run examples in general, you can use the following command:
+
+```sh
+$ just go-run examples/greet.go
+Hello, Wasmer 🐹!
+```
+
 # Development
 
 The Go library is written in Go and Rust.
