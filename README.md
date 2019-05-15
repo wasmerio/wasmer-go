@@ -51,6 +51,7 @@ import (
 func main(){
 	bytes, _ := wasm.ReadBytes("simple.wasm")
 	instance, _ := wasm.NewInstance(bytes)
+	defer instance.Close()
     
 	sum := instance.Exports["sum"]
 	result, _ := sum(5, 37)
