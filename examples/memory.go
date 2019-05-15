@@ -20,10 +20,5 @@ func main() {
 
 	memory := instance.Memory.Data()
 
-	fmt.Println(string(memory[pointer : pointer+13]))
-
-	memory[pointer] = 72
-
-	fmt.Println(string(memory[pointer : pointer+13]))
-
+	fmt.Println(string(memory[pointer : pointer+13])) // Hello, World!
 }
