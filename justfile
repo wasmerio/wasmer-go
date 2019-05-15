@@ -9,13 +9,13 @@ go:
 	cd extension
 	case "{{os()}}" in
 		"macos")
-			dylib_extension=".dylib"
+			dylib_extension="dylib"
 			;;
 		"windows")
-			dylib_extension=".dll"
+			dylib_extension="dll"
 			;;
 		*)
-			dylib_extension=".so"
+			dylib_extension="so"
 	esac
 	test -f libwasmer_runtime_c_api.${dylib_extension} && rm libwasmer_runtime_c_api.${dylib_extension}
 	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
