@@ -5,7 +5,7 @@ jobs:
   # Build and test the project.
   build-and-test:
     docker:
-      - image: circleci/go:latest
+      - image: circleci/golang:latest
     steps:
       # Update the project.
       - checkout
