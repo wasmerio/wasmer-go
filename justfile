@@ -39,6 +39,14 @@ test:
 	# Run the long examples.
 	go test -test.v $(find . -type f \( -name "example_*_test.go" \) )
 
+# Run the benchmarks.
+bench:
+	#!/usr/bin/env bash
+	export LD_LIBRARY_PATH=$(pwd)/wasmer
+	cd wasmer
+	go test -bench 'Wasmer|Wagon' benchmarks_test.go
+
+
 # Server the documentation.
 doc:
 	@echo 'Open http://localhost:6060/pkg/wasmer/'
