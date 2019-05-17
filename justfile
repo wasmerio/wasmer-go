@@ -38,7 +38,9 @@ test:
 	export GOPATH=$(pwd)/extension
 	# Run the tests.
 	go test -test.v $(find extension/src/wasmer -type f \( -name "*_test.go" \! -name "example_*.go" \) )
-	# Run the examples.
+	# Run the short examples.
+	go test -test.v extension/src/wasmer/example_test.go
+	# Run the long examples.
 	go test -test.v $(find extension/src/wasmer -type f \( -name "example_*_test.go" \) )
 
 # Server the documentation.
