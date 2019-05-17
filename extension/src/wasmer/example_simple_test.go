@@ -9,7 +9,7 @@ import (
 
 func simpleWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(filename), "/../../examples/simple.wasm")
+	return path.Join(path.Dir(filename), "testdata", "examples", "simple.wasm")
 }
 
 func Example() {

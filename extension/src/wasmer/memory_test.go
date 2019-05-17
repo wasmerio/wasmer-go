@@ -10,7 +10,7 @@ import (
 
 func TestMemoryIsAbsent(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "..", "..", "tests", "no_memory.wasm")
+	module_path := path.Join(path.Dir(filename), "testdata", "no_memory.wasm")
 
 	bytes, _ := wasm.ReadBytes(module_path)
 	_, err := wasm.NewInstance(bytes)

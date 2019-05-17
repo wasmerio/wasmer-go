@@ -10,7 +10,7 @@ import (
 
 func Example_greet() {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "/../../examples/greet.wasm")
+	module_path := path.Join(path.Dir(filename), "testdata", "examples", "greet.wasm")
 
 	// Instantiate the module.
 	bytes, _ := wasm.ReadBytes(module_path)

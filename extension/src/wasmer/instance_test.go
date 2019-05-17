@@ -10,7 +10,7 @@ import (
 
 func GetBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "..", "..", "tests", "tests.wasm")
+	module_path := path.Join(path.Dir(filename), "testdata", "tests.wasm")
 
 	bytes, _ := wasm.ReadBytes(module_path)
 
@@ -19,7 +19,7 @@ func GetBytes() []byte {
 
 func GetInvalidBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "..", "..", "tests", "invalid.wasm")
+	module_path := path.Join(path.Dir(filename), "testdata", "invalid.wasm")
 
 	bytes, _ := wasm.ReadBytes(module_path)
 
