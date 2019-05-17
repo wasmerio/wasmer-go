@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
-func Example_greet() {
+func greetWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "examples", "greet.wasm")
+	return path.Join(path.Dir(filename), "testdata", "examples", "greet.wasm")
+}
 
+func Example_greet() {
 	// Instantiate the module.
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(greetWasmFile())
 	instance, _ := wasm.NewInstance(bytes)
 	defer instance.Close()
 
