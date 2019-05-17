@@ -10,6 +10,7 @@ import (
 	"unsafe"
 )
 
+// Returns the last error message if any, otherwise returns an error.
 func GetLastError() (string, error) {
 	var error_length C.int = C.wasmer_last_error_length()
 

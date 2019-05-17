@@ -261,6 +261,6 @@ func TestCallVoid(t *testing.T) {
 
 	output, err := instance.Exports["void"]()
 
-	assert.Equal(t, Void(), output)
+	assert.Equal(t, void(), output)
 	assert.NoError(t, err)
 }

@@ -10,37 +10,70 @@ import (
 	"unsafe"
 )
 
+// Represents any kind of errors related to a WebAssembly instance. It
+// is returned by `Instance` functions only.
 type InstanceError struct {
+	// Error message.
 	message string
 }
 
+// Constructs a new `InstanceError`.
 func NewInstanceError(message string) error {
 	return &InstanceError{message}
 }
 
+// `InstanceError` is an actual error. The `Error` function returns
+// the error message.
 func (self *InstanceError) Error() string {
 	return self.message
 }
 
+// Represents any kind of errors related to a WebAssembly exported
+// function. It is returned by `Instance` functions only.
 type ExportedFunctionError struct {
 	function_name string
 	message       string
 }
 
+// Constructs a new `ExportedFunctionError`, where `function_name` is
+// the name of the exported function, and `message` is the error
+// message. If the error message contains `%s`, then this parameter will
+// be replaced by `function_name`.
 func NewExportedFunctionError(function_name string, message string) error {
 	return &ExportedFunctionError{function_name, message}
 }
 
+// `ExportedFunctionError` is an actual error. The `Error` function
+// returns the error message.
 func (self *ExportedFunctionError) Error() string {
 	return fmt.Sprintf(self.message, self.function_name)
 }
 
+// Represents a WebAssembly instance.
 type Instance struct {
+	// The underlying WebAssembly instance.
 	instance *C.wasmer_instance_t
-	Exports  map[string]func(...interface{}) (Value, error)
-	Memory   Memory
+
+	// All functions exported by the WebAssembly instance, indexed
+	// by their name as a string. An exported function is a
+	// regular variadic Go closure. Arguments are untyped. Since
+	// WebAssembly only supports: `i32`, `i64`, `f32` and `f64`
+	// types, the accepted Go types are: `int8`, `uint8`, `int16`,
+	// `uint16`, `int32`, `uint32`, `int64`, `int`, `uint`, `float32`
+	// and `float64`. In addition to those types, the `Value` type
+	// (from this project) is accepted. The convertion from a Go
+	// value to a WebAssembly value is done automatically except for
+	// the `Value` type (where type is coerced, that's the intent
+	// here). The WebAssembly type is automatically infered. Note
+	// that the returned value is of kind `Value`, and not a
+	// standard Go type.
+	Exports map[string]func(...interface{}) (Value, error)
+
+	// The exported memory of a WebAssembly instance.
+	Memory Memory
 }
 
+// Constructs a new `Instance`.
 func NewInstance(bytes []byte) (Instance, error) {
 	var imports []C.wasmer_import_t = []C.wasmer_import_t{}
 	var instance *C.wasmer_instance_t = nil
@@ -82,7 +115,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 				return empty_instance, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			memory = NewMemory(wasm_memory)
+			memory = newMemory(wasm_memory)
 			has_memory = true
 
 		case C.WASM_FUNCTION:
@@ -294,7 +327,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 						panic("unreachable")
 					}
 				} else {
-					return Void(), nil
+					return void(), nil
 				}
 			}
 		}
@@ -307,6 +340,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 	return Instance{instance: instance, Exports: exports, Memory: memory}, nil
 }
 
+// Closes/frees an `Instance`.
 func (self *Instance) Close() {
 	if self.instance != nil {
 		C.wasmer_instance_destroy(self.instance)

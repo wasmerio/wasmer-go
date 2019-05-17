@@ -42,7 +42,7 @@ func TestValueF64(t *testing.T) {
 }
 
 func TestValueVoid(t *testing.T) {
-	wasm_value := Void()
+	wasm_value := void()
 
 	assert.Equal(t, nil, wasm_value.ToVoid())
 	assert.Equal(t, Type_Void, wasm_value.GetType())
