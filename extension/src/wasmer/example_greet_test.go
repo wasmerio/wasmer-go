@@ -1,20 +1,19 @@
-package main
+package wasmer
 
 import (
 	"fmt"
 	"path"
 	"runtime"
 	"strings"
-	wasm "wasmer"
 )
 
-func main() {
+func Example_greet() {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "greet.wasm")
+	module_path := path.Join(path.Dir(filename), "/../../examples/greet.wasm")
 
 	// Instantiate the module.
-	bytes, _ := wasm.ReadBytes(module_path)
-	instance, _ := wasm.NewInstance(bytes)
+	bytes, _ := ReadBytes(module_path)
+	instance, _ := NewInstance(bytes)
 	defer instance.Close()
 
 	// Set the subject to greet.
@@ -61,4 +60,7 @@ func main() {
 	deallocate := instance.Exports["deallocate"]
 	deallocate(input_pointer, length_of_subject)
 	deallocate(output_pointer, length_of_output)
+
+	// Output:
+	// Hello, Wasmer 🐹!
 }
