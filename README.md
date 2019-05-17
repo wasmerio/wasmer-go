@@ -11,19 +11,19 @@
     <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License" valign="middle"></a>
 </p>
 
-`go-ext-wasm` is a Go library for executing WebAssembly binaries.
+Wasm is a Go library for executing WebAssembly binaries.
 
 # Install
 
-So far, to install the `go-ext-wasm` library, just run this command in your shell:
+So far, to install the Wasm library, just run this command in your shell:
 
 ```sh
-$ go get https://github.com/wasmerio/go-ext-wasm
+$ go install github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
 # Example
 
-There is a toy program in `examples/simple.go`, written in Rust (or
+There is a toy program in `wasmer/testdata/examples/simple.rs`, written in Rust (or
 any other language that compiles to WebAssembly):
 
 ```rust
@@ -34,9 +34,9 @@ pub extern fn sum(x: i32, y: i32) -> i32 {
 ```
 
 After compilation to WebAssembly, the
-[`examples/simple.wasm`](https://github.com/wasmerio/go-ext-wasm/blob/master/examples/simple.wasm)
+[`wasmer/testdata/examples/simple.wasm`](https://github.com/wasmerio/go-ext-wasm/blob/master/wasmer/testdata/examples/simple.wasm)
 binary file is generated. ([Download
-it](https://github.com/wasmerio/go-ext-wasm/raw/master/examples/simple.wasm)).
+it](https://github.com/wasmerio/go-ext-wasm/raw/master/wasmer/testdata/examples/simple.wasm)).
 
 Then, we can execute it in Go:
 
@@ -45,7 +45,7 @@ package main
 
 import (
 	"fmt"
-	wasm "https://github.com/wasmerio/go-ext-wasm"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
 func main(){
@@ -58,19 +58,6 @@ func main(){
 
 	fmt.Println(result) // 42!
 }
-```
-
-And then, finally, enjoy by running:
-
-```sh
-$ go run examples/simple.wasm
-```
-
-To run examples in general, you can use the following command:
-
-```sh
-$ just go-run examples/greet.go
-Hello, Wasmer 🐹!
 ```
 
 # Development
