@@ -5,7 +5,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
-	wasm "wasmer"
+	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func Example_greet() {

@@ -1,8 +1,8 @@
 package wasmer
 
 /*
-#cgo LDFLAGS: -L../../ -lwasmer_runtime_c_api
-#include "../../wasmer.h"
+#cgo LDFLAGS: -L./ -lwasmer_runtime_c_api
+#include "./wasmer.h"
 */
 import "C"
 import (

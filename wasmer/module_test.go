@@ -5,7 +5,7 @@ import (
 	"path"
 	"runtime"
 	"testing"
-	wasm "wasmer"
+	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func TestValidate(t *testing.T) {

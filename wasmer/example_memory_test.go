@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 	"runtime"
-	wasm "wasmer"
+	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func memoryWasmFile() string {

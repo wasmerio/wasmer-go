@@ -3,7 +3,7 @@ package wasmer_test
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
-	wasm "wasmer"
+	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func TestValueI32(t *testing.T) {

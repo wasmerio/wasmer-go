@@ -1,3 +1,0 @@
-[submodule "extension/src/github.com/stretchr/testify"]
-	path = wasmer/src/github.com/stretchr/testify
-	url = https://github.com/stretchr/testify
