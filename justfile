@@ -21,10 +21,6 @@ go:
 	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
 	go build -o ../target/go/wasm -ldflags="-r $(pwd)" .
 
-# Run a Go program, like `just go-run examples/simple.go`.
-go-run FILE:
-	GOPATH=$(pwd)/wasmer go run {{FILE}}
-
 # Generate cgo debug objects.
 debug-cgo:
 	cd wasmer/ && \
