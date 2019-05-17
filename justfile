@@ -41,6 +41,11 @@ test:
 	# Run the examples.
 	go test -test.v $(find extension/src/wasmer -type f \( -name "example_*_test.go" \) )
 
+# Server the documentation.
+doc:
+	@echo 'Open http://localhost:6060/pkg/wasmer/'
+	GOPATH=$(pwd)/extension godoc -http=:6060
+
 # Local Variables:
 # mode: makefile
 # End:
