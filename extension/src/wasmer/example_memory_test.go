@@ -1,22 +1,33 @@
-package wasmer
+package wasmer_test
 
 import (
 	"fmt"
 	"path"
 	"runtime"
+	wasm "wasmer"
 )
 
-func Example_memory() {
+func memoryWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "/../../examples/memory.wasm")
+	return path.Join(path.Dir(filename), "/../../examples/memory.wasm")
+}
 
-	bytes, _ := ReadBytes(module_path)
-	instance, _ := NewInstance(bytes)
+func Example_memory() {
+	// Reads the WebAssembly module as bytes.
+	bytes, _ := wasm.ReadBytes(memoryWasmFile())
+
+	// Instantiates the WebAssembly mdule.
+	instance, _ := wasm.NewInstance(bytes)
 	defer instance.Close()
 
+	// Calls the `return_hello` exported function. This function
+	// returns a pointer to a string.
 	result, _ := instance.Exports["return_hello"]()
+
+	// Gets the pointer value as an integer.
 	pointer := result.ToI32()
 
+	// Reads the memory.
 	memory := instance.Memory.Data()
 
 	fmt.Println(string(memory[pointer : pointer+13]))

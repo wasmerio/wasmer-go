@@ -1,20 +1,23 @@
-package wasmer
+package wasmer_test
 
 import (
 	"fmt"
 	"path"
 	"runtime"
+	wasm "wasmer"
 )
 
-func Example() {
+func simpleWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "/../../examples/simple.wasm")
+	return path.Join(path.Dir(filename), "/../../examples/simple.wasm")
+}
 
+func Example() {
 	// Reads the WebAssembly module as bytes.
-	bytes, _ := ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(simpleWasmFile())
 
 	// Instantiates the WebAssembly module.
-	instance, _ := NewInstance(bytes)
+	instance, _ := wasm.NewInstance(bytes)
 
 	// Close the WebAssembly instance later.
 	defer instance.Close()

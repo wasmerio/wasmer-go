@@ -1,10 +1,11 @@
-package wasmer
+package wasmer_test
 
 import (
 	"fmt"
 	"path"
 	"runtime"
 	"strings"
+	wasm "wasmer"
 )
 
 func Example_greet() {
@@ -12,8 +13,8 @@ func Example_greet() {
 	module_path := path.Join(path.Dir(filename), "/../../examples/greet.wasm")
 
 	// Instantiate the module.
-	bytes, _ := ReadBytes(module_path)
-	instance, _ := NewInstance(bytes)
+	bytes, _ := wasm.ReadBytes(module_path)
+	instance, _ := wasm.NewInstance(bytes)
 	defer instance.Close()
 
 	// Set the subject to greet.

@@ -1,24 +1,25 @@
-package wasmer
+package wasmer_test
 
 import (
 	"github.com/stretchr/testify/assert"
 	"path"
 	"runtime"
 	"testing"
+	wasm "wasmer"
 )
 
 func TestMemoryIsAbsent(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	module_path := path.Join(path.Dir(filename), "..", "..", "tests", "no_memory.wasm")
 
-	bytes, _ := ReadBytes(module_path)
-	_, err := NewInstance(bytes)
+	bytes, _ := wasm.ReadBytes(module_path)
+	_, err := wasm.NewInstance(bytes)
 
 	assert.EqualError(t, err, "No memory exported.")
 }
 
 func TestMemoryLength(t *testing.T) {
-	instance, _ := NewInstance(GetBytes())
+	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
 	var memory_length uint32 = instance.Memory.Length()
@@ -27,7 +28,7 @@ func TestMemoryLength(t *testing.T) {
 }
 
 func TestMemoryDataIsASlice(t *testing.T) {
-	instance, _ := NewInstance(GetBytes())
+	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
 	memory_length := instance.Memory.Length()
@@ -38,7 +39,7 @@ func TestMemoryDataIsASlice(t *testing.T) {
 }
 
 func TestMemoryData(t *testing.T) {
-	instance, _ := NewInstance(GetBytes())
+	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
 	result, _ := instance.Exports["string"]()
@@ -50,7 +51,7 @@ func TestMemoryData(t *testing.T) {
 }
 
 func TestMemoryDataReadWrite(t *testing.T) {
-	instance, _ := NewInstance(GetBytes())
+	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
 	result, _ := instance.Exports["string"]()
