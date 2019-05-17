@@ -1,4 +1,4 @@
-module wasmerio/go-ext-wasm/wasmer
+module github.com/wasmerio/go-ext-wasm/wasmer
 
 go 1.12
 

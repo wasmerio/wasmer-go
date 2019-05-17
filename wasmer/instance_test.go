@@ -2,10 +2,10 @@ package wasmer_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
 	"testing"
-	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func GetBytes() []byte {

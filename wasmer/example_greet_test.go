@@ -2,10 +2,10 @@ package wasmer_test
 
 import (
 	"fmt"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
 	"strings"
-	wasm "wasmerio/go-ext-wasm/wasmer"
 )
 
 func Example_greet() {
