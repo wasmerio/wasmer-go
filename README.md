@@ -7,6 +7,8 @@
 <p align="center">
   <a href="https://spectrum.chat/wasmer">
     <img src="https://withspectrum.github.io/badge/badge.svg" alt="Join the Wasmer Community" valign="middle"></a>
+  <a href="https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer">
+    <img src="https://img.shields.io/badge/documentation-API-ff0066.svg" alt="Read our API documentation"></a>
   <a href="https://github.com/wasmerio/wasmer/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License" valign="middle"></a>
 </p>
@@ -75,6 +77,8 @@ To build the Go part, run:
 
 (Yes, you need [`just`]).
 
+[`just`]: https://github.com/casey/just/
+
 # Testing
 
 Once the library is build, run the following command:
@@ -82,6 +86,14 @@ Once the library is build, run the following command:
 ```sh
 $ just test
 ```
+
+# Documentation
+
+[The documentation can be read online on godoc.org][documentation]. It
+contains function descriptions, short examples, long examples
+etc. Everything one need to start using Wasmer with Go!
+
+[documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
 
 # What is WebAssembly?
 
@@ -110,5 +122,4 @@ The entire project is under the BSD-3-Clause license. Please read [the
 `LICENSE` file][license].
 
 
-[`just`]: https://github.com/casey/just/
 [license]: https://github.com/wasmerio/wasmer/blob/master/LICENSE
