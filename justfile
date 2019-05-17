@@ -6,7 +6,7 @@ rust:
 go:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	cd extension
+	cd wasmer
 	case "{{os()}}" in
 		"macos")
 			dylib_extension="dylib"
@@ -23,30 +23,30 @@ go:
 
 # Run a Go program, like `just go-run examples/simple.go`.
 go-run FILE:
-	GOPATH=$(pwd)/extension go run {{FILE}}
+	GOPATH=$(pwd)/wasmer go run {{FILE}}
 
 # Generate cgo debug objects.
 debug-cgo:
-	cd extension/src/wasmer/ && \
+	cd wasmer/src/wasmer/ && \
 		go tool cgo wasmer.go && \
-		echo "Browse extension/src/wasmer/_obj/"
+		echo "Browse wasmer/src/wasmer/_obj/"
 
 # Run all the tests.
 test:
 	#!/usr/bin/env bash
-	export LD_LIBRARY_PATH=$(pwd)/extension
-	export GOPATH=$(pwd)/extension
+	export LD_LIBRARY_PATH=$(pwd)/wasmer
+	export GOPATH=$(pwd)/wasmer
 	# Run the tests.
-	go test -test.v $(find extension/src/wasmer -type f \( -name "*_test.go" \! -name "example_*.go" \) )
+	go test -test.v $(find wasmer/src/wasmer -type f \( -name "*_test.go" \! -name "example_*.go" \) )
 	# Run the short examples.
-	go test -test.v extension/src/wasmer/example_test.go
+	go test -test.v wasmer/src/wasmer/example_test.go
 	# Run the long examples.
-	go test -test.v $(find extension/src/wasmer -type f \( -name "example_*_test.go" \) )
+	go test -test.v $(find wasmer/src/wasmer -type f \( -name "example_*_test.go" \) )
 
 # Server the documentation.
 doc:
 	@echo 'Open http://localhost:6060/pkg/wasmer/'
-	GOPATH=$(pwd)/extension godoc -http=:6060
+	GOPATH=$(pwd)/wasmer godoc -http=:6060
 
 # Local Variables:
 # mode: makefile

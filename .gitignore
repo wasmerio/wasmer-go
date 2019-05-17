@@ -1,4 +1,4 @@
-/extension/libwasmer_runtime_c_api.dylib
-/extension/pkg
-/extension/src/wasmer/_obj
 /target
+/wasmer/libwasmer_runtime_c_api.dylib
+/wasmer/pkg
+/wasmer/src/wasmer/_obj

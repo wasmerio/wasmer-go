@@ -23,25 +23,25 @@ jobs:
             export PATH="$HOME/.cargo/bin:$PATH"
             test -f $HOME/.cargo/bin/just || cargo install just
 
-      # Compile the Rust part of the extension.
+      # Compile the Rust part of the library.
       - run:
-          name: Compile the Rust part of the Go extension
+          name: Compile the Rust part of the Go library
           command: |
             export PATH="$HOME/.cargo/bin:$PATH"
             just rust
 
-      # Compile and install the Go extension.
+      # Compile and install the Go library.
       - run:
-          name: Compile and install the Go extension
+          name: Compile and install the Go library
           command: |
             export PATH="$HOME/.cargo/bin:$PATH"
             git submodule init
             git submodule update
             just go
 
-      # Run the extension test suites.
+      # Run the library test suites.
       - run:
-          name: Test the extension
+          name: Test the library
           command: |
             export PATH="$HOME/.cargo/bin:$PATH"
             just test
