@@ -31,9 +31,15 @@ debug-cgo:
 		go tool cgo wasmer.go && \
 		echo "Browse extension/src/wasmer/_obj/"
 
-# Run the tests.
+# Run all the tests.
 test:
-	LD_LIBRARY_PATH=$(pwd)/extension GOPATH=$(pwd)/extension go test wasmer -test.v
+	#!/usr/bin/env bash
+	export LD_LIBRARY_PATH=$(pwd)/extension
+	export GOPATH=$(pwd)/extension
+	# Run the tests.
+	go test -test.v $(find extension/src/wasmer -type f \( -name "*_test.go" \! -name "example_*.go" \) )
+	# Run the examples.
+	go test -test.v $(find extension/src/wasmer -type f \( -name "example_*_test.go" \) )
 
 # Local Variables:
 # mode: makefile
