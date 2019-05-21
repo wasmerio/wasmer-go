@@ -18,7 +18,7 @@ type InstanceError struct {
 }
 
 // NewInstanceError constructs a new `InstanceError`.
-func NewInstanceError(message string) error {
+func NewInstanceError(message string) *InstanceError {
 	return &InstanceError{message}
 }
 
@@ -40,7 +40,7 @@ type ExportedFunctionError struct {
 // where `functionName` is the name of the exported function, and
 // `message` is the error message. If the error message contains `%s`,
 // then this parameter will be replaced by `functionName`.
-func NewExportedFunctionError(functionName string, message string) error {
+func NewExportedFunctionError(functionName string, message string) *ExportedFunctionError {
 	return &ExportedFunctionError{functionName, message}
 }
 
