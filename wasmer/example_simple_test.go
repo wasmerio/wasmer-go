@@ -26,7 +26,7 @@ func Example() {
 	sum := instance.Exports["sum"]
 
 	// Calls that exported function with Go standard values. The
-	// WebAssembly types are infered and values are casted
+	// WebAssembly types are inferred and values are casted
 	// automatically.
 	result, _ := sum(1, 2)
 

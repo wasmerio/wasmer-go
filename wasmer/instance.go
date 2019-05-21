@@ -62,10 +62,10 @@ type Instance struct {
 	// types, the accepted Go types are: `int8`, `uint8`, `int16`,
 	// `uint16`, `int32`, `uint32`, `int64`, `int`, `uint`, `float32`
 	// and `float64`. In addition to those types, the `Value` type
-	// (from this project) is accepted. The convertion from a Go
+	// (from this project) is accepted. The conversion from a Go
 	// value to a WebAssembly value is done automatically except for
 	// the `Value` type (where type is coerced, that's the intent
-	// here). The WebAssembly type is automatically infered. Note
+	// here). The WebAssembly type is automatically inferred. Note
 	// that the returned value is of kind `Value`, and not a
 	// standard Go type.
 	Exports map[string]func(...interface{}) (Value, error)
