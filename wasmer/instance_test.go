@@ -106,28 +106,28 @@ func TestCallI32I32(t *testing.T) {
 	assert.Equal(t, wasm.I32(7), output)
 	assert.NoError(t, err)
 
-	output, err = i32_i32(int8(7))
+	output, _ = i32_i32(int8(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(uint8(7))
+	output, _ = i32_i32(uint8(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(int16(7))
+	output, _ = i32_i32(int16(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(uint16(7))
+	output, _ = i32_i32(uint16(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(int32(7))
+	output, _ = i32_i32(int32(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(int(7))
+	output, _ = i32_i32(int(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(uint(7))
+	output, _ = i32_i32(uint(7))
 	assert.Equal(t, wasm.I32(7), output)
 
-	output, err = i32_i32(wasm.I32(7))
+	output, _ = i32_i32(wasm.I32(7))
 	assert.Equal(t, wasm.I32(7), output)
 
 	_, err = i32_i32(int64(7))
@@ -144,34 +144,34 @@ func TestCallI64I64(t *testing.T) {
 	assert.Equal(t, wasm.I64(7), output)
 	assert.NoError(t, err)
 
-	output, err = i64_i64(int8(7))
+	output, _ = i64_i64(int8(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(uint8(7))
+	output, _ = i64_i64(uint8(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(int16(7))
+	output, _ = i64_i64(int16(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(uint16(7))
+	output, _ = i64_i64(uint16(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(int32(7))
+	output, _ = i64_i64(int32(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(uint32(7))
+	output, _ = i64_i64(uint32(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(int64(7))
+	output, _ = i64_i64(int64(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(int(7))
+	output, _ = i64_i64(int(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(uint(7))
+	output, _ = i64_i64(uint(7))
 	assert.Equal(t, wasm.I64(7), output)
 
-	output, err = i64_i64(wasm.I64(7))
+	output, _ = i64_i64(wasm.I64(7))
 	assert.Equal(t, wasm.I64(7), output)
 
 	_, err = i64_i64("foo")
@@ -188,7 +188,7 @@ func TestCallF32F32(t *testing.T) {
 	assert.Equal(t, wasm.F32(7.42), output)
 	assert.NoError(t, err)
 
-	output, err = f32_f32(wasm.F32(7.42))
+	output, _ = f32_f32(wasm.F32(7.42))
 	assert.Equal(t, wasm.F32(7.42), output)
 
 	_, err = f32_f32("foo")
@@ -205,13 +205,13 @@ func TestCallF64F64(t *testing.T) {
 	assert.Equal(t, wasm.F64(7.42), output)
 	assert.NoError(t, err)
 
-	output, err = f64_f64(float32(7.42))
+	output, _ = f64_f64(float32(7.42))
 	assert.Equal(t, wasm.F64(float64(float32(7.42))), output)
 
-	output, err = f64_f64(float64(7.42))
+	output, _ = f64_f64(float64(7.42))
 	assert.Equal(t, wasm.F64(7.42), output)
 
-	output, err = f64_f64(wasm.F64(7.42))
+	output, _ = f64_f64(wasm.F64(7.42))
 	assert.Equal(t, wasm.F64(7.42), output)
 
 	_, err = f64_f64("foo")
