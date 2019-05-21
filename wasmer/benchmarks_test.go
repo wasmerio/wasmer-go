@@ -15,18 +15,18 @@ const N = 100000
 
 func GetBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "benchmarks", "nbody.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "benchmarks", "nbody.wasm")
 
-	bytes, _ := wasmer.ReadBytes(module_path)
+	bytes, _ := wasmer.ReadBytes(modulePath)
 
 	return bytes
 }
 
 func BenchmarkWasmer(b *testing.B) {
-	wasm_bytes := GetBytes()
+	wasmBytes := GetBytes()
 
 	for i := 0; i < b.N; i++ {
-		instance, _ := wasmer.NewInstance(wasm_bytes)
+		instance, _ := wasmer.NewInstance(wasmBytes)
 		result, _ := instance.Exports["main"](N)
 
 		_ = result
@@ -34,10 +34,10 @@ func BenchmarkWasmer(b *testing.B) {
 }
 
 func BenchmarkWagon(b *testing.B) {
-	wasm_bytes := GetBytes()
+	wasmBytes := GetBytes()
 
 	for i := 0; i < b.N; i++ {
-		module, _ := wagon_wasm.ReadModule(bytes.NewReader(wasm_bytes), func(name string) (*wagon_wasm.Module, error) {
+		module, _ := wagon_wasm.ReadModule(bytes.NewReader(wasmBytes), func(name string) (*wagon_wasm.Module, error) {
 			return nil, fmt.Errorf("Module %q unknown.", name)
 		})
 		vm, _ := wagon_exec.NewVM(module)

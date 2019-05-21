@@ -10,9 +10,9 @@ import (
 
 func TestValidate(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
 
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(modulePath)
 	output := wasm.Validate(bytes)
 
 	assert.True(t, output)
@@ -20,9 +20,9 @@ func TestValidate(t *testing.T) {
 
 func TestValidateInvalid(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "invalid.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "invalid.wasm")
 
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(modulePath)
 	output := wasm.Validate(bytes)
 
 	assert.False(t, output)

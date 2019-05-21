@@ -21,28 +21,28 @@ func Example_greet() {
 
 	// Set the subject to greet.
 	subject := "Wasmer 🐹"
-	length_of_subject := len(subject)
+	lengthOfSubject := len(subject)
 
 	// Allocate memory for the subject, and get a pointer to it.
-	allocate_result, _ := instance.Exports["allocate"](length_of_subject)
-	input_pointer := allocate_result.ToI32()
+	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject)
+	inputPointer := allocateResult.ToI32()
 
 	// Write the subject into the memory.
-	memory := instance.Memory.Data()[input_pointer:]
+	memory := instance.Memory.Data()[inputPointer:]
 
-	for nth := 0; nth < length_of_subject; nth++ {
+	for nth := 0; nth < lengthOfSubject; nth++ {
 		memory[nth] = subject[nth]
 	}
 
 	// C-string terminates by NULL.
-	memory[length_of_subject] = 0
+	memory[lengthOfSubject] = 0
 
 	// Run the `greet` function. Given the pointer to the subject.
-	greet_result, _ := instance.Exports["greet"](input_pointer)
-	output_pointer := greet_result.ToI32()
+	greetResult, _ := instance.Exports["greet"](inputPointer)
+	outputPointer := greetResult.ToI32()
 
 	// Read the result of the `greet` function.
-	memory = instance.Memory.Data()[output_pointer:]
+	memory = instance.Memory.Data()[outputPointer:]
 	nth := 0
 	var output strings.Builder
 
@@ -55,14 +55,14 @@ func Example_greet() {
 		nth++
 	}
 
-	length_of_output := nth
+	lengthOfOutput := nth
 
 	fmt.Println(output.String())
 
 	// Deallocate the subject, and the output.
 	deallocate := instance.Exports["deallocate"]
-	deallocate(input_pointer, length_of_subject)
-	deallocate(output_pointer, length_of_output)
+	deallocate(inputPointer, lengthOfSubject)
+	deallocate(outputPointer, lengthOfOutput)
 
 	// Output:
 	// Hello, Wasmer 🐹!

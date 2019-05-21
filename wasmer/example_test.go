@@ -9,9 +9,9 @@ import (
 
 func GetBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
 
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(modulePath)
 
 	return bytes
 }
@@ -47,9 +47,9 @@ func ExampleInstance_exportedFunctions() {
 	defer instance.Close()
 
 	// Gets an exported function.
-	sum, function_exists := instance.Exports["sum"]
+	sum, functionExists := instance.Exports["sum"]
 
-	fmt.Println(function_exists)
+	fmt.Println(functionExists)
 
 	// Calls the `sum` exported function with Go values.
 	result, _ := sum(1, 2)
