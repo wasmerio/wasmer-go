@@ -10,46 +10,47 @@ import (
 	"unsafe"
 )
 
-// Represents any kind of errors related to a WebAssembly instance. It
+// InstanceError represents any kind of errors related to a WebAssembly instance. It
 // is returned by `Instance` functions only.
 type InstanceError struct {
 	// Error message.
 	message string
 }
 
-// Constructs a new `InstanceError`.
+// NewInstanceError constructs a new `InstanceError`.
 func NewInstanceError(message string) error {
 	return &InstanceError{message}
 }
 
 // `InstanceError` is an actual error. The `Error` function returns
 // the error message.
-func (self *InstanceError) Error() string {
-	return self.message
+func (error *InstanceError) Error() string {
+	return error.message
 }
 
-// Represents any kind of errors related to a WebAssembly exported
-// function. It is returned by `Instance` functions only.
+// ExportedFunctionError represents any kind of errors related to a
+// WebAssembly exported function. It is returned by `Instance`
+// functions only.
 type ExportedFunctionError struct {
-	function_name string
-	message       string
+	functionName string
+	message      string
 }
 
-// Constructs a new `ExportedFunctionError`, where `function_name` is
-// the name of the exported function, and `message` is the error
-// message. If the error message contains `%s`, then this parameter will
-// be replaced by `function_name`.
-func NewExportedFunctionError(function_name string, message string) error {
-	return &ExportedFunctionError{function_name, message}
+// NewExportedFunctionError constructs a new `ExportedFunctionError`,
+// where `functionName` is the name of the exported function, and
+// `message` is the error message. If the error message contains `%s`,
+// then this parameter will be replaced by `functionName`.
+func NewExportedFunctionError(functionName string, message string) error {
+	return &ExportedFunctionError{functionName, message}
 }
 
-// `ExportedFunctionError` is an actual error. The `Error` function
+// ExportedFunctionError is an actual error. The `Error` function
 // returns the error message.
-func (self *ExportedFunctionError) Error() string {
-	return fmt.Sprintf(self.message, self.function_name)
+func (error *ExportedFunctionError) Error() string {
+	return fmt.Sprintf(error.message, error.functionName)
 }
 
-// Represents a WebAssembly instance.
+// Instance represents a WebAssembly instance.
 type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *C.wasmer_instance_t
@@ -73,12 +74,12 @@ type Instance struct {
 	Memory Memory
 }
 
-// Constructs a new `Instance`.
+// NewInstance constructs a new `Instance`.
 func NewInstance(bytes []byte) (Instance, error) {
-	var imports []C.wasmer_import_t = []C.wasmer_import_t{}
-	var instance *C.wasmer_instance_t = nil
+	var imports = []C.wasmer_import_t{}
+	var instance *C.wasmer_instance_t
 
-	var compile_result C.wasmer_result_t = C.wasmer_instantiate(
+	var compileResult = C.wasmer_instantiate(
 		&instance,
 		(*C.uchar)(unsafe.Pointer(&bytes[0])),
 		C.uint(len(bytes)),
@@ -87,84 +88,84 @@ func NewInstance(bytes []byte) (Instance, error) {
 	)
 
 	var memory Memory
-	var empty_instance Instance = Instance{instance: nil, Exports: nil, Memory: memory}
+	var emptyInstance = Instance{instance: nil, Exports: nil, Memory: memory}
 
-	if C.WASMER_OK != compile_result {
-		return empty_instance, NewInstanceError("Failed to compile the module.")
+	if C.WASMER_OK != compileResult {
+		return emptyInstance, NewInstanceError("Failed to compile the module.")
 	}
 
-	var exports map[string]func(...interface{}) (Value, error) = make(map[string]func(...interface{}) (Value, error))
+	var exports = make(map[string]func(...interface{}) (Value, error))
 
-	var wasm_exports *C.wasmer_exports_t = nil
-	var has_memory bool = false
+	var wasmExports *C.wasmer_exports_t
+	var hasMemory = false
 
-	C.wasmer_instance_exports(instance, &wasm_exports)
-	defer C.wasmer_exports_destroy(wasm_exports)
+	C.wasmer_instance_exports(instance, &wasmExports)
+	defer C.wasmer_exports_destroy(wasmExports)
 
-	var number_of_exports int = int(C.wasmer_exports_len(wasm_exports))
+	var numberOfExports = int(C.wasmer_exports_len(wasmExports))
 
-	for nth := 0; nth < number_of_exports; nth++ {
-		var wasm_export *C.wasmer_export_t = C.wasmer_exports_get(wasm_exports, C.int(nth))
-		var wasm_export_kind C.wasmer_import_export_kind = C.wasmer_export_kind(wasm_export)
+	for nth := 0; nth < numberOfExports; nth++ {
+		var wasmExport = C.wasmer_exports_get(wasmExports, C.int(nth))
+		var wasmExportKind = C.wasmer_export_kind(wasmExport)
 
-		switch wasm_export_kind {
+		switch wasmExportKind {
 		case C.WASM_MEMORY:
-			var wasm_memory *C.wasmer_memory_t = nil
+			var wasmMemory *C.wasmer_memory_t
 
-			if C.wasmer_export_to_memory(wasm_export, &wasm_memory) != C.WASMER_OK {
-				return empty_instance, NewInstanceError("Failed to extract the exported memory.")
+			if C.wasmer_export_to_memory(wasmExport, &wasmMemory) != C.WASMER_OK {
+				return emptyInstance, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			memory = newMemory(wasm_memory)
-			has_memory = true
+			memory = newMemory(wasmMemory)
+			hasMemory = true
 
 		case C.WASM_FUNCTION:
-			var wasm_export_name C.wasmer_byte_array = C.wasmer_export_name(wasm_export)
-			var exported_function_name = C.GoStringN((*C.char)(unsafe.Pointer(wasm_export_name.bytes)), (C.int)(wasm_export_name.bytes_len))
-			var wasm_function *C.wasmer_export_func_t = C.wasmer_export_to_func(wasm_export)
-			var wasm_function_inputs_arity C.uint
+			var wasmExportName = C.wasmer_export_name(wasmExport)
+			var exportedFunctionName = C.GoStringN((*C.char)(unsafe.Pointer(wasmExportName.bytes)), (C.int)(wasmExportName.bytes_len))
+			var wasmFunction = C.wasmer_export_to_func(wasmExport)
+			var wasmFunctionInputsArity C.uint
 
-			if C.wasmer_export_func_params_arity(wasm_function, &wasm_function_inputs_arity) != C.WASMER_OK {
-				return empty_instance, NewExportedFunctionError(exported_function_name, "Failed to read the input arity of the `%s` exported function.")
+			if C.wasmer_export_func_params_arity(wasmFunction, &wasmFunctionInputsArity) != C.WASMER_OK {
+				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
 			}
 
-			var wasm_function_input_signatures []C.wasmer_value_tag = make([]C.wasmer_value_tag, int(wasm_function_inputs_arity))
+			var wasmFunctionInputSignatures = make([]C.wasmer_value_tag, int(wasmFunctionInputsArity))
 
-			if wasm_function_inputs_arity > 0 {
-				var wasm_function_input_signatures_c_pointer *C.wasmer_value_tag = (*C.wasmer_value_tag)(unsafe.Pointer(&wasm_function_input_signatures[0]))
+			if wasmFunctionInputsArity > 0 {
+				var wasmFunctionInputSignaturesCPointer = (*C.wasmer_value_tag)(unsafe.Pointer(&wasmFunctionInputSignatures[0]))
 
-				if C.wasmer_export_func_params(wasm_function, wasm_function_input_signatures_c_pointer, C.int(wasm_function_inputs_arity)) != C.WASMER_OK {
-					return empty_instance, NewExportedFunctionError(exported_function_name, "Failed to read the signature of the `%s` exported function.")
+				if C.wasmer_export_func_params(wasmFunction, wasmFunctionInputSignaturesCPointer, C.int(wasmFunctionInputsArity)) != C.WASMER_OK {
+					return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
 				}
 			}
 
-			var wasm_function_outputs_arity C.uint
+			var wasmFunctionOutputsArity C.uint
 
-			if C.wasmer_export_func_returns_arity(wasm_function, &wasm_function_outputs_arity) != C.WASMER_OK {
-				return empty_instance, NewExportedFunctionError(exported_function_name, "Failed to read the output arity of the `%s` exported function.")
+			if C.wasmer_export_func_returns_arity(wasmFunction, &wasmFunctionOutputsArity) != C.WASMER_OK {
+				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
 			}
 
-			var number_of_expected_arguments int = int(wasm_function_inputs_arity)
+			var numberOfExpectedArguments = int(wasmFunctionInputsArity)
 
-			exports[exported_function_name] = func(arguments ...interface{}) (Value, error) {
-				var number_of_given_arguments int = len(arguments)
-				var diff int = number_of_expected_arguments - number_of_given_arguments
+			exports[exportedFunctionName] = func(arguments ...interface{}) (Value, error) {
+				var numberOfGivenArguments = len(arguments)
+				var diff = numberOfExpectedArguments - numberOfGivenArguments
 
 				if diff > 0 {
-					return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Missing %d argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", diff, number_of_expected_arguments, number_of_given_arguments))
+					return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Missing %d argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", diff, numberOfExpectedArguments, numberOfGivenArguments))
 				} else if diff < 0 {
-					return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, number_of_expected_arguments, number_of_given_arguments))
+					return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, numberOfExpectedArguments, numberOfGivenArguments))
 				}
 
-				var wasm_inputs []C.wasmer_value_t = make([]C.wasmer_value_t, wasm_function_inputs_arity)
+				var wasmInputs = make([]C.wasmer_value_t, wasmFunctionInputsArity)
 
 				for nth, value := range arguments {
-					var wasm_input_type = wasm_function_input_signatures[nth]
+					var wasmInputType = wasmFunctionInputSignatures[nth]
 
-					switch wasm_input_type {
+					switch wasmInputType {
 					case C.WASM_I32:
-						wasm_inputs[nth].tag = C.WASM_I32
-						var pointer *int32 = (*int32)(unsafe.Pointer(&wasm_inputs[nth].value))
+						wasmInputs[nth].tag = C.WASM_I32
+						var pointer = (*int32)(unsafe.Pointer(&wasmInputs[nth].value))
 
 						switch value.(type) {
 						case int8:
@@ -184,17 +185,17 @@ func NewInstance(bytes []byte) (Instance, error) {
 						case Value:
 							var value = value.(Value)
 
-							if value.GetType() != Type_I32 {
-								return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
+							if value.GetType() != TypeI32 {
+								return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
 							}
 
 							*pointer = value.ToI32()
 						default:
-							return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
+							return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
 						}
 					case C.WASM_I64:
-						wasm_inputs[nth].tag = C.WASM_I64
-						var pointer *int64 = (*int64)(unsafe.Pointer(&wasm_inputs[nth].value))
+						wasmInputs[nth].tag = C.WASM_I64
+						var pointer = (*int64)(unsafe.Pointer(&wasmInputs[nth].value))
 
 						switch value.(type) {
 						case int8:
@@ -218,17 +219,17 @@ func NewInstance(bytes []byte) (Instance, error) {
 						case Value:
 							var value = value.(Value)
 
-							if value.GetType() != Type_I64 {
-								return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i64`, cannot cast given value to this type.", nth+1))
+							if value.GetType() != TypeI64 {
+								return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i64`, cannot cast given value to this type.", nth+1))
 							}
 
 							*pointer = value.ToI64()
 						default:
-							return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i64`, cannot cast given value to this type.", nth+1))
+							return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i64`, cannot cast given value to this type.", nth+1))
 						}
 					case C.WASM_F32:
-						wasm_inputs[nth].tag = C.WASM_F32
-						var pointer *float32 = (*float32)(unsafe.Pointer(&wasm_inputs[nth].value))
+						wasmInputs[nth].tag = C.WASM_F32
+						var pointer = (*float32)(unsafe.Pointer(&wasmInputs[nth].value))
 
 						switch value.(type) {
 						case float32:
@@ -236,17 +237,17 @@ func NewInstance(bytes []byte) (Instance, error) {
 						case Value:
 							var value = value.(Value)
 
-							if value.GetType() != Type_F32 {
-								return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f32`, cannot cast given value to this type.", nth+1))
+							if value.GetType() != TypeF32 {
+								return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f32`, cannot cast given value to this type.", nth+1))
 							}
 
 							*pointer = value.ToF32()
 						default:
-							return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f32`, cannot cast given value to this type.", nth+1))
+							return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f32`, cannot cast given value to this type.", nth+1))
 						}
 					case C.WASM_F64:
-						wasm_inputs[nth].tag = C.WASM_F64
-						var pointer *float64 = (*float64)(unsafe.Pointer(&wasm_inputs[nth].value))
+						wasmInputs[nth].tag = C.WASM_F64
+						var pointer = (*float64)(unsafe.Pointer(&wasmInputs[nth].value))
 
 						switch value.(type) {
 						case float32:
@@ -256,55 +257,55 @@ func NewInstance(bytes []byte) (Instance, error) {
 						case Value:
 							var value = value.(Value)
 
-							if value.GetType() != Type_F64 {
-								return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f64`, cannot cast given value to this type.", nth+1))
+							if value.GetType() != TypeF64 {
+								return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f64`, cannot cast given value to this type.", nth+1))
 							}
 
 							*pointer = value.ToF64()
 						default:
-							return I32(0), NewExportedFunctionError(exported_function_name, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f64`, cannot cast given value to this type.", nth+1))
+							return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `f64`, cannot cast given value to this type.", nth+1))
 						}
 					default:
-						panic(fmt.Sprintf("Invalid arguments type when calling the `%s` exported function.", exported_function_name))
+						panic(fmt.Sprintf("Invalid arguments type when calling the `%s` exported function.", exportedFunctionName))
 					}
 				}
 
-				var wasm_outputs []C.wasmer_value_t = make([]C.wasmer_value_t, wasm_function_outputs_arity)
+				var wasmOutputs = make([]C.wasmer_value_t, wasmFunctionOutputsArity)
 
-				var wasm_function_name = C.CString(exported_function_name)
-				defer C.free(unsafe.Pointer(wasm_function_name))
+				var wasmFunctionName = C.CString(exportedFunctionName)
+				defer C.free(unsafe.Pointer(wasmFunctionName))
 
-				var wasm_inputs_c_pointer *C.wasmer_value_t = nil
+				var wasmInputsCPointer *C.wasmer_value_t
 
-				if wasm_function_inputs_arity > 0 {
-					wasm_inputs_c_pointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasm_inputs[0]))
+				if wasmFunctionInputsArity > 0 {
+					wasmInputsCPointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasmInputs[0]))
 				} else {
-					wasm_inputs_c_pointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasm_inputs))
+					wasmInputsCPointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasmInputs))
 				}
 
-				var wasm_outputs_c_pointer *C.wasmer_value_t = nil
+				var wasmOutputsCPointer *C.wasmer_value_t
 
-				if wasm_function_outputs_arity > 0 {
-					wasm_outputs_c_pointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasm_outputs[0]))
+				if wasmFunctionOutputsArity > 0 {
+					wasmOutputsCPointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasmOutputs[0]))
 				} else {
-					wasm_outputs_c_pointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasm_outputs))
+					wasmOutputsCPointer = (*C.wasmer_value_t)(unsafe.Pointer(&wasmOutputs))
 				}
 
-				var call_result C.wasmer_result_t = C.wasmer_instance_call(
+				var callResult = C.wasmer_instance_call(
 					instance,
-					wasm_function_name,
-					wasm_inputs_c_pointer,
-					C.int(wasm_function_inputs_arity),
-					wasm_outputs_c_pointer,
-					C.int(wasm_function_outputs_arity),
+					wasmFunctionName,
+					wasmInputsCPointer,
+					C.int(wasmFunctionInputsArity),
+					wasmOutputsCPointer,
+					C.int(wasmFunctionOutputsArity),
 				)
 
-				if C.WASMER_OK != call_result {
-					return I32(0), NewExportedFunctionError(exported_function_name, "Failed to call the `%s` exported function.")
+				if C.WASMER_OK != callResult {
+					return I32(0), NewExportedFunctionError(exportedFunctionName, "Failed to call the `%s` exported function.")
 				}
 
-				if wasm_function_outputs_arity > 0 {
-					var result = wasm_outputs[0]
+				if wasmFunctionOutputsArity > 0 {
+					var result = wasmOutputs[0]
 
 					switch result.tag {
 					case C.WASM_I32:
@@ -333,16 +334,16 @@ func NewInstance(bytes []byte) (Instance, error) {
 		}
 	}
 
-	if has_memory == false {
-		return empty_instance, NewInstanceError("No memory exported.")
+	if hasMemory == false {
+		return emptyInstance, NewInstanceError("No memory exported.")
 	}
 
 	return Instance{instance: instance, Exports: exports, Memory: memory}, nil
 }
 
-// Closes/frees an `Instance`.
-func (self *Instance) Close() {
-	if self.instance != nil {
-		C.wasmer_instance_destroy(self.instance)
+// Close closes/frees an `Instance`.
+func (instance *Instance) Close() {
+	if instance.instance != nil {
+		C.wasmer_instance_destroy(instance.instance)
 	}
 }

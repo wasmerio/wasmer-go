@@ -229,7 +229,7 @@ func TestCallI32I64F32F64F64(t *testing.T) {
 		5.6,
 	)
 
-	assert.Equal(t, wasm.Type_F64, output.GetType())
+	assert.Equal(t, wasm.TypeF64, output.GetType())
 	assert.Equal(t, 1+2+3.4+5.6, float64(int(output.ToF64()*10000000))/10000000)
 	assert.NoError(t, err)
 }
@@ -260,6 +260,6 @@ func TestCallVoid(t *testing.T) {
 
 	output, err := instance.Exports["void"]()
 
-	assert.Equal(t, wasm.Type_Void, output.GetType())
+	assert.Equal(t, wasm.TypeVoid, output.GetType())
 	assert.NoError(t, err)
 }

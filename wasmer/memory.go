@@ -10,7 +10,7 @@ import (
 	"unsafe"
 )
 
-// Represents an exported memory of a WebAssembly instance. To read
+// Memory represents an exported memory of a WebAssembly instance. To read
 // and write data, please see the `Data` function.
 type Memory struct {
 	memory *C.wasmer_memory_t
@@ -21,15 +21,15 @@ func newMemory(memory *C.wasmer_memory_t) Memory {
 	return Memory{memory}
 }
 
-// Calculates the memory length (in bytes).
-func (self *Memory) Length() uint32 {
-	return uint32(C.wasmer_memory_data_length(self.memory))
+// Length calculates the memory length (in bytes).
+func (memory *Memory) Length() uint32 {
+	return uint32(C.wasmer_memory_data_length(memory.memory))
 }
 
-// Returns a slice of bytes over the WebAssembly memory.
-func (self *Memory) Data() []byte {
-	var length uint32 = self.Length()
-	var data *uint8 = (*uint8)(C.wasmer_memory_data(self.memory))
+// Data returns a slice of bytes over the WebAssembly memory.
+func (memory *Memory) Data() []byte {
+	var length = memory.Length()
+	var data = (*uint8)(C.wasmer_memory_data(memory.memory))
 
 	var header reflect.SliceHeader
 	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))

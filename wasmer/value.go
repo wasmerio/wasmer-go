@@ -5,29 +5,30 @@ import (
 	"math"
 )
 
-// Represents the `Value` type.
+// ValueType represents the `Value` type.
 type ValueType int
 
 const (
-	// Represents the WebAssembly `i32` type.
-	Type_I32 ValueType = iota
+	// TypeI32 represents the WebAssembly `i32` type.
+	TypeI32 ValueType = iota
 
-	// Represents the WebAssembly `i64` type.
-	Type_I64
+	// TypeI64 represents the WebAssembly `i64` type.
+	TypeI64
 
-	// Represents the WebAssembly `f32` type.
-	Type_F32
+	// TypeF32 represents the WebAssembly `f32` type.
+	TypeF32
 
-	// Represents the WebAssembly `f64` type.
-	Type_F64
+	// TypeF64 represents the WebAssembly `f64` type.
+	TypeF64
 
+	// TypeVoid represents nothing.
 	// WebAssembly doesn't have “void” type, but it is introduced
 	// here to represent the returned value of a WebAssembly exported
 	// function that returns nothing.
-	Type_Void
+	TypeVoid
 )
 
-// Represents a WebAssembly value of a particular type.
+// Value represents a WebAssembly value of a particular type.
 type Value struct {
 	// The WebAssembly value (as bits).
 	value uint64
@@ -36,93 +37,93 @@ type Value struct {
 	ty ValueType
 }
 
-// Constructs a WebAssembly value of type `i32`.
+// I32 constructs a WebAssembly value of type `i32`.
 func I32(value int32) Value {
 	return Value{
 		value: uint64(value),
-		ty:    Type_I32,
+		ty:    TypeI32,
 	}
 }
 
-// Constructs a WebAssembly value of type `i64`.
+// I64 constructs a WebAssembly value of type `i64`.
 func I64(value int64) Value {
 	return Value{
 		value: uint64(value),
-		ty:    Type_I64,
+		ty:    TypeI64,
 	}
 }
 
-// Constructs a WebAssembly value of type `f32`.
+// F32 constructs a WebAssembly value of type `f32`.
 func F32(value float32) Value {
 	return Value{
 		value: uint64(math.Float32bits(value)),
-		ty:    Type_F32,
+		ty:    TypeF32,
 	}
 }
 
-// Constructs a WebAssembly value of type `f64`.
+// F64 constructs a WebAssembly value of type `f64`.
 func F64(value float64) Value {
 	return Value{
 		value: math.Float64bits(value),
-		ty:    Type_F64,
+		ty:    TypeF64,
 	}
 }
 
-// Constructs an empty WebAssembly value.
+// void constructs an empty WebAssembly value.
 func void() Value {
 	return Value{
 		value: 0,
-		ty:    Type_Void,
+		ty:    TypeVoid,
 	}
 }
 
-// Gets the type of the WebAssembly value.
-func (self Value) GetType() ValueType {
-	return self.ty
+// GetType gets the type of the WebAssembly value.
+func (value Value) GetType() ValueType {
+	return value.ty
 }
 
-// Reads the WebAssembly value bits as an `int32`. The WebAssembly
+// ToI32 reads the WebAssembly value bits as an `int32`. The WebAssembly
 // value type is ignored.
-func (self Value) ToI32() int32 {
-	return int32(self.value)
+func (value Value) ToI32() int32 {
+	return int32(value.value)
 }
 
-// Reads the WebAssembly value bits as an `int64`. The WebAssembly
+// ToI64 reads the WebAssembly value bits as an `int64`. The WebAssembly
 // value type is ignored.
-func (self Value) ToI64() int64 {
-	return int64(self.value)
+func (value Value) ToI64() int64 {
+	return int64(value.value)
 }
 
-// Reads the WebAssembly value bits as a `float32`. The WebAssembly
+// ToF32 reads the WebAssembly value bits as a `float32`. The WebAssembly
 // value type is ignored.
-func (self Value) ToF32() float32 {
-	return math.Float32frombits(uint32(self.value))
+func (value Value) ToF32() float32 {
+	return math.Float32frombits(uint32(value.value))
 }
 
-// Reads the WebAssembly value bits as a `float64`. The WebAssembly
+// ToF64 reads the WebAssembly value bits as a `float64`. The WebAssembly
 // value type is ignored.
-func (self Value) ToF64() float64 {
-	return math.Float64frombits(self.value)
+func (value Value) ToF64() float64 {
+	return math.Float64frombits(value.value)
 }
 
-// Reads the WebAssembly value bits as a `nil`. The WebAssembly
+// ToVoid reads the WebAssembly value bits as a `nil`. The WebAssembly
 // value type is ignored.
-func (self Value) ToVoid() interface{} {
+func (value Value) ToVoid() interface{} {
 	return nil
 }
 
-// Formats the WebAssembly value as a Go string.
-func (self Value) String() string {
-	switch self.ty {
-	case Type_I32:
-		return fmt.Sprintf("%d", self.ToI32())
-	case Type_I64:
-		return fmt.Sprintf("%d", self.ToI64())
-	case Type_F32:
-		return fmt.Sprintf("%f", self.ToF32())
-	case Type_F64:
-		return fmt.Sprintf("%f", self.ToF64())
-	case Type_Void:
+// String formats the WebAssembly value as a Go string.
+func (value Value) String() string {
+	switch value.ty {
+	case TypeI32:
+		return fmt.Sprintf("%d", value.ToI32())
+	case TypeI64:
+		return fmt.Sprintf("%d", value.ToI64())
+	case TypeF32:
+		return fmt.Sprintf("%f", value.ToF32())
+	case TypeF64:
+		return fmt.Sprintf("%f", value.ToF64())
+	case TypeVoid:
 		return "void"
 	default:
 		return ""
