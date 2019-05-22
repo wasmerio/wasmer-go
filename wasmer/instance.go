@@ -123,7 +123,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 			var wasmExportName = C.wasmer_export_name(wasmExport)
 			var exportedFunctionName = C.GoStringN((*C.char)(unsafe.Pointer(wasmExportName.bytes)), (C.int)(wasmExportName.bytes_len))
 			var wasmFunction = C.wasmer_export_to_func(wasmExport)
-			var wasmFunctionInputsArity C.uint
+			var wasmFunctionInputsArity C.uint32_t
 
 			if C.wasmer_export_func_params_arity(wasmFunction, &wasmFunctionInputsArity) != C.WASMER_OK {
 				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
@@ -134,12 +134,12 @@ func NewInstance(bytes []byte) (Instance, error) {
 			if wasmFunctionInputsArity > 0 {
 				var wasmFunctionInputSignaturesCPointer = (*C.wasmer_value_tag)(unsafe.Pointer(&wasmFunctionInputSignatures[0]))
 
-				if C.wasmer_export_func_params(wasmFunction, wasmFunctionInputSignaturesCPointer, C.int(wasmFunctionInputsArity)) != C.WASMER_OK {
+				if C.wasmer_export_func_params(wasmFunction, wasmFunctionInputSignaturesCPointer, wasmFunctionInputsArity) != C.WASMER_OK {
 					return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
 				}
 			}
 
-			var wasmFunctionOutputsArity C.uint
+			var wasmFunctionOutputsArity C.uint32_t
 
 			if C.wasmer_export_func_returns_arity(wasmFunction, &wasmFunctionOutputsArity) != C.WASMER_OK {
 				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
@@ -295,9 +295,9 @@ func NewInstance(bytes []byte) (Instance, error) {
 					instance,
 					wasmFunctionName,
 					wasmInputsCPointer,
-					C.int(wasmFunctionInputsArity),
+					wasmFunctionInputsArity,
 					wasmOutputsCPointer,
-					C.int(wasmFunctionOutputsArity),
+					wasmFunctionOutputsArity,
 				)
 
 				if C.WASMER_OK != callResult {

@@ -385,7 +385,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "go-ext-wasm"
 version = "0.0.1"
 dependencies = [
- "wasmer-runtime-c-api 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-c-api 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1002,7 +1002,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "wasmer-clif-backend"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "byteorder 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1019,37 +1019,37 @@ dependencies = [
  "serde_bytes 0.10.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
  "target-lexicon 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime-core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-win-exception-handler 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-win-exception-handler 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasmparser 0.29.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "wasmer-runtime"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "memmap 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-clif-backend 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime-core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-clif-backend 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "wasmer-runtime-c-api"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cbindgen 0.8.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.54 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime-core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "wasmer-runtime-core"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "blake2b_simd 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1075,14 +1075,14 @@ dependencies = [
 
 [[package]]
 name = "wasmer-win-exception-handler"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bindgen 0.46.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cmake 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.54 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime-core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1268,11 +1268,11 @@ dependencies = [
 "checksum vec_map 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "05c78687fb1a80548ae3250346c3db86a80a7cdd77bda190189f2d0a0987c81a"
 "checksum version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
-"checksum wasmer-clif-backend 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ab915761dcea52f464559ff4f33d2987fd684c34e88e8cadadb0984bc1264e2e"
-"checksum wasmer-runtime 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "9dc84f8c72dab911012c9aad5f645daa4052ea65457c41d262df9f9e4844c2db"
-"checksum wasmer-runtime-c-api 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7c22291a41a0df42b945220a2ac282bc566f18f2b576892adaa4366164534ce5"
-"checksum wasmer-runtime-core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "27844a1aa2775fb9bea2e57a6b47a09fd57165008999c750254eefaa88dde5da"
-"checksum wasmer-win-exception-handler 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c5d9ab8215da2239ebc571f879b4949420c5a36e9c8478751093da9032fbb45e"
+"checksum wasmer-clif-backend 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "8f6b03083b0970238ae427d79a26795bc4fb2ef11745840314f95a5f66600ef7"
+"checksum wasmer-runtime 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "cbde16b1a3665dadc79182a41553731ecba3111b1e6429fff14bcc4515e849f5"
+"checksum wasmer-runtime-c-api 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "856fc5057a7af671887be1308412035f9d9dd829c5d19b1aa8bcebf9bc94a84b"
+"checksum wasmer-runtime-core 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7b92f733aa4e173165b7ce7494dcbec6c81e207ac9fd5dcf489329f393f1f083"
+"checksum wasmer-win-exception-handler 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "4d037b9dfd4d469940c639999e77e9f1888ee7300b098a936e690bcca8087a52"
 "checksum wasmparser 0.29.2 (registry+https://github.com/rust-lang/crates.io-index)" = "981a8797cf89762e0233ec45fae731cb79a4dfaee12d9f0fe6cee01e4ac58d00"
 "checksum which 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b57acb10231b9493c8472b20cb57317d0679a49e0bdbee44b3b803a6473af164"
 "checksum winapi 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "167dc9d6949a9b857f3451275e911c3f44255842c1f7a76f33c55103a909087a"

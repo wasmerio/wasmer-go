@@ -14,4 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime-c-api = "0.4.1"
+wasmer-runtime-c-api = "0.4.2"
