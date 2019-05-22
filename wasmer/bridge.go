@@ -1,127 +1,126 @@
 package wasmer
 
-/*
-#cgo LDFLAGS: -L./ -lwasmer_runtime_c_api
-#include "./wasmer.h"
-*/
+// #cgo LDFLAGS: -L./ -lwasmer_runtime_c_api
+// #include "./wasmer.h"
+//
 import "C"
 import "unsafe"
 
-type C_wasmer_instance_t C.wasmer_instance_t
-type C_wasmer_memory_t C.wasmer_memory_t
-type C_wasmer_result_t C.wasmer_result_t
-type C_wasmer_exports_t C.wasmer_exports_t
-type C_wasmer_export_t C.wasmer_export_t
-type C_wasmer_import_t C.wasmer_import_t
-type C_wasmer_import_export_kind C.wasmer_import_export_kind
-type C_wasmer_export_func_t C.wasmer_export_func_t
-type C_wasmer_value_tag C.wasmer_value_tag
-type C_wasmer_value_t C.wasmer_value_t
-type C_wasmer_byte_array C.wasmer_byte_array
-type C_uchar C.uchar
-type C_char C.char
-type C_int C.int
-type C_bool C.bool
-type C_uint C.uint
-type C_uint8_t C.uint8_t
-type C_uint32_t C.uint32_t
+type cWasmerInstanceT C.wasmer_instance_t
+type cWasmerMemoryT C.wasmer_memory_t
+type cWasmerResultT C.wasmer_result_t
+type cWasmerExportsT C.wasmer_exports_t
+type cWasmerExportT C.wasmer_export_t
+type cWasmerImportT C.wasmer_import_t
+type cWasmerImportExportKind C.wasmer_import_export_kind
+type cWasmerExportFuncT C.wasmer_export_func_t
+type cWasmerValueTag C.wasmer_value_tag
+type cWasmerValueT C.wasmer_value_t
+type cWasmerByteArray C.wasmer_byte_array
+type cUchar C.uchar
+type cChar C.char
+type cInt C.int
+type cBool C.bool
+type cUint C.uint
+type cUint8T C.uint8_t
+type cUint32T C.uint32_t
 
-const C_WASMER_OK = C.WASMER_OK
-const C_WASM_I32 = C.WASM_I32
-const C_WASM_I64 = C.WASM_I64
-const C_WASM_F32 = C.WASM_F32
-const C_WASM_F64 = C.WASM_F64
-const C_WASM_MEMORY = C.WASM_MEMORY
-const C_WASM_FUNCTION = C.WASM_FUNCTION
+const cWasmerOk = C.WASMER_OK
+const cWasmI32 = C.WASM_I32
+const cWasmI64 = C.WASM_I64
+const cWasmF32 = C.WASM_F32
+const cWasmF64 = C.WASM_F64
+const cWasmMemory = C.WASM_MEMORY
+const cWasmFunction = C.WASM_FUNCTION
 
-func C_wasmer_last_error_length() C_int {
-	return C_int(C.wasmer_last_error_length())
+func cWasmerLastErrorLength() cInt {
+	return cInt(C.wasmer_last_error_length())
 }
 
-func C_wasmer_last_error_message(buffer *C_char, length C_int) C_int {
-	return C_int(C.wasmer_last_error_message((*C.char)(buffer), (C.int)(length)))
+func cWasmerLastErrorMessage(buffer *cChar, length cInt) cInt {
+	return cInt(C.wasmer_last_error_message((*C.char)(buffer), (C.int)(length)))
 }
 
-func C_wasmer_memory_data_length(memory *C_wasmer_memory_t) C_uint32_t {
-	return C_uint32_t(C.wasmer_memory_data_length((*C.wasmer_memory_t)(memory)))
+func cWasmerMemoryDataLength(memory *cWasmerMemoryT) cUint32T {
+	return cUint32T(C.wasmer_memory_data_length((*C.wasmer_memory_t)(memory)))
 }
 
-func C_wasmer_memory_data(memory *C_wasmer_memory_t) *C_uint8_t {
-	return (*C_uint8_t)(C.wasmer_memory_data((*C.wasmer_memory_t)(memory)))
+func cWasmerMemoryData(memory *cWasmerMemoryT) *cUint8T {
+	return (*cUint8T)(C.wasmer_memory_data((*C.wasmer_memory_t)(memory)))
 }
 
-func C_wasmer_validate(wasm_bytes *C_uchar, wasm_bytes_length C_uint) C_bool {
-	return C_bool(C.wasmer_validate((*C.uchar)(wasm_bytes), (C.uint)(wasm_bytes_length)))
+func cWasmerValidate(wasmBytes *cUchar, wasmBytesLength cUint) cBool {
+	return cBool(C.wasmer_validate((*C.uchar)(wasmBytes), (C.uint)(wasmBytesLength)))
 }
 
-func C_wasmer_instantiate(instance **C_wasmer_instance_t, wasm_bytes *C_uchar, wasm_bytes_length C_uint, imports *C_wasmer_import_t, imports_length C_int) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_instantiate((**C.wasmer_instance_t)(unsafe.Pointer(instance)), (*C.uchar)(wasm_bytes), (C.uint)(wasm_bytes_length), (*C.wasmer_import_t)(imports), (C.int)(imports_length)))
+func cWasmerInstantiate(instance **cWasmerInstanceT, wasmBytes *cUchar, wasmBytesLength cUint, imports *cWasmerImportT, importsLength cInt) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_instantiate((**C.wasmer_instance_t)(unsafe.Pointer(instance)), (*C.uchar)(wasmBytes), (C.uint)(wasmBytesLength), (*C.wasmer_import_t)(imports), (C.int)(importsLength)))
 }
 
-func C_wasmer_instance_exports(instance *C_wasmer_instance_t, exports **C_wasmer_exports_t) {
+func cWasmerInstanceExports(instance *cWasmerInstanceT, exports **cWasmerExportsT) {
 	C.wasmer_instance_exports((*C.wasmer_instance_t)(instance), (**C.wasmer_exports_t)(unsafe.Pointer(exports)))
 }
 
-func C_wasmer_exports_destroy(exports *C_wasmer_exports_t) {
+func cWasmerExportsDestroy(exports *cWasmerExportsT) {
 	C.wasmer_exports_destroy((*C.wasmer_exports_t)(exports))
 }
 
-func C_wasmer_exports_len(exports *C_wasmer_exports_t) C_int {
-	return C_int(C.wasmer_exports_len((*C.wasmer_exports_t)(exports)))
+func cWasmerExportsLen(exports *cWasmerExportsT) cInt {
+	return cInt(C.wasmer_exports_len((*C.wasmer_exports_t)(exports)))
 }
 
-func C_wasmer_exports_get(exports *C_wasmer_exports_t, index C_int) *C_wasmer_export_t {
-	return (*C_wasmer_export_t)(C.wasmer_exports_get((*C.wasmer_exports_t)(exports), (C.int)(index)))
+func cWasmerExportsGet(exports *cWasmerExportsT, index cInt) *cWasmerExportT {
+	return (*cWasmerExportT)(C.wasmer_exports_get((*C.wasmer_exports_t)(exports), (C.int)(index)))
 }
 
-func C_wasmer_export_kind(export *C_wasmer_export_t) C_wasmer_import_export_kind {
-	return (C_wasmer_import_export_kind)(C.wasmer_export_kind((*C.wasmer_export_t)(export)))
+func cWasmerExportKind(export *cWasmerExportT) cWasmerImportExportKind {
+	return (cWasmerImportExportKind)(C.wasmer_export_kind((*C.wasmer_export_t)(export)))
 }
 
-func C_wasmer_export_to_memory(export *C_wasmer_export_t, memory **C_wasmer_memory_t) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_export_to_memory((*C.wasmer_export_t)(export), (**C.wasmer_memory_t)(unsafe.Pointer(memory))))
+func cWasmerExportToMemory(export *cWasmerExportT, memory **cWasmerMemoryT) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_export_to_memory((*C.wasmer_export_t)(export), (**C.wasmer_memory_t)(unsafe.Pointer(memory))))
 }
 
-func C_wasmer_export_name(export *C_wasmer_export_t) C_wasmer_byte_array {
-	return (C_wasmer_byte_array)(C.wasmer_export_name((*C.wasmer_export_t)(export)))
+func cWasmerExportName(export *cWasmerExportT) cWasmerByteArray {
+	return (cWasmerByteArray)(C.wasmer_export_name((*C.wasmer_export_t)(export)))
 }
 
-func C_wasmer_export_to_func(export *C_wasmer_export_t) *C_wasmer_export_func_t {
-	return (*C_wasmer_export_func_t)(C.wasmer_export_to_func((*C.wasmer_export_t)(export)))
+func cWasmerExportToFunc(export *cWasmerExportT) *cWasmerExportFuncT {
+	return (*cWasmerExportFuncT)(C.wasmer_export_to_func((*C.wasmer_export_t)(export)))
 }
 
-func C_wasmer_export_func_params_arity(function *C_wasmer_export_func_t, result *C_uint32_t) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_export_func_params_arity((*C.wasmer_export_func_t)(function), (*C.uint32_t)(result)))
+func cWasmerExportFuncParamsArity(function *cWasmerExportFuncT, result *cUint32T) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_export_func_params_arity((*C.wasmer_export_func_t)(function), (*C.uint32_t)(result)))
 }
 
-func C_wasmer_export_func_params(function *C_wasmer_export_func_t, parameters *C_wasmer_value_tag, parametersLength C_uint32_t) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_export_func_params((*C.wasmer_export_func_t)(function), (*C.wasmer_value_tag)(parameters), (C.uint32_t)(parametersLength)))
+func cWasmerExportFuncParams(function *cWasmerExportFuncT, parameters *cWasmerValueTag, parametersLength cUint32T) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_export_func_params((*C.wasmer_export_func_t)(function), (*C.wasmer_value_tag)(parameters), (C.uint32_t)(parametersLength)))
 }
 
-func C_wasmer_export_func_returns_arity(function *C_wasmer_export_func_t, result *C_uint32_t) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_export_func_returns_arity((*C.wasmer_export_func_t)(function), (*C.uint32_t)(result)))
+func cWasmerExportFuncResultsArity(function *cWasmerExportFuncT, result *cUint32T) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_export_func_returns_arity((*C.wasmer_export_func_t)(function), (*C.uint32_t)(result)))
 }
 
-func C_wasmer_instance_call(instance *C_wasmer_instance_t, name *C_char, parameters *C_wasmer_value_t, parametersLength C_uint32_t, results *C_wasmer_value_t, resultsLength C_uint32_t) C_wasmer_result_t {
-	return C_wasmer_result_t(C.wasmer_instance_call((*C.wasmer_instance_t)(instance), (*C.char)(name), (*C.wasmer_value_t)(parameters), (C.uint32_t)(parametersLength), (*C.wasmer_value_t)(results), (C.uint32_t)(resultsLength)))
+func cWasmerInstanceCall(instance *cWasmerInstanceT, name *cChar, parameters *cWasmerValueT, parametersLength cUint32T, results *cWasmerValueT, resultsLength cUint32T) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_instance_call((*C.wasmer_instance_t)(instance), (*C.char)(name), (*C.wasmer_value_t)(parameters), (C.uint32_t)(parametersLength), (*C.wasmer_value_t)(results), (C.uint32_t)(resultsLength)))
 }
 
-func C_wasmer_instance_destroy(instance *C_wasmer_instance_t) {
+func cWasmerInstanceDestroy(instance *cWasmerInstanceT) {
 	C.wasmer_instance_destroy((*C.wasmer_instance_t)(instance))
 }
 
-func C_GoString(string *C_char) string {
+func cGoString(string *cChar) string {
 	return C.GoString((*C.char)(string))
 }
 
-func C_GoStringN(string *C_char, length C_int) string {
+func cGoStringN(string *cChar, length cInt) string {
 	return C.GoStringN((*C.char)(string), (C.int)(length))
 }
 
-func C_CString(string string) *C_char {
-	return (*C_char)(C.CString(string))
+func cCString(string string) *cChar {
+	return (*cChar)(C.CString(string))
 }
 
-func C_free(pointer unsafe.Pointer) {
+func cFree(pointer unsafe.Pointer) {
 	C.free(pointer)
 }
