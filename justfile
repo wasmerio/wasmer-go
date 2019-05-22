@@ -1,6 +1,6 @@
-# Compile the Rust part.
+# Compile the Rust part for this specific system.
 rust:
-        cargo build --release
+	cargo build --release
 
 # Compile the Go part.
 go:
@@ -19,7 +19,7 @@ go:
 	esac
 	test -f libwasmer_runtime_c_api.${dylib_extension} && rm libwasmer_runtime_c_api.${dylib_extension}
 	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
-	go build -o ../target/go/wasm -ldflags="-r $(pwd)" .
+	go build -ldflags="-r $(pwd)" -v .
 
 # Generate cgo debug objects.
 debug-cgo:
@@ -38,19 +38,6 @@ test:
 	go test -test.v example_test.go
 	# Run the long examples.
 	go test -test.v $(find . -type f \( -name "example_*_test.go" \) )
-
-# Run the benchmarks.
-bench:
-	#!/usr/bin/env bash
-	export LD_LIBRARY_PATH=$(pwd)/wasmer
-	cd wasmer
-	go test -bench 'Wasmer|Wagon' benchmarks_test.go
-
-
-# Server the documentation.
-doc:
-	@echo 'Open http://localhost:6060/pkg/wasmer/'
-	cd wasmer && godoc -http=:6060
 
 # Local Variables:
 # mode: makefile
