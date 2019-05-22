@@ -19,11 +19,7 @@ Wasm is a Go library for executing WebAssembly binaries.
 
 # Install
 
-So far, to install the Wasm library, just run this command in your shell:
-
-```sh
-$ go install github.com/wasmerio/go-ext-wasm/wasmer
-```
+To be defined.
 
 # Example
 
