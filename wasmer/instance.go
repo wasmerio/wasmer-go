@@ -1,5 +1,9 @@
 package wasmer
 
+// #include <stdlib.h>
+//
+// extern long long foo(int32_t x, int32_t y);
+import "C"
 import (
 	"fmt"
 	"unsafe"
@@ -69,8 +73,8 @@ type Instance struct {
 	Memory Memory
 }
 
-// Foo bla bla
-func Foo(arguments ...interface{}) int {
+//export foo
+func foo(x int32, y int32) int {
 	return 42
 }
 
@@ -85,11 +89,8 @@ func NewInstance(bytes []byte) (Instance, error) {
 	var returnsSignatureCPointer *cWasmerValueTag
 	returnsSignatureCPointer = (*cWasmerValueTag)(unsafe.Pointer(&returnsSignature[0]))
 
-	var functionPointer = new(func(...interface{}) int)
-	*functionPointer = Foo
-
 	var function = cWasmerImportFuncNew(
-		unsafe.Pointer(functionPointer),
+		C.foo,
 		paramsSignatureCPointer,
 		cUint(len(paramsSignature)),
 		returnsSignatureCPointer,
