@@ -69,17 +69,44 @@ type Instance struct {
 	Memory Memory
 }
 
+// Foo bla bla
+func Foo(arguments ...interface{}) int {
+	return 42
+}
+
 // NewInstance constructs a new `Instance`.
 func NewInstance(bytes []byte) (Instance, error) {
-	var imports = []cWasmerImportT{}
+	var paramsSignature = []cWasmerValueTag{cWasmI32, cWasmI32}
+	var returnsSignature = []cWasmerValueTag{cWasmI32}
+
+	var paramsSignatureCPointer *cWasmerValueTag
+	paramsSignatureCPointer = (*cWasmerValueTag)(unsafe.Pointer(&paramsSignature[0]))
+
+	var returnsSignatureCPointer *cWasmerValueTag
+	returnsSignatureCPointer = (*cWasmerValueTag)(unsafe.Pointer(&returnsSignature[0]))
+
+	var functionPointer = new(func(...interface{}) int)
+	*functionPointer = Foo
+
+	var function = cWasmerImportFuncNew(
+		unsafe.Pointer(functionPointer),
+		paramsSignatureCPointer,
+		cUint(len(paramsSignature)),
+		returnsSignatureCPointer,
+		cUint(len(returnsSignature)),
+	)
+
+	var importedFunction = cNewWasmerImportT("env", "sum", function)
+
+	var wasmImports = []cWasmerImportT{importedFunction}
 	var instance *cWasmerInstanceT
 
 	var compileResult = cWasmerInstantiate(
 		&instance,
 		(*cUchar)(unsafe.Pointer(&bytes[0])),
 		cUint(len(bytes)),
-		(*cWasmerImportT)(unsafe.Pointer(&imports)),
-		cInt(0),
+		(*cWasmerImportT)(unsafe.Pointer(&wasmImports[0])),
+		cInt(1),
 	)
 
 	var memory Memory

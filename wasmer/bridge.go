@@ -6,32 +6,34 @@ package wasmer
 import "C"
 import "unsafe"
 
+type cBool C.bool
+type cChar C.char
+type cInt C.int
+type cUchar C.uchar
+type cUint C.uint
+type cUint32T C.uint32_t
+type cUint8T C.uint8_t
+type cWasmerByteArray C.wasmer_byte_array
+type cWasmerExportFuncT C.wasmer_export_func_t
+type cWasmerExportT C.wasmer_export_t
+type cWasmerExportsT C.wasmer_exports_t
+type cWasmerImportExportKind C.wasmer_import_export_kind
+type cWasmerImportExportValue C.wasmer_import_export_value
+type cWasmerImportFuncT C.wasmer_import_func_t
+type cWasmerImportT C.wasmer_import_t
 type cWasmerInstanceT C.wasmer_instance_t
 type cWasmerMemoryT C.wasmer_memory_t
 type cWasmerResultT C.wasmer_result_t
-type cWasmerExportsT C.wasmer_exports_t
-type cWasmerExportT C.wasmer_export_t
-type cWasmerImportT C.wasmer_import_t
-type cWasmerImportExportKind C.wasmer_import_export_kind
-type cWasmerExportFuncT C.wasmer_export_func_t
-type cWasmerValueTag C.wasmer_value_tag
 type cWasmerValueT C.wasmer_value_t
-type cWasmerByteArray C.wasmer_byte_array
-type cUchar C.uchar
-type cChar C.char
-type cInt C.int
-type cBool C.bool
-type cUint C.uint
-type cUint8T C.uint8_t
-type cUint32T C.uint32_t
+type cWasmerValueTag C.wasmer_value_tag
 
-const cWasmerOk = C.WASMER_OK
-const cWasmI32 = C.WASM_I32
-const cWasmI64 = C.WASM_I64
 const cWasmF32 = C.WASM_F32
 const cWasmF64 = C.WASM_F64
-const cWasmMemory = C.WASM_MEMORY
 const cWasmFunction = C.WASM_FUNCTION
+const cWasmI32 = C.WASM_I32
+const cWasmI64 = C.WASM_I64
+const cWasmMemory = C.WASM_MEMORY
+const cWasmerOk = C.WASMER_OK
 
 func cWasmerLastErrorLength() cInt {
 	return cInt(C.wasmer_last_error_length())
@@ -107,6 +109,32 @@ func cWasmerInstanceCall(instance *cWasmerInstanceT, name *cChar, parameters *cW
 
 func cWasmerInstanceDestroy(instance *cWasmerInstanceT) {
 	C.wasmer_instance_destroy((*C.wasmer_instance_t)(instance))
+}
+
+func cWasmerImportFuncNew(function unsafe.Pointer, parametersSignature *cWasmerValueTag, parametersLength cUint, resultsSignature *cWasmerValueTag, resultsLength cUint) *cWasmerImportFuncT {
+	return (*cWasmerImportFuncT)(C.wasmer_import_func_new((*[0]byte)(function), (*C.wasmer_value_tag)(parametersSignature), (C.int)(parametersLength), (*C.wasmer_value_tag)(resultsSignature), (C.int)(resultsLength)))
+}
+
+func cGoStringToWasmerByteArray(string string) cWasmerByteArray {
+	var cString = cCString(string)
+
+	var byteArray cWasmerByteArray
+	byteArray.bytes = (*C.uchar)(unsafe.Pointer(cString))
+	byteArray.bytes_len = (C.uint)(len(string))
+
+	return byteArray
+}
+
+func cNewWasmerImportT(moduleName string, importName string, function *cWasmerImportFuncT) cWasmerImportT {
+	var importedFunction C.wasmer_import_t
+	importedFunction.module_name = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(moduleName))
+	importedFunction.import_name = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(importName))
+	importedFunction.tag = cWasmFunction
+
+	var pointer = (**C.wasmer_import_func_t)(unsafe.Pointer(&importedFunction.value))
+	*pointer = (*C.wasmer_import_func_t)(function)
+
+	return (cWasmerImportT)(importedFunction)
 }
 
 func cGoString(string *cChar) string {
