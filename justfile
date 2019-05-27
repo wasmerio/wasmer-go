@@ -3,7 +3,7 @@ rust:
 	cargo build --release
 
 # Compile the Go part.
-go:
+go go-build-args='':
 	#!/usr/bin/env bash
 	set -euo pipefail
 	cd wasmer
@@ -17,9 +17,9 @@ go:
 		*)
 			dylib_extension="so"
 	esac
-	test -f libwasmer_runtime_c_api.${dylib_extension} && rm libwasmer_runtime_c_api.${dylib_extension}
-	ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
-	go build -ldflags="-r $(pwd)" -v .
+	#test -f libwasmer_runtime_c_api.${dylib_extension} && rm libwasmer_runtime_c_api.${dylib_extension}
+	#ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
+	go build -ldflags="-r $(pwd)" -v {{go-build-args}} .
 
 # Generate cgo debug objects.
 debug-cgo:
