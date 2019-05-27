@@ -2,7 +2,7 @@ package wasmer
 
 // #include <stdlib.h>
 //
-// extern long long foo(int32_t x, int32_t y);
+// extern int32_t foo(void *ctx, int32_t x, int32_t y);
 import "C"
 import (
 	"fmt"
@@ -73,8 +73,13 @@ type Instance struct {
 	Memory Memory
 }
 
+// InstanceContext foobar
+type InstanceContext = unsafe.Pointer
+
 //export foo
-func foo(x int32, y int32) int {
+func foo(context InstanceContext, x int32, y int32) int32 {
+	fmt.Println(x)
+	fmt.Println(y)
 	return 42
 }
 
