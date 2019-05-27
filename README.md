@@ -21,10 +21,12 @@ Wasm is a Go library for executing WebAssembly binaries.
 
 To be defined.
 
-# Example
+# Examples
 
-There is a toy program in `wasmer/testdata/examples/simple.rs`, written in Rust (or
-any other language that compiles to WebAssembly):
+## Basic example
+
+There is a toy program in `wasmer/test/testdata/examples/simple.rs`,
+written in Rust (or any other language that compiles to WebAssembly):
 
 ```rust
 #[no_mangle]
@@ -34,9 +36,9 @@ pub extern fn sum(x: i32, y: i32) -> i32 {
 ```
 
 After compilation to WebAssembly, the
-[`wasmer/testdata/examples/simple.wasm`](https://github.com/wasmerio/go-ext-wasm/blob/master/wasmer/testdata/examples/simple.wasm)
+[`wasmer/test/testdata/examples/simple.wasm`](https://github.com/wasmerio/go-ext-wasm/blob/master/wasmer/test/testdata/examples/simple.wasm)
 binary file is generated. ([Download
-it](https://github.com/wasmerio/go-ext-wasm/raw/master/wasmer/testdata/examples/simple.wasm)).
+it](https://github.com/wasmerio/go-ext-wasm/raw/master/wasmer/test/testdata/examples/simple.wasm)).
 
 Then, we can execute it in Go:
 
@@ -49,15 +51,98 @@ import (
 )
 
 func main(){
+	// Reads the WebAssembly module as bytes.
 	bytes, _ := wasm.ReadBytes("simple.wasm")
+	
+	// Instantiates the WebAssembly module.
 	instance, _ := wasm.NewInstance(bytes)
 	defer instance.Close()
-    
+
+	// Gets the `sum` exported function from the WebAssembly instance.
 	sum := instance.Exports["sum"]
+
+	// Calls that exported function with Go standard values. The WebAssembly
+	// types are inferred and values are casted automatically.
 	result, _ := sum(5, 37)
 
 	fmt.Println(result) // 42!
 }
+```
+
+## Imported function
+
+A WebAssembly module can export functions, this is how to run a
+WebAssembly function, like we did in the previous example with
+`instance.Exports["sum"](1, 2)`. Nonetheless, a WebAssembly module can
+depend on “extern functions”, then called imported functions. For
+instance, let's consider the basic following Rust program:
+
+```rust
+extern {
+    fn sum(x: i32, y: i32) -> i32;
+}
+
+#[no_mangle]
+pub extern fn add1(x: i32, y: i32) -> i32 {
+    unsafe { sum(x, y) + 1 }
+}
+```
+
+In this case, the `add1` function is a WebAssembly exported function,
+whilst the `sum` function is a WebAssembly imported function (the
+WebAssembly instance needs to _import_ it to complete the
+program). Good news: We can write the implementation of the `sum`
+function directly in Go!
+
+First, we need to declare the `sum` function signature in C inside a
+Go comment (with the help of [cgo](https://golang.org/cmd/cgo/)):
+
+```go
+package main
+
+// #include <stdlib.h>
+//
+// extern int32_t sum(void *context, int32_t x, int32_t y);
+import "C"
+```
+
+Second, we declare the `sum` function implementation in Go. Notice the
+`//export` which is the way cgo uses to map Go code to C code.
+
+```go
+//export sum
+func sum(context unsafe.Pointer, x int32, y int32) int32 {
+	return x + y
+}
+```
+
+Third, we use `NewImports` to create the WebAssembly imports. In this
+code:
+
+* `"sum"` is the imported function name,
+* `sum` is the Go function pointer, and
+* `C.sum` is the cgo function pointer.
+
+```go
+imports, _ := wasm.NewImports().Append("sum", sum, C.sum)
+```
+
+Finally, we use `NewInstanceWithImports` to inject the imports:
+
+```go
+bytes, _ := wasm.ReadBytes("imported_function.wasm")
+instance, _ := wasm.NewInstanceWithImports(bytes, imports)
+defer instance.Close()
+
+// Gets and calls the `add1` exported function from the WebAssembly instance.
+results, _ := instance.Exports["add1"](1, 2)
+
+fmt.Println(result)
+//   add1(1, 2)
+// = sum(1 + 2) + 1
+// = 1 + 2 + 1
+// = 4
+// QED
 ```
 
 # Development
