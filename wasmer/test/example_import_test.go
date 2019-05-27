@@ -12,7 +12,7 @@ import (
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
-    "unsafe"
+	"unsafe"
 )
 
 func importWasmFile() string {
@@ -23,7 +23,7 @@ func importWasmFile() string {
 // 2️⃣ Write the implementation of the `sum` function, and export it (for cgo).
 //export sum
 func sum(context unsafe.Pointer, x int32, y int32) int32 {
-    return x + y
+	return x + y
 }
 
 func Example_import() {
