@@ -15,11 +15,13 @@
     <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License" valign="middle"></a>
 </p>
 
-Wasm is a Go library for executing WebAssembly binaries.
+Wasmer is a Go library for executing WebAssembly binaries.
 
 # Install
 
-To be defined.
+```sh
+$ go get github.com/wasmerio/go-ext-wasm/wasmer
+```
 
 # Documentation
 
