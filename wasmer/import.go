@@ -66,10 +66,20 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	var importType = reflect.TypeOf(implementation)
 
 	if importType.Kind() != reflect.Func {
-		return nil, NewImportedFunctionError(importName, fmt.Sprintf("Import function `%%s` must be a function; given %s.", importType.Kind()))
+		return nil, NewImportedFunctionError(importName, fmt.Sprintf("Imported function `%%s` must be a function; given `%s`.", importType.Kind()))
 	}
 
-	var importInputsArity = importType.NumIn() - 1 // Skip the first input of kind `InstanceContext`
+	var importInputsArity = importType.NumIn()
+
+	if importInputsArity < 1 {
+		return nil, NewImportedFunctionError(importName, "Imported function `%s` must at least have one argument for the instance context.")
+	}
+
+	if importType.In(0).Kind() != reflect.UnsafePointer {
+		return nil, NewImportedFunctionError(importName, fmt.Sprintf("The instance context of the `%%s` imported function must be of kind `unsafe.Pointer`; given `%s`; is it missing?", importType.In(0).Kind()))
+	}
+
+	importInputsArity--
 	var importOutputsArity = importType.NumOut()
 	var wasmInputs = make([]cWasmerValueTag, importInputsArity)
 	var wasmOutputs = make([]cWasmerValueTag, importOutputsArity)
@@ -87,7 +97,7 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 		case reflect.Float64:
 			wasmInputs[nth] = cWasmF64
 		default:
-			return nil, NewImportedFunctionError(importName, "Invalid input type for the `%s` imported function.")
+			return nil, NewImportedFunctionError(importName, fmt.Sprintf("Invalid input type for the `%%s` imported function; given `%s`; only accept `int32`, `int64`, `float32`, and `float64`.", importInput.Kind()))
 		}
 	}
 
@@ -104,7 +114,7 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 		case reflect.Float64:
 			wasmOutputs[0] = cWasmF64
 		default:
-			return nil, NewImportedFunctionError(importName, "Invalid output type for the `%s` imported function.")
+			return nil, NewImportedFunctionError(importName, fmt.Sprintf("Invalid output type for the `%%s` imported function; given `%s`; only accept `int32`, `int64`, `float32`, and `float64`.", importType.Out(0).Kind()))
 		}
 	}
 
