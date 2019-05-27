@@ -37,7 +37,7 @@ test:
 	# Run the short examples.
 	go test -test.v example_test.go
 	# Run the long examples.
-	go test -test.v $(find . -depth 1 -type f \( -name "example_*_test.go" \) )
+	go test -test.v $(find . -depth 1 -type f \( -name "example_*_test.go" \! -name "example_import_test.go" \) )
 
 # Local Variables:
 # mode: makefile
