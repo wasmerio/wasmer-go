@@ -50,6 +50,8 @@ type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *cWasmerInstanceT
 
+	// The imported functions. Use the `NewInstanceWithImports`
+	// constructor to set it.
 	imports *Imports
 
 	// All functions exported by the WebAssembly instance, indexed
@@ -71,11 +73,12 @@ type Instance struct {
 	Memory Memory
 }
 
-// NewInstance constructs a new `Instance`.
+// NewInstance constructs a new `Instance` with no imported functions.
 func NewInstance(bytes []byte) (Instance, error) {
 	return NewInstanceWithImports(bytes, NewImports())
 }
 
+// NewInstanceWithImports constructs a new `Instance` with imported functions.
 func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
@@ -97,7 +100,7 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 		}
 
 		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
-			importFunction.pointer,
+			importFunction.cgoPointer,
 			importFunctionInputsCPointer,
 			cUint(wasmInputsArity),
 			importFunctionOutputsCPointer,

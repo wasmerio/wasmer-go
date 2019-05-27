@@ -5,7 +5,6 @@ package wasmertest
 // extern int32_t sum(void *ctx, int32_t x, int32_t y);
 import "C"
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
@@ -16,9 +15,6 @@ import (
 
 //export sum
 func sum(context unsafe.Pointer, x int32, y int32) int32 {
-	fmt.Println(x)
-	fmt.Println(y)
-
 	return x + y
 }
 
@@ -32,17 +28,15 @@ func getImportedFunctionBytes() []byte {
 }
 
 func testImport(t *testing.T) {
-	instance, err := wasm.NewInstanceWithImports(
-		getImportedFunctionBytes(),
-		wasm.NewImports().
-			Append("sum", sum, C.sum),
-	)
-	defer instance.Close()
-
+	imports, err := wasm.NewImports().Append("sum", sum, C.sum)
 	assert.NoError(t, err)
 
-	add1, exists := instance.Exports["add1"]
+	instance, err := wasm.NewInstanceWithImports(getImportedFunctionBytes(), imports)
+	assert.NoError(t, err)
 
+	defer instance.Close()
+
+	add1, exists := instance.Exports["add1"]
 	assert.Equal(t, true, exists)
 
 	result, err := add1(1, 2)
