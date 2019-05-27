@@ -2,7 +2,7 @@ package wasmertest
 
 // #include <stdlib.h>
 //
-// extern int32_t foo(void *ctx, int32_t x, int32_t y);
+// extern int32_t sum(void *ctx, int32_t x, int32_t y);
 import "C"
 import (
 	"fmt"
@@ -14,25 +14,28 @@ import (
 	"unsafe"
 )
 
-//export foo
-func foo(context unsafe.Pointer, x int32, y int32) int32 {
+//export sum
+func sum(context unsafe.Pointer, x int32, y int32) int32 {
 	fmt.Println(x)
 	fmt.Println(y)
 
 	return x + y
 }
 
-func testImport(t *testing.T) {
+func getImportedFunctionBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
 	modulePath := path.Join(path.Dir(filename), "testdata", "examples", "imported_function.wasm")
 
 	bytes, _ := wasm.ReadBytes(modulePath)
 
+	return bytes
+}
+
+func testImport(t *testing.T) {
 	instance, err := wasm.NewInstanceWithImports(
-		bytes,
-		map[string]wasm.Import{
-			"sum": wasm.NewImport(foo, C.foo),
-		},
+		getImportedFunctionBytes(),
+		wasm.NewImports().
+			Append("sum", sum, C.sum),
 	)
 	defer instance.Close()
 

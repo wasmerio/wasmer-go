@@ -137,6 +137,10 @@ func cNewWasmerImportT(moduleName string, importName string, function *cWasmerIm
 	return (cWasmerImportT)(importedFunction)
 }
 
+func cWasmerImportFuncDestroy(function *cWasmerImportFuncT) {
+	C.wasmer_import_func_destroy((*C.wasmer_import_func_t)(function))
+}
+
 func cGoString(string *cChar) string {
 	return C.GoString((*C.char)(string))
 }

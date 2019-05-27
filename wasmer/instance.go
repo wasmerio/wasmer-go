@@ -2,7 +2,6 @@ package wasmer
 
 import (
 	"fmt"
-	"reflect"
 	"unsafe"
 )
 
@@ -46,19 +45,12 @@ func (error *ExportedFunctionError) Error() string {
 	return fmt.Sprintf(error.message, error.functionName)
 }
 
-type Import struct {
-	implementation interface{}
-	pointer        unsafe.Pointer
-}
-
-func NewImport(implementation interface{}, pointer unsafe.Pointer) Import {
-	return Import{implementation, pointer}
-}
-
 // Instance represents a WebAssembly instance.
 type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *cWasmerInstanceT
+
+	imports *Imports
 
 	// All functions exported by the WebAssembly instance, indexed
 	// by their name as a string. An exported function is a
@@ -79,90 +71,46 @@ type Instance struct {
 	Memory Memory
 }
 
-// InstanceContext foobar
-type InstanceContext = unsafe.Pointer
-
 // NewInstance constructs a new `Instance`.
 func NewInstance(bytes []byte) (Instance, error) {
-	var imports map[string]Import
-
-	return NewInstanceWithImports(bytes, imports)
+	return NewInstanceWithImports(bytes, NewImports())
 }
 
-func NewInstanceWithImports(bytes []byte, imports map[string]Import) (Instance, error) {
-	var numberOfImports = len(imports)
+func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
+	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
 	var importFunctionNth = 0
 
-	for importName, importFunction := range imports {
-		var importType = reflect.TypeOf(importFunction.implementation)
-
-		if importType.Kind() != reflect.Func {
-			panic(fmt.Sprintf("Import function must be a function."))
-		}
-
-		var importFunctionInputsArity = importType.NumIn() - 1 // Skip the first input of kind `InstanceContext`
-		var importFunctionOutputsArity = importType.NumOut()
-		var importFunctionInputs = make([]cWasmerValueTag, importFunctionInputsArity)
-		var importFunctionOutputs = make([]cWasmerValueTag, importFunctionOutputsArity)
-
-		for nth := 0; nth < importFunctionInputsArity; nth++ {
-			var importFunctionInput = importType.In(nth + 1)
-
-			switch importFunctionInput.Kind() {
-			case reflect.Int32:
-				importFunctionInputs[nth] = cWasmI32
-			case reflect.Int64:
-				importFunctionInputs[nth] = cWasmI64
-			case reflect.Float32:
-				importFunctionInputs[nth] = cWasmF32
-			case reflect.Float64:
-				importFunctionInputs[nth] = cWasmF64
-			default:
-				panic(fmt.Sprintf("Invalid input type for the `%s` imported function.", importName))
-			}
-		}
-
-		if importFunctionOutputsArity > 1 {
-			panic(fmt.Sprintf("The `%s` imported function must have at most one output value.", importName))
-		} else if importFunctionOutputsArity == 1 {
-			switch importType.Out(0).Kind() {
-			case reflect.Int32:
-				importFunctionOutputs[0] = cWasmI32
-			case reflect.Int64:
-				importFunctionOutputs[0] = cWasmI64
-			case reflect.Float32:
-				importFunctionOutputs[0] = cWasmF32
-			case reflect.Float64:
-				importFunctionOutputs[0] = cWasmF64
-			default:
-				panic(fmt.Sprintf("Invalid output type for the `%s` imported function.", importName))
-			}
-		}
+	for importName, importFunction := range imports.imports {
+		var wasmInputsArity = len(importFunction.wasmInputs)
+		var wasmOutputsArity = len(importFunction.wasmOutputs)
 
 		var importFunctionInputsCPointer *cWasmerValueTag
 		var importFunctionOutputsCPointer *cWasmerValueTag
 
-		if importFunctionInputsArity > 0 {
-			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunctionInputs[0]))
+		if wasmInputsArity > 0 {
+			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
 		}
 
-		if importFunctionOutputsArity > 0 {
-			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunctionOutputs[0]))
+		if wasmOutputsArity > 0 {
+			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
 		}
 
-		var function = cWasmerImportFuncNew(
+		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
 			importFunction.pointer,
 			importFunctionInputsCPointer,
-			cUint(importFunctionInputsArity),
+			cUint(wasmInputsArity),
 			importFunctionOutputsCPointer,
-			cUint(importFunctionOutputsArity),
+			cUint(wasmOutputsArity),
 		)
 
-		var importedFunction = cNewWasmerImportT("env", importName, function)
+		var importedFunction = cNewWasmerImportT(
+			"env",
+			importName,
+			importFunction.importedFunctionPointer,
+		)
 
 		wasmImports[importFunctionNth] = importedFunction
-
 		importFunctionNth++
 	}
 
@@ -183,7 +131,7 @@ func NewInstanceWithImports(bytes []byte, imports map[string]Import) (Instance, 
 	)
 
 	var memory Memory
-	var emptyInstance = Instance{instance: nil, Exports: nil, Memory: memory}
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
 
 	if compileResult != cWasmerOk {
 		return emptyInstance, NewInstanceError("Failed to compile the module.")
@@ -433,11 +381,15 @@ func NewInstanceWithImports(bytes []byte, imports map[string]Import) (Instance, 
 		return emptyInstance, NewInstanceError("No memory exported.")
 	}
 
-	return Instance{instance: instance, Exports: exports, Memory: memory}, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
 }
 
 // Close closes/frees an `Instance`.
 func (instance *Instance) Close() {
+	if instance.imports != nil {
+		instance.imports.Close()
+	}
+
 	if instance.instance != nil {
 		cWasmerInstanceDestroy(instance.instance)
 	}
