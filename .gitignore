@@ -1,4 +1,4 @@
 /target
+/wasmer/_obj
 /wasmer/libwasmer_runtime_c_api.dylib
 /wasmer/pkg
-/wasmer/src/wasmer/_obj
