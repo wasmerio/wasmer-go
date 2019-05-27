@@ -33,11 +33,11 @@ test:
 	export LD_LIBRARY_PATH=$(pwd)/wasmer
 	cd wasmer/test/
 	# Run the tests.
-	go test -test.v $(find . -depth 1 -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
+	go test -test.v $(find . -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
 	# Run the short examples.
 	go test -test.v example_test.go
 	# Run the long examples.
-	go test -test.v $(find . -depth 1 -type f \( -name "example_*_test.go" \! -name "example_import_test.go" \) )
+	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "example_import_test.go" \) )
 
 # Local Variables:
 # mode: makefile
