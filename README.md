@@ -224,6 +224,22 @@ Once the library is build, run the following command:
 $ just test
 ```
 
+# Benchmarks
+
+We quickly compared Wasmer to [Wagon][wagon] and [Life][life]. The
+benchmarks are in `benchmarks/`. We run [the n-body algorithm][n-body]
+with N=100000. Here are the results:
+
+| Runtime | Time (ms) | Ratio (smaller is better)
+|-|-:|-:|
+| Wasmer | 42.06ms | 1
+| Wagon | 1812.15ms | 43.1
+| Life | 2136.46ms | 50.8
+
+[wagon]: https://github.com/go-interpreter/wagon
+[life]: https://github.com/perlin-network/life
+[n-body]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html#nbody
+
 # What is WebAssembly?
 
 Quoting [the WebAssembly site](https://webassembly.org/):
