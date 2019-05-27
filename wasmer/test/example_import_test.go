@@ -1,6 +1,6 @@
 package wasmertest
 
-// // 1️⃣ Declare the `sum` function signature (see [cgo](Declare the `sum` function)).
+// // 1️⃣ Declare the `sum` function signature (see [cgo](https://golang.org/cmd/cgo/)).
 //
 // #include <stdlib.h>
 //
