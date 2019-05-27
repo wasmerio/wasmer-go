@@ -21,9 +21,17 @@ Wasm is a Go library for executing WebAssembly binaries.
 
 To be defined.
 
+# Documentation
+
+[The documentation can be read online on godoc.org][documentation]. It
+contains function descriptions, short examples, long examples
+etc. Everything one need to start using Wasmer with Go!
+
+[documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
+
 # Examples
 
-## Basic example
+## Basic example: Exported function
 
 There is a toy program in `wasmer/test/testdata/examples/simple.rs`,
 written in Rust (or any other language that compiles to WebAssembly):
@@ -95,7 +103,7 @@ program). Good news: We can write the implementation of the `sum`
 function directly in Go!
 
 First, we need to declare the `sum` function signature in C inside a
-Go comment (with the help of [cgo](https://golang.org/cmd/cgo/)):
+Go comment (with the help of [cgo]):
 
 ```go
 package main
@@ -145,6 +153,50 @@ fmt.Println(result)
 // QED
 ```
 
+[cgo]: https://golang.org/cmd/cgo/
+
+## Read the memory
+
+A WebAssembly instance has a linear memory. Let's see how to read
+it. Consider the following Rust program:
+
+```rust
+#[no_mangle]
+pub extern fn return_hello() -> *const u8 {
+    b"Hello, World!\0".as_ptr()
+}
+```
+
+The `return_hello` function returns a pointer to a string. This string
+is stored in the WebAssembly memory. Let's read it.
+
+```go
+bytes, _ := wasm.ReadBytes("memory.wasm")
+instance, _ := wasm.NewInstance(bytes)
+defer instance.Close()
+
+// Calls the `return_hello` exported fucntion. This function returns a pointer to a string.
+result, _ := instance.Exports["return_hello"]()
+
+// Gets the pointer value as an integer.
+pointer := result.ToI32()
+
+// Reads the memory.
+memory := instance.Memory.Data()
+
+fmt.Println(string(memory[pointer : pointer+13])) // Hello, World!
+```
+
+In this example, we already know the string length, and we use a slice
+to read a portion of the memory directly. Notice that the string
+terminates by a null byte, which means we could iterate over the
+memory starting from `pointer` until a null byte is met; that's a
+similar approach.
+
+For a more complete example, see the [Greet Example][greet-example].
+
+[greet-example]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer#example-package--Greet
+
 # Development
 
 The Go library is written in Go and Rust.
@@ -169,14 +221,6 @@ Once the library is build, run the following command:
 ```sh
 $ just test
 ```
-
-# Documentation
-
-[The documentation can be read online on godoc.org][documentation]. It
-contains function descriptions, short examples, long examples
-etc. Everything one need to start using Wasmer with Go!
-
-[documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
 
 # What is WebAssembly?
 
