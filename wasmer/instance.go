@@ -1,11 +1,8 @@
 package wasmer
 
-// #include <stdlib.h>
-//
-// extern int32_t foo(void *ctx, int32_t x, int32_t y);
-import "C"
 import (
 	"fmt"
+	"reflect"
 	"unsafe"
 )
 
@@ -49,6 +46,15 @@ func (error *ExportedFunctionError) Error() string {
 	return fmt.Sprintf(error.message, error.functionName)
 }
 
+type Import struct {
+	implementation interface{}
+	pointer        unsafe.Pointer
+}
+
+func NewImport(implementation interface{}, pointer unsafe.Pointer) Import {
+	return Import{implementation, pointer}
+}
+
 // Instance represents a WebAssembly instance.
 type Instance struct {
 	// The underlying WebAssembly instance.
@@ -76,43 +82,104 @@ type Instance struct {
 // InstanceContext foobar
 type InstanceContext = unsafe.Pointer
 
-//export foo
-func foo(context InstanceContext, x int32, y int32) int32 {
-	fmt.Println(x)
-	fmt.Println(y)
-	return 42
-}
-
 // NewInstance constructs a new `Instance`.
 func NewInstance(bytes []byte) (Instance, error) {
-	var paramsSignature = []cWasmerValueTag{cWasmI32, cWasmI32}
-	var returnsSignature = []cWasmerValueTag{cWasmI32}
+	var imports map[string]Import
 
-	var paramsSignatureCPointer *cWasmerValueTag
-	paramsSignatureCPointer = (*cWasmerValueTag)(unsafe.Pointer(&paramsSignature[0]))
+	return NewInstanceWithImports(bytes, imports)
+}
 
-	var returnsSignatureCPointer *cWasmerValueTag
-	returnsSignatureCPointer = (*cWasmerValueTag)(unsafe.Pointer(&returnsSignature[0]))
+func NewInstanceWithImports(bytes []byte, imports map[string]Import) (Instance, error) {
+	var numberOfImports = len(imports)
+	var wasmImports = make([]cWasmerImportT, numberOfImports)
+	var importFunctionNth = 0
 
-	var function = cWasmerImportFuncNew(
-		C.foo,
-		paramsSignatureCPointer,
-		cUint(len(paramsSignature)),
-		returnsSignatureCPointer,
-		cUint(len(returnsSignature)),
-	)
+	for importName, importFunction := range imports {
+		var importType = reflect.TypeOf(importFunction.implementation)
 
-	var importedFunction = cNewWasmerImportT("env", "sum", function)
+		if importType.Kind() != reflect.Func {
+			panic(fmt.Sprintf("Import function must be a function."))
+		}
 
-	var wasmImports = []cWasmerImportT{importedFunction}
+		var importFunctionInputsArity = importType.NumIn() - 1 // Skip the first input of kind `InstanceContext`
+		var importFunctionOutputsArity = importType.NumOut()
+		var importFunctionInputs = make([]cWasmerValueTag, importFunctionInputsArity)
+		var importFunctionOutputs = make([]cWasmerValueTag, importFunctionOutputsArity)
+
+		for nth := 0; nth < importFunctionInputsArity; nth++ {
+			var importFunctionInput = importType.In(nth + 1)
+
+			switch importFunctionInput.Kind() {
+			case reflect.Int32:
+				importFunctionInputs[nth] = cWasmI32
+			case reflect.Int64:
+				importFunctionInputs[nth] = cWasmI64
+			case reflect.Float32:
+				importFunctionInputs[nth] = cWasmF32
+			case reflect.Float64:
+				importFunctionInputs[nth] = cWasmF64
+			default:
+				panic(fmt.Sprintf("Invalid input type for the `%s` imported function.", importName))
+			}
+		}
+
+		if importFunctionOutputsArity > 1 {
+			panic(fmt.Sprintf("The `%s` imported function must have at most one output value.", importName))
+		} else if importFunctionOutputsArity == 1 {
+			switch importType.Out(0).Kind() {
+			case reflect.Int32:
+				importFunctionOutputs[0] = cWasmI32
+			case reflect.Int64:
+				importFunctionOutputs[0] = cWasmI64
+			case reflect.Float32:
+				importFunctionOutputs[0] = cWasmF32
+			case reflect.Float64:
+				importFunctionOutputs[0] = cWasmF64
+			default:
+				panic(fmt.Sprintf("Invalid output type for the `%s` imported function.", importName))
+			}
+		}
+
+		var importFunctionInputsCPointer *cWasmerValueTag
+		var importFunctionOutputsCPointer *cWasmerValueTag
+
+		if importFunctionInputsArity > 0 {
+			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunctionInputs[0]))
+		}
+
+		if importFunctionOutputsArity > 0 {
+			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunctionOutputs[0]))
+		}
+
+		var function = cWasmerImportFuncNew(
+			importFunction.pointer,
+			importFunctionInputsCPointer,
+			cUint(importFunctionInputsArity),
+			importFunctionOutputsCPointer,
+			cUint(importFunctionOutputsArity),
+		)
+
+		var importedFunction = cNewWasmerImportT("env", importName, function)
+
+		wasmImports[importFunctionNth] = importedFunction
+
+		importFunctionNth++
+	}
+
+	var wasmImportsCPointer *cWasmerImportT
+
+	if numberOfImports > 0 {
+		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
+	}
+
 	var instance *cWasmerInstanceT
 
 	var compileResult = cWasmerInstantiate(
 		&instance,
 		(*cUchar)(unsafe.Pointer(&bytes[0])),
 		cUint(len(bytes)),
-		(*cWasmerImportT)(unsafe.Pointer(&wasmImports[0])),
-		cInt(1),
+		wasmImportsCPointer,
+		cInt(numberOfImports),
 	)
 
 	var memory Memory
