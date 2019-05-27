@@ -50,6 +50,10 @@ type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *cWasmerInstanceT
 
+	// The imported functions. Use the `NewInstanceWithImports`
+	// constructor to set it.
+	imports *Imports
+
 	// All functions exported by the WebAssembly instance, indexed
 	// by their name as a string. An exported function is a
 	// regular variadic Go closure. Arguments are untyped. Since
@@ -69,21 +73,68 @@ type Instance struct {
 	Memory Memory
 }
 
-// NewInstance constructs a new `Instance`.
+// NewInstance constructs a new `Instance` with no imported functions.
 func NewInstance(bytes []byte) (Instance, error) {
-	var imports = []cWasmerImportT{}
+	return NewInstanceWithImports(bytes, NewImports())
+}
+
+// NewInstanceWithImports constructs a new `Instance` with imported functions.
+func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
+	var numberOfImports = len(imports.imports)
+	var wasmImports = make([]cWasmerImportT, numberOfImports)
+	var importFunctionNth = 0
+
+	for importName, importFunction := range imports.imports {
+		var wasmInputsArity = len(importFunction.wasmInputs)
+		var wasmOutputsArity = len(importFunction.wasmOutputs)
+
+		var importFunctionInputsCPointer *cWasmerValueTag
+		var importFunctionOutputsCPointer *cWasmerValueTag
+
+		if wasmInputsArity > 0 {
+			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
+		}
+
+		if wasmOutputsArity > 0 {
+			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
+		}
+
+		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
+			importFunction.cgoPointer,
+			importFunctionInputsCPointer,
+			cUint(wasmInputsArity),
+			importFunctionOutputsCPointer,
+			cUint(wasmOutputsArity),
+		)
+
+		var importedFunction = cNewWasmerImportT(
+			"env",
+			importName,
+			importFunction.importedFunctionPointer,
+		)
+
+		wasmImports[importFunctionNth] = importedFunction
+		importFunctionNth++
+	}
+
+	var wasmImportsCPointer *cWasmerImportT
+
+	if numberOfImports > 0 {
+		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
+	}
+
 	var instance *cWasmerInstanceT
 
 	var compileResult = cWasmerInstantiate(
 		&instance,
 		(*cUchar)(unsafe.Pointer(&bytes[0])),
 		cUint(len(bytes)),
-		(*cWasmerImportT)(unsafe.Pointer(&imports)),
-		cInt(0),
+		wasmImportsCPointer,
+		cInt(numberOfImports),
 	)
 
 	var memory Memory
-	var emptyInstance = Instance{instance: nil, Exports: nil, Memory: memory}
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
 
 	if compileResult != cWasmerOk {
 		return emptyInstance, NewInstanceError("Failed to compile the module.")
@@ -333,11 +384,15 @@ func NewInstance(bytes []byte) (Instance, error) {
 		return emptyInstance, NewInstanceError("No memory exported.")
 	}
 
-	return Instance{instance: instance, Exports: exports, Memory: memory}, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
 }
 
 // Close closes/frees an `Instance`.
 func (instance *Instance) Close() {
+	if instance.imports != nil {
+		instance.imports.Close()
+	}
+
 	if instance.instance != nil {
 		cWasmerInstanceDestroy(instance.instance)
 	}

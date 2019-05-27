@@ -1,4 +1,4 @@
-package wasmer_test
+package wasmertest
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -10,18 +10,18 @@ import (
 
 func GetBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
 
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(modulePath)
 
 	return bytes
 }
 
 func GetInvalidBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	module_path := path.Join(path.Dir(filename), "testdata", "invalid.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", "invalid.wasm")
 
-	bytes, _ := wasm.ReadBytes(module_path)
+	bytes, _ := wasm.ReadBytes(modulePath)
 
 	return bytes
 }
@@ -60,10 +60,10 @@ func TestCallUndefinedFunction(t *testing.T) {
 	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
-	function_name := "foo"
-	_, export_exists := instance.Exports[function_name]
+	functionName := "foo"
+	_, exportExists := instance.Exports[functionName]
 
-	assert.Equal(t, false, export_exists)
+	assert.Equal(t, false, exportExists)
 }
 
 func TestCallMissingArguments(t *testing.T) {
