@@ -39,6 +39,10 @@ test:
 	# Run the long examples.
 	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "example_import_test.go" \) )
 
+# Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
+bench subject='wagon' filter='.*':
+	cd benchmarks/{{subject}} && go test -bench '{{filter}}' benchmarks_test.go
+
 # Local Variables:
 # mode: makefile
 # End:
