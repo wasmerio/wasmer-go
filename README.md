@@ -19,9 +19,14 @@ Wasmer is a Go library for executing WebAssembly binaries.
 
 # Install
 
+To install the library, follow the classical:
+
 ```sh
 $ go get github.com/wasmerio/go-ext-wasm/wasmer
 ```
+
+`go get` will work on many macOS and Linux distributions. It will not
+work on Windows yet, we are working on it.
 
 # Documentation
 
@@ -60,7 +65,7 @@ import (
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
-func main(){
+func main() {
 	// Reads the WebAssembly module as bytes.
 	bytes, _ := wasm.ReadBytes("simple.wasm")
 	
@@ -177,7 +182,8 @@ bytes, _ := wasm.ReadBytes("memory.wasm")
 instance, _ := wasm.NewInstance(bytes)
 defer instance.Close()
 
-// Calls the `return_hello` exported fucntion. This function returns a pointer to a string.
+// Calls the `return_hello` exported function.
+// This function returns a pointer to a string.
 result, _ := instance.Exports["return_hello"]()
 
 // Gets the pointer value as an integer.
