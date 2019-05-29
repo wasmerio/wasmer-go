@@ -2,5 +2,5 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
-github.com/wasmerio/go-ext-wasm v0.0.0-20190527154049-20a5840a9e4f h1:xyPd41z0V3O555xDX+iUi69mbM3czwF99ALHI+UBphw=
-github.com/wasmerio/go-ext-wasm v0.0.0-20190527154049-20a5840a9e4f/go.mod h1:UkqsV9/yC6+lwjqMq7fpBrxhhGKH0VzqT7nAFR4jS9I=
+github.com/wasmerio/go-ext-wasm v0.0.0-20190529144619-c706f2f0aaf6 h1:SDmOFENk2t9BHUprWF0/nGkUCuPti93vIG321bFL04g=
+github.com/wasmerio/go-ext-wasm v0.0.0-20190529144619-c706f2f0aaf6/go.mod h1:UkqsV9/yC6+lwjqMq7fpBrxhhGKH0VzqT7nAFR4jS9I=
