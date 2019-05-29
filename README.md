@@ -60,7 +60,7 @@ import (
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
-func main(){
+func main() {
 	// Reads the WebAssembly module as bytes.
 	bytes, _ := wasm.ReadBytes("simple.wasm")
 	
@@ -177,7 +177,8 @@ bytes, _ := wasm.ReadBytes("memory.wasm")
 instance, _ := wasm.NewInstance(bytes)
 defer instance.Close()
 
-// Calls the `return_hello` exported fucntion. This function returns a pointer to a string.
+// Calls the `return_hello` exported function.
+// This function returns a pointer to a string.
 result, _ := instance.Exports["return_hello"]()
 
 // Gets the pointer value as an integer.
