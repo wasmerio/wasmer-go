@@ -23,19 +23,12 @@ jobs:
             export PATH="$HOME/.cargo/bin:$PATH"
             test -f $HOME/.cargo/bin/just || cargo install just
 
-      # Compile the Rust part of the library.
-      - run:
-          name: Compile the Rust part of the Go library
-          command: |
-            export PATH="$HOME/.cargo/bin:$PATH"
-            just rust
-
       # Compile and install the Go library.
       - run:
           name: Compile and install the Go library
           command: |
             export PATH="$HOME/.cargo/bin:$PATH"
-            just go
+            just build
 
       # Run the library test suites.
       - run:

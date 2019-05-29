@@ -1,9 +1,5 @@
-# Compile the Rust part for this specific system.
-rust:
-	cargo build --release
-
-# Compile the Go part.
-go go-build-args='':
+# Compile the library.
+build go-build-args='-v':
 	#!/usr/bin/env bash
 	set -euo pipefail
 	cd wasmer
@@ -17,9 +13,15 @@ go go-build-args='':
 		*)
 			dylib_extension="so"
 	esac
-	test -f libwasmer_runtime_c_api.${dylib_extension} || \
+	if ! test -f libwasmer_runtime_c_api.${dylib_extension}; then
+		cargo build --release
 		ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
-	go build -ldflags="-r $(pwd)" -v {{go-build-args}} .
+	fi
+	go build {{go-build-args}} .
+
+# Compile the Rust part for this specific system.
+rust:
+	cargo build --release
 
 # Generate cgo debug objects.
 debug-cgo:
@@ -30,7 +32,7 @@ debug-cgo:
 # Run all the tests.
 test:
 	#!/usr/bin/env bash
-	export LD_LIBRARY_PATH=$(pwd)/wasmer
+	#export DYLD_PRINT_LIBRARIES=y
 	cd wasmer/test/
 	# Run the tests.
 	go test -test.v $(find . -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
