@@ -270,7 +270,7 @@ About safety:
 
 # License
 
-The entire project is under the BSD-3-Clause license. Please read [the
+The entire project is under the MIT License. Please read [the
 `LICENSE` file][license].
 
 
