@@ -22,12 +22,17 @@ Wasmer is a Go library for executing WebAssembly binaries.
 To install the library, follow the classical:
 
 ```sh
-$ CGO_ENABLED=1 go install github.com/wasmerio/go-ext-wasm/wasmer
+$ go get github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
-The `CGO_ENABLED` part is very likely to be optional. `go install`
-will work on many macOS and Linux distributions. It will not work on
-Windows yet, we are working on it.
+To install the `go-wasmer` CLI, follow the classical:
+
+```sh
+$ go install github.com/wasmerio/go-ext-wasm/go-wasmer
+```
+
+`go install` will work on many macOS and Linux distributions. It will
+not work on Windows yet, we are working on it.
 
 # Documentation
 
