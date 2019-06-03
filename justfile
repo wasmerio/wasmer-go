@@ -1,4 +1,4 @@
-# Compile the library.
+# Build the `wasmer` library.
 build go-build-args='-v':
 	#!/usr/bin/env bash
 	set -euo pipefail
@@ -18,6 +18,10 @@ build go-build-args='-v':
 		ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
 	fi
 	go build {{go-build-args}} .
+
+# Build the `go-wasmer` bin.
+build-bin go-build-args='-v':
+	cd go-wasmer && go build {{go-build-args}} -o ../target/go/go-wasmer .
 
 # Compile the Rust part for this specific system.
 rust:
