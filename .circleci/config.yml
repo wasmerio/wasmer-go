@@ -40,10 +40,17 @@ jobs:
   # Build and test the project on macOS.
   build-and-test-macos:
     macos:
-      xcode: "9.0"
+      xcode: "10.0"
     steps:
       # Update the project.
       - checkout
+
+      # Install Go.
+      - run:
+          name: Install Go
+          command: |
+            curl https://dl.google.com/go/go1.12.5.darwin-amd64.tar.gz > go.tar.gz
+            sudo tar -C /usr/local -xzf go.tar.gz
 
       # Install Rust.
       - run:
@@ -62,14 +69,14 @@ jobs:
       - run:
           name: Compile and install the Go library
           command: |
-            export PATH="$HOME/.cargo/bin:$PATH"
+            export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
             just build
 
       # Run the library test suites.
       - run:
           name: Test the library
           command: |
-            export PATH="$HOME/.cargo/bin:$PATH"
+            export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
             just test
 
 
