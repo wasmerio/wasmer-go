@@ -139,3 +139,19 @@ func (imports *Imports) Close() {
 		}
 	}
 }
+
+type InstanceContext struct {
+	context *cWasmerInstanceContextT
+	memory  Memory
+}
+
+func IntoInstanceContext(instanceContext unsafe.Pointer) InstanceContext {
+	context := (*cWasmerInstanceContextT)(instanceContext)
+	memory := newMemory(cWasmerInstanceContextMemory(context))
+
+	return InstanceContext{context, memory}
+}
+
+func (instanceContext *InstanceContext) Memory() *Memory {
+	return &instanceContext.memory
+}

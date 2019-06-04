@@ -21,6 +21,7 @@ type cWasmerImportExportKind C.wasmer_import_export_kind
 type cWasmerImportExportValue C.wasmer_import_export_value
 type cWasmerImportFuncT C.wasmer_import_func_t
 type cWasmerImportT C.wasmer_import_t
+type cWasmerInstanceContextT C.wasmer_instance_context_t
 type cWasmerInstanceT C.wasmer_instance_t
 type cWasmerMemoryT C.wasmer_memory_t
 type cWasmerResultT C.wasmer_result_t
@@ -139,6 +140,10 @@ func cNewWasmerImportT(moduleName string, importName string, function *cWasmerIm
 
 func cWasmerImportFuncDestroy(function *cWasmerImportFuncT) {
 	C.wasmer_import_func_destroy((*C.wasmer_import_func_t)(function))
+}
+
+func cWasmerInstanceContextMemory(instanceContext *cWasmerInstanceContextT) *cWasmerMemoryT {
+	return (*cWasmerMemoryT)(C.wasmer_instance_context_memory((*C.wasmer_instance_context_t)(instanceContext), 0))
 }
 
 func cGoString(string *cChar) string {
