@@ -32,3 +32,7 @@ func TestImportBadInput(t *testing.T) {
 func TestImportBadOutput(t *testing.T) {
 	testImportBadOutput(t)
 }
+
+func TestImportInstanceContext(t *testing.T) {
+	testImportInstanceContext(t)
+}

@@ -139,3 +139,24 @@ func (imports *Imports) Close() {
 		}
 	}
 }
+
+// InstanceContext represents a way to access instance API from within
+// an imported context.
+type InstanceContext struct {
+	context *cWasmerInstanceContextT
+	memory  Memory
+}
+
+// IntoInstanceContext casts the first `context unsafe.Pointer`
+// argument of an imported function into an `InstanceContext`.
+func IntoInstanceContext(instanceContext unsafe.Pointer) InstanceContext {
+	context := (*cWasmerInstanceContextT)(instanceContext)
+	memory := newMemory(cWasmerInstanceContextMemory(context))
+
+	return InstanceContext{context, memory}
+}
+
+// Memory returns the current instance memory.
+func (instanceContext *InstanceContext) Memory() *Memory {
+	return &instanceContext.memory
+}
