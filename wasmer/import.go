@@ -47,18 +47,33 @@ type Import struct {
 
 	// The function implementation signature as a WebAssembly signature.
 	wasmOutputs []cWasmerValueTag
+
+	// The namespace of the imported function.
+	namespace string
 }
 
 // Imports represents a set of imported functions for a WebAssembly instance.
 type Imports struct {
+	// All imports.
 	imports map[string]Import
+
+	// Current namespace where to register the import.
+	currentNamespace string
 }
 
 // NewImports constructs a new empty `Imports`.
 func NewImports() *Imports {
 	var imports = make(map[string]Import)
+	var currentNamespace = "env"
 
-	return &Imports{imports}
+	return &Imports{imports, currentNamespace}
+}
+
+// Namespace changes the current namespace of the next imported functions.
+func (imports *Imports) Namespace(namespace string) *Imports {
+	imports.currentNamespace = namespace
+
+	return imports
 }
 
 // Append adds a new imported function to the current set.
@@ -119,6 +134,7 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	}
 
 	var importedFunctionPointer *cWasmerImportFuncT
+	var namespace = imports.currentNamespace
 
 	imports.imports[importName] = Import{
 		implementation,
@@ -126,6 +142,7 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 		importedFunctionPointer,
 		wasmInputs,
 		wasmOutputs,
+		namespace,
 	}
 
 	return imports, nil

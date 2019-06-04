@@ -108,7 +108,7 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 		)
 
 		var importedFunction = cNewWasmerImportT(
-			"env",
+			importFunction.namespace,
 			importName,
 			importFunction.importedFunctionPointer,
 		)
