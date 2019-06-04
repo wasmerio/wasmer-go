@@ -387,6 +387,10 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
 }
 
+func (instance *Instance) SetContextData(data unsafe.Pointer) {
+	cWasmerInstanceContextDataSet(instance.instance, data)
+}
+
 // Close closes/frees an `Instance`.
 func (instance *Instance) Close() {
 	if instance.imports != nil {

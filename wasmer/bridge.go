@@ -146,6 +146,14 @@ func cWasmerInstanceContextMemory(instanceContext *cWasmerInstanceContextT) *cWa
 	return (*cWasmerMemoryT)(C.wasmer_instance_context_memory((*C.wasmer_instance_context_t)(instanceContext), 0))
 }
 
+func cWasmerInstanceContextDataSet(instance *cWasmerInstanceT, dataPointer unsafe.Pointer) {
+	C.wasmer_instance_context_data_set((*C.wasmer_instance_t)(instance), dataPointer)
+}
+
+func cWasmerInstanceContextDataGet(instanceContext *cWasmerInstanceContextT) unsafe.Pointer {
+	return unsafe.Pointer(C.wasmer_instance_context_data_get((*C.wasmer_instance_t)(instanceContext)))
+}
+
 func cGoString(string *cChar) string {
 	return C.GoString((*C.char)(string))
 }
