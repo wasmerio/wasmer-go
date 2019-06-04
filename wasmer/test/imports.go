@@ -33,7 +33,7 @@ func sum(context unsafe.Pointer, x int32, y int32) int32 {
 }
 
 func testImport(t *testing.T) {
-	imports, err := wasm.NewImports().Append("sum", sum, C.sum)
+	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
 	assert.NoError(t, err)
 
 	instance, err := wasm.NewInstanceWithImports(getImportedFunctionBytes("examples", "imported_function.wasm"), imports)
