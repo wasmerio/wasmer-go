@@ -27,3 +27,33 @@ func TestValidateInvalid(t *testing.T) {
 
 	assert.False(t, output)
 }
+
+func TestCompile(t *testing.T) {
+	module, err := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	assert.NoError(t, err)
+}
+
+func TestCompileInvalidModule(t *testing.T) {
+	module, err := wasm.Compile(GetInvalidBytes())
+	defer module.Close()
+
+	assert.EqualError(t, err, "Failed to compile the module.")
+}
+
+func TestModuleInstantiate(t *testing.T) {
+	module, err := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	assert.NoError(t, err)
+
+	instance, err := module.Instantiate()
+	defer instance.Close()
+
+	assert.NoError(t, err)
+
+	result, _ := instance.Exports["sum"](1, 2)
+
+	assert.Equal(t, wasm.I32(3), result)
+}
