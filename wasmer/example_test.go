@@ -9,7 +9,7 @@ import (
 
 func GetBytes() []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	modulePath := path.Join(path.Dir(filename), "test", "testdata", "tests.wasm")
 
 	bytes, _ := wasm.ReadBytes(modulePath)
 
