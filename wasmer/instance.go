@@ -387,6 +387,12 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
 }
 
+// SetContextData assigns a data that can be used by all imported
+// functions. Indeed, each imported function receives as its first
+// argument an instance context (see `InstanceContext`). An instance
+// context can hold a pointer to any kind of data. It is important to
+// understand that this data is shared by all imported function, it's
+// global to the instance.
 func (instance *Instance) SetContextData(data unsafe.Pointer) {
 	cWasmerInstanceContextDataSet(instance.instance, data)
 }
