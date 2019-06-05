@@ -1,4 +1,4 @@
-package wasmer_test
+package wasmertest
 
 // // 1️⃣ Declare the `sum` function signature (see [cgo](https://golang.org/cmd/cgo/)).
 //
@@ -17,7 +17,7 @@ import (
 
 func importWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(filename), "testdata", "examples", "imported_function.wasm")
+	return path.Join(path.Dir(filename), "test", "testdata", "examples", "imported_function.wasm")
 }
 
 // 2️⃣ Write the implementation of the `sum` function, and export it (for cgo).

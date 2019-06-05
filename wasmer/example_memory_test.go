@@ -9,7 +9,7 @@ import (
 
 func memoryWasmFile() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(filename), "testdata", "examples", "memory.wasm")
+	return path.Join(path.Dir(filename), "test", "testdata", "examples", "memory.wasm")
 }
 
 func Example_memory() {

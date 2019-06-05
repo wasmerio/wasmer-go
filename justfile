@@ -37,13 +37,13 @@ debug-cgo:
 test:
 	#!/usr/bin/env bash
 	#export DYLD_PRINT_LIBRARIES=y
-	cd wasmer/test/
+	cd wasmer
 	# Run the tests.
-	GODEBUG=cgocheck=2 go test -test.v $(find . -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
+	GODEBUG=cgocheck=2 go test -test.v $(find test -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) test/imports.go
 	# Run the short examples.
 	go test -test.v example_test.go
 	# Run the long examples.
-	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "example_import_test.go" \) )
+	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
 
 # Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
 bench subject='wagon' filter='.*':
