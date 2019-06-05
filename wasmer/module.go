@@ -86,6 +86,52 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 	)
 }
 
+// Serialize serializes the current module into a sequence of
+// bytes. Those bytes can be deserialized into a module with
+// `DeserializeModule`.
+func (module *Module) Serialize() ([]byte, error) {
+	var serializedModule *cWasmerSerializedModuleT
+	var serializeResult = cWasmerModuleSerialize(&serializedModule, module.module)
+	defer cWasmerSerializedModuleDestroy(serializedModule)
+
+	if serializeResult != cWasmerOk {
+		return nil, NewModuleError("Failed to serialize the module.")
+	}
+
+	return cWasmerSerializedModuleBytes(serializedModule), nil
+}
+
+// DeserializeModule deserializes a sequence of bytes into a
+// module. Ideally, those bytes must come from `Module.Serialize`.
+func DeserializeModule(serializedModuleBytes []byte) (Module, error) {
+	var emptyModule = Module{module: nil}
+
+	if len(serializedModuleBytes) < 1 {
+		return emptyModule, NewModuleError("Serialized module bytes are empty.")
+	}
+
+	var serializedModule *cWasmerSerializedModuleT
+	var deserializeBytesResult = cWasmerSerializedModuleFromBytes(
+		&serializedModule,
+		(*cUint8T)(unsafe.Pointer(&serializedModuleBytes[0])),
+		cInt(len(serializedModuleBytes)),
+	)
+	defer cWasmerSerializedModuleDestroy(serializedModule)
+
+	if deserializeBytesResult != cWasmerOk {
+		return emptyModule, NewModuleError("Failed to reconstitute the serialized module from the given bytes.")
+	}
+
+	var module *cWasmerModuleT
+	var deserializeResult = cWasmerModuleDeserialize(&module, serializedModule)
+
+	if deserializeResult != cWasmerOk {
+		return emptyModule, NewModuleError("Failed to deserialize the module.")
+	}
+
+	return Module{module}, nil
+}
+
 // Close closes/frees a `Module`.
 func (module *Module) Close() {
 	if module.module != nil {

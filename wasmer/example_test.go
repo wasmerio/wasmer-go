@@ -65,6 +65,41 @@ func ExampleModule_Instantiate() {
 	// 3
 }
 
+func ExampleModule_Serialize() {
+	// Compiles the bytes into a WebAssembly module.
+	module1, _ := wasm.Compile(GetBytes())
+	defer module1.Close()
+
+	// Serializes the module into a sequence of bytes.
+	serialization, _ := module1.Serialize()
+
+	// Do something with `serialization`.
+	// Then later…
+
+	// Deserializes the module.
+	module2, _ := wasm.DeserializeModule(serialization)
+	defer module2.Close()
+	// And enjoy!
+
+	// Instantiates the WebAssembly module.
+	instance, _ := module2.Instantiate()
+	defer instance.Close()
+
+	// Gets an exported function.
+	sum, functionExists := instance.Exports["sum"]
+
+	fmt.Println(functionExists)
+
+	// Calls the `sum` exported function with Go values.
+	result, _ := sum(1, 2)
+
+	fmt.Println(result)
+
+	// Output:
+	// true
+	// 3
+}
+
 func ExampleInstance_basic() {
 	// Instantiates a WebAssembly instance from bytes.
 	instance, err := wasm.NewInstance(GetBytes())
