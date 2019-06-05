@@ -177,3 +177,9 @@ func IntoInstanceContext(instanceContext unsafe.Pointer) InstanceContext {
 func (instanceContext *InstanceContext) Memory() *Memory {
 	return &instanceContext.memory
 }
+
+// Data returns the instance context data as an `unsafe.Pointer`. It's
+// up to the user to cast it appropriately as a pointer to a data.
+func (instanceContext *InstanceContext) Data() unsafe.Pointer {
+	return cWasmerInstanceContextDataGet(instanceContext.context)
+}

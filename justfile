@@ -39,7 +39,7 @@ test:
 	#export DYLD_PRINT_LIBRARIES=y
 	cd wasmer/test/
 	# Run the tests.
-	go test -test.v $(find . -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
+	GODEBUG=cgocheck=2 go test -test.v $(find . -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) imports.go
 	# Run the short examples.
 	go test -test.v example_test.go
 	# Run the long examples.
