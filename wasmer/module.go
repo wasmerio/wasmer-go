@@ -86,6 +86,9 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 	)
 }
 
+// Serialize serializes the current module into a sequence of
+// bytes. Those bytes can be deserialized into a module with
+// `DeserializeModule`.
 func (module *Module) Serialize() ([]byte, error) {
 	var serializedModule *cWasmerSerializedModuleT
 	var serializeResult = cWasmerModuleSerialize(&serializedModule, module.module)
@@ -98,6 +101,8 @@ func (module *Module) Serialize() ([]byte, error) {
 	return cWasmerSerializedModuleBytes(serializedModule), nil
 }
 
+// DeserializeModule deserializes a sequence of bytes into a
+// module. Ideally, those bytes must come from `Module.Serialize`.
 func DeserializeModule(serializedModuleBytes []byte) (Module, error) {
 	var emptyModule = Module{module: nil}
 
