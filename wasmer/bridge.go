@@ -26,6 +26,7 @@ type cWasmerInstanceT C.wasmer_instance_t
 type cWasmerMemoryT C.wasmer_memory_t
 type cWasmerModuleT C.wasmer_module_t
 type cWasmerResultT C.wasmer_result_t
+type cWasmerSerializedModuleT C.wasmer_serialized_module_t
 type cWasmerValueT C.wasmer_value_t
 type cWasmerValueTag C.wasmer_value_tag
 
@@ -165,6 +166,28 @@ func cWasmerModuleDestroy(module *cWasmerModuleT) {
 
 func cWasmerModuleInstantiate(module *cWasmerModuleT, instance **cWasmerInstanceT, imports *cWasmerImportT, importsLength cInt) cWasmerResultT {
 	return cWasmerResultT(C.wasmer_module_instantiate((*C.wasmer_module_t)(module), (**C.wasmer_instance_t)(unsafe.Pointer(instance)), (*C.wasmer_import_t)(imports), (C.int)(importsLength)))
+}
+
+func cWasmerModuleSerialize(serializedModule **cWasmerSerializedModuleT, module *cWasmerModuleT) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_module_serialize((**C.wasmer_serialized_module_t)(unsafe.Pointer(serializedModule)), (*C.wasmer_module_t)(module)))
+}
+
+func cWasmerModuleDeserialize(module **cWasmerModuleT, serializedModule *cWasmerSerializedModuleT) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_module_deserialize((**C.wasmer_module_t)(unsafe.Pointer(module)), (*C.wasmer_serialized_module_t)(serializedModule)))
+}
+
+func cWasmerSerializedModuleBytes(serializedModule *cWasmerSerializedModuleT) []byte {
+	var byteArray = C.wasmer_serialized_module_bytes((*C.wasmer_serialized_module_t)(serializedModule))
+
+	return C.GoBytes(unsafe.Pointer(byteArray.bytes), (C.int)(byteArray.bytes_len))
+}
+
+func cWasmerSerializedModuleFromBytes(serializedModule **cWasmerSerializedModuleT, serializedModuleBytes *cUint8T, serializedModuleBytesLength cInt) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_serialized_module_from_bytes((**C.wasmer_serialized_module_t)(unsafe.Pointer(serializedModule)), (*C.uint8_t)(serializedModuleBytes), (C.uint)(serializedModuleBytesLength)))
+}
+
+func cWasmerSerializedModuleDestroy(serializedModule *cWasmerSerializedModuleT) {
+	C.wasmer_serialized_module_destroy((*C.wasmer_serialized_module_t)(serializedModule))
 }
 
 func cGoString(string *cChar) string {
