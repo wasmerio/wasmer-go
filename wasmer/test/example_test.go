@@ -1,4 +1,4 @@
-package wasmertest
+package wasmer_test
 
 import (
 	"fmt"
