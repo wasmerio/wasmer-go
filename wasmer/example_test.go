@@ -33,8 +33,40 @@ func ExampleValidate() {
 	// true
 }
 
-func ExampleInstance_basic() {
+func ExampleCompile() {
+	// Compiles the bytes into a WebAssembly module.
+	module, err := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	_ = err
+}
+
+func ExampleModule_Instantiate() {
+	// Compiles the bytes into a WebAssembly module.
+	module, _ := wasm.Compile(GetBytes())
+	defer module.Close()
+
 	// Instantiates the WebAssembly module.
+	instance, _ := module.Instantiate()
+	defer instance.Close()
+
+	// Gets an exported function.
+	sum, functionExists := instance.Exports["sum"]
+
+	fmt.Println(functionExists)
+
+	// Calls the `sum` exported function with Go values.
+	result, _ := sum(1, 2)
+
+	fmt.Println(result)
+
+	// Output:
+	// true
+	// 3
+}
+
+func ExampleInstance_basic() {
+	// Instantiates a WebAssembly instance from bytes.
 	instance, err := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
@@ -42,7 +74,7 @@ func ExampleInstance_basic() {
 }
 
 func ExampleInstance_exportedFunctions() {
-	// Instantiates the WebAssembly module.
+	// Instantiates a WebAssembly instance from bytes.
 	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
@@ -68,7 +100,7 @@ func ExampleInstance_exportedFunctions() {
 }
 
 func ExampleInstance_memory() {
-	// Instantiates the WebAssembly module.
+	// Instantiates a WebAssembly instance from bytes.
 	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()
 
@@ -90,7 +122,7 @@ func ExampleInstance_memory() {
 }
 
 func ExampleInstance_Close() {
-	// Instantiates the WebAssembly module.
+	// Instantiates a WebAssembly instance from bytes.
 	instance, _ := wasm.NewInstance(GetBytes())
 
 	// Closes/frees the instance (usually used with `defer`).

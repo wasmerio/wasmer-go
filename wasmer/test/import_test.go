@@ -7,8 +7,12 @@ import (
 	"unsafe"
 )
 
-func TestImport(t *testing.T) {
-	testImport(t)
+func TestInstanceImport(t *testing.T) {
+	testInstanceImport(t)
+}
+
+func TestModuleImport(t *testing.T) {
+	testModuleImport(t)
 }
 
 func TestImportNoAFunction(t *testing.T) {
