@@ -69,6 +69,7 @@ func TestModuleSerialize(t *testing.T) {
 	assert.NoError(t, err)
 
 	module2, err := wasm.DeserializeModule(bytes)
+	defer module2.Close()
 
 	assert.NoError(t, err)
 
