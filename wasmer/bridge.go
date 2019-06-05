@@ -24,6 +24,7 @@ type cWasmerImportT C.wasmer_import_t
 type cWasmerInstanceContextT C.wasmer_instance_context_t
 type cWasmerInstanceT C.wasmer_instance_t
 type cWasmerMemoryT C.wasmer_memory_t
+type cWasmerModuleT C.wasmer_module_t
 type cWasmerResultT C.wasmer_result_t
 type cWasmerValueT C.wasmer_value_t
 type cWasmerValueTag C.wasmer_value_tag
@@ -152,6 +153,18 @@ func cWasmerInstanceContextDataSet(instance *cWasmerInstanceT, dataPointer unsaf
 
 func cWasmerInstanceContextDataGet(instanceContext *cWasmerInstanceContextT) unsafe.Pointer {
 	return unsafe.Pointer(C.wasmer_instance_context_data_get((*C.wasmer_instance_t)(instanceContext)))
+}
+
+func cWasmerCompile(module **cWasmerModuleT, wasmBytes *cUchar, wasmBytesLength cUint) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_compile((**C.wasmer_module_t)(unsafe.Pointer(module)), (*C.uchar)(wasmBytes), (C.uint)(wasmBytesLength)))
+}
+
+func cWasmerModuleDestroy(module *cWasmerModuleT) {
+	C.wasmer_module_destroy((*C.wasmer_module_t)(module))
+}
+
+func cWasmerModuleInstantiate(module *cWasmerModuleT, instance **cWasmerInstanceT, imports *cWasmerImportT, importsLength cInt) cWasmerResultT {
+	return cWasmerResultT(C.wasmer_module_instantiate((*C.wasmer_module_t)(module), (**C.wasmer_instance_t)(unsafe.Pointer(instance)), (*C.wasmer_import_t)(imports), (C.int)(importsLength)))
 }
 
 func cGoString(string *cChar) string {

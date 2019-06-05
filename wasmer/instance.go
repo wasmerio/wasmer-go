@@ -80,6 +80,32 @@ func NewInstance(bytes []byte) (Instance, error) {
 
 // NewInstanceWithImports constructs a new `Instance` with imported functions.
 func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
+	return newInstanceWithImports(
+		imports,
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+			var instance *cWasmerInstanceT
+
+			var compileResult = cWasmerInstantiate(
+				&instance,
+				(*cUchar)(unsafe.Pointer(&bytes[0])),
+				cUint(len(bytes)),
+				wasmImportsCPointer,
+				cInt(numberOfImports),
+			)
+
+			if compileResult != cWasmerOk {
+				return nil, NewInstanceError("Failed to instantiate the module.")
+			}
+
+			return instance, nil
+		},
+	)
+}
+
+func newInstanceWithImports(
+	imports *Imports,
+	instanceBuilder func(*cWasmerImportT, int) (*cWasmerInstanceT, error),
+) (Instance, error) {
 	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
 	var importFunctionNth = 0
@@ -123,21 +149,13 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
 	}
 
-	var instance *cWasmerInstanceT
-
-	var compileResult = cWasmerInstantiate(
-		&instance,
-		(*cUchar)(unsafe.Pointer(&bytes[0])),
-		cUint(len(bytes)),
-		wasmImportsCPointer,
-		cInt(numberOfImports),
-	)
+	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
 
 	var memory Memory
 	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
 
-	if compileResult != cWasmerOk {
-		return emptyInstance, NewInstanceError("Failed to compile the module.")
+	if err != nil {
+		return emptyInstance, err
 	}
 
 	var exports = make(map[string]func(...interface{}) (Value, error))
