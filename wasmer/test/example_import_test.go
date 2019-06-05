@@ -1,4 +1,4 @@
-package wasmertest
+package wasmer_test
 
 // // 1️⃣ Declare the `sum` function signature (see [cgo](https://golang.org/cmd/cgo/)).
 //
