@@ -19,6 +19,8 @@ type cWasmerExportDescriptorsT C.wasmer_export_descriptors_t
 type cWasmerExportFuncT C.wasmer_export_func_t
 type cWasmerExportT C.wasmer_export_t
 type cWasmerExportsT C.wasmer_exports_t
+type cWasmerImportDescriptorT C.wasmer_import_descriptor_t
+type cWasmerImportDescriptorsT C.wasmer_import_descriptors_t
 type cWasmerImportExportKind C.wasmer_import_export_kind
 type cWasmerImportExportValue C.wasmer_import_export_value
 type cWasmerImportFuncT C.wasmer_import_func_t
@@ -216,6 +218,34 @@ func cWasmerExportDescriptorKind(exportDescriptor *cWasmerExportDescriptorT) cWa
 
 func cWasmerExportDescriptorName(exportDescriptor *cWasmerExportDescriptorT) cWasmerByteArray {
 	return (cWasmerByteArray)(C.wasmer_export_descriptor_name((*C.wasmer_export_descriptor_t)(exportDescriptor)))
+}
+
+func cWasmerImportDescriptors(module *cWasmerModuleT, importDescriptors **cWasmerImportDescriptorsT) {
+	C.wasmer_import_descriptors((*C.wasmer_module_t)(module), (**C.wasmer_import_descriptors_t)(unsafe.Pointer(importDescriptors)))
+}
+
+func cWasmerImportDescriptorsDestroy(importDescriptors *cWasmerImportDescriptorsT) {
+	C.wasmer_import_descriptors_destroy((*C.wasmer_import_descriptors_t)(importDescriptors))
+}
+
+func cWasmerImportDescriptorsLen(importDescriptors *cWasmerImportDescriptorsT) cInt {
+	return (cInt)(C.wasmer_import_descriptors_len((*C.wasmer_import_descriptors_t)(importDescriptors)))
+}
+
+func cWasmerImportDescriptorsGet(importDescriptors *cWasmerImportDescriptorsT, index cInt) *cWasmerImportDescriptorT {
+	return (*cWasmerImportDescriptorT)(C.wasmer_import_descriptors_get((*C.wasmer_import_descriptors_t)(importDescriptors), (C.int)(index)))
+}
+
+func cWasmerImportDescriptorKind(importDescriptor *cWasmerImportDescriptorT) cWasmerImportExportKind {
+	return cWasmerImportExportKind(C.wasmer_import_descriptor_kind((*C.wasmer_import_descriptor_t)(importDescriptor)))
+}
+
+func cWasmerImportDescriptorName(importDescriptor *cWasmerImportDescriptorT) cWasmerByteArray {
+	return (cWasmerByteArray)(C.wasmer_import_descriptor_name((*C.wasmer_import_descriptor_t)(importDescriptor)))
+}
+
+func cWasmerImportDescriptorModuleName(importDescriptor *cWasmerImportDescriptorT) cWasmerByteArray {
+	return (cWasmerByteArray)(C.wasmer_import_descriptor_module_name((*C.wasmer_import_descriptor_t)(importDescriptor)))
 }
 
 func cGoString(string *cChar) string {
