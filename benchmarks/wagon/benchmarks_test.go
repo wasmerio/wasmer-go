@@ -3,12 +3,13 @@ package wasmer_test
 import (
 	"bytes"
 	"fmt"
-	wagon_exec "github.com/go-interpreter/wagon/exec"
-	wagon_wasm "github.com/go-interpreter/wagon/wasm"
 	"io/ioutil"
 	"path"
 	"runtime"
 	"testing"
+
+	wagon_exec "github.com/go-interpreter/wagon/exec"
+	wagon_wasm "github.com/go-interpreter/wagon/wasm"
 )
 
 const N = 100000
@@ -29,7 +30,7 @@ func benchmarkWagon(b *testing.B, wasmFile string, exportName int64, exportValue
 		module, _ := wagon_wasm.ReadModule(bytes.NewReader(wasmBytes), func(name string) (*wagon_wasm.Module, error) {
 			return nil, fmt.Errorf("Module %q unknown.", name)
 		})
-		vm, _ := wagon_exec.NewVM(module)
+		vm, _ := wagon_exec.NewVM(module, wagon_exec.EnableAOT(true))
 		result, _ := vm.ExecCode(exportName, exportValues...)
 
 		_ = result
