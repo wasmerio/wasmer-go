@@ -40,7 +40,12 @@ not work on Windows yet, we are working on it.
 contains function descriptions, short examples, long examples
 etc. Everything one need to start using Wasmer with Go!
 
+Also, there is this article written for the announcement that
+introduces the project: [Announcing the fastest WebAssembly runtime
+for Go: wasmer][medium].
+
 [documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
+[medium]: https://medium.com/wasmer/announcing-the-fastest-webassembly-runtime-for-go-wasmer-19832d77c050
 
 # Examples
 
@@ -238,19 +243,81 @@ $ just test
 
 # Benchmarks
 
-We quickly compared Wasmer to [Wagon][wagon] and [Life][life]. The
-benchmarks are in `benchmarks/`. We run [the n-body algorithm][n-body]
-with N=100000. Here are the results:
+We compared Wasmer to [Wagon][wagon] and [Life][life]. The benchmarks
+are in `benchmarks/`. The computer that ran these benchmarks is a
+MacBook Pro 15" from 2016, 2.9Ghz Core i7 with 16Gb of memory. Here
+are the results in a table (the lower the ratio is, the better):
 
-| Runtime | Time (ms) | Ratio (smaller is better)
-|-|-:|-:|
-| Wasmer | 42.06ms | 1
-| Wagon | 1812.15ms | 43.1
-| Life | 2136.46ms | 50.8
+<table>
+  <thead>
+    <tr>
+      <th>Benchmark</th>
+      <th>Runtime</th>
+      <th align="right">Time (ms)</th>
+      <th align="right">Ratio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="3">N-Body</td>
+      <td>Wasmer</td>
+      <td align="right">42.078</td>
+      <td align="right">1×</td>
+    </tr>
+    <tr>
+      <td>Wagon</td>
+      <td align="right">1841.950</td>
+      <td align="right">44×</td>
+    </tr>
+    <tr>
+      <td>Life</td>
+      <td align="right">1976.215</td>
+      <td align="right">47×</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Fibonacci (recursive)</td>
+      <td>Wasmer</td>
+      <td align="right">28.559</td>
+      <td align="right">1×</td>
+    </tr>
+    <tr>
+      <td>Wagon</td>
+      <td align="right">3238.050</td>
+      <td align="right">113×</td>
+    </tr>
+    <tr>
+      <td>Life</td>
+      <td align="right">3029.209</td>
+      <td align="right">106×</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Pollard rho 128</td>
+      <td>Wasmer</td>
+      <td align="right">37.478</td>
+      <td align="right">1×</td>
+    </tr>
+    <tr>
+      <td>Wagon</td>
+      <td align="right">2165.563</td>
+      <td align="right">58×</td>
+    </tr>
+    <tr>
+      <td>Life</td>
+      <td align="right">2407.752</td>
+      <td align="right">64×</td>
+    </tr>
+  </tbody>
+</table>
+
+While both Life and Wagon provide on average the same speed, Wasmer is
+on average 72 times faster.
+
+Put on a graph, it looks like this (reminder: the lower, the better):
+
+![Benchmark results](https://cdn-images-1.medium.com/max/1200/1*08ymx9shShohcPCKi1XjlA.png)
 
 [wagon]: https://github.com/go-interpreter/wagon
 [life]: https://github.com/perlin-network/life
-[n-body]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html#nbody
 
 # What is WebAssembly?
 
