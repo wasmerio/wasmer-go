@@ -104,57 +104,86 @@ func TestModuleExports(t *testing.T) {
 		[]wasm.ExportDescriptor{
 			wasm.ExportDescriptor{
 				Name: "void",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "i32_i64_f32_f64_f64",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "sum",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "__heap_base",
-				Kind: wasm.ExportKindGlobal,
+				Kind: wasm.ImportExportKindGlobal,
 			},
 			wasm.ExportDescriptor{
 				Name: "arity_0",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "i32_i32",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "memory",
-				Kind: wasm.ExportKindMemory,
+				Kind: wasm.ImportExportKindMemory,
 			},
 			wasm.ExportDescriptor{
 				Name: "bool_casted_to_i32",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "__data_end",
-				Kind: wasm.ExportKindGlobal,
+				Kind: wasm.ImportExportKindGlobal,
 			},
 			wasm.ExportDescriptor{
 				Name: "f32_f32",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "f64_f64",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "string",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "i64_i64",
-				Kind: wasm.ExportKindFunction,
+				Kind: wasm.ImportExportKindFunction,
 			},
 		},
 		module.Exports,
 	)
+}
+
+func TestModuleImports(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	modulePath := path.Join(path.Dir(filename), "testdata", "log.wasm")
+
+	bytes, _ := wasm.ReadBytes(modulePath)
+
+	module, _ := wasm.Compile(bytes)
+	defer module.Close()
+
+	assert.Equal(
+		t,
+		[]wasm.ImportDescriptor{
+			wasm.ImportDescriptor{
+				Name:      "log_message",
+				Namespace: "env",
+				Kind:      wasm.ImportExportKindFunction,
+			},
+		},
+		module.Imports,
+	)
+}
+
+func TestModuleImportsNone(t *testing.T) {
+	module, _ := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	assert.Equal(t, []wasm.ImportDescriptor{}, module.Imports)
 }
