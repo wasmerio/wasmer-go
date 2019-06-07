@@ -34,9 +34,24 @@ func (error *ModuleError) Error() string {
 	return error.message
 }
 
+type ExportDescriptor struct {
+	Name string
+	Kind ExportKind
+}
+
+type ExportKind int
+
+const (
+	ExportKindFunction = ExportKind(cWasmFunction)
+	ExportKindGlobal   = ExportKind(cWasmGlobal)
+	ExportKindMemory   = ExportKind(cWasmMemory)
+	ExportKindTable    = ExportKind(cWasmTable)
+)
+
 // Module represents a WebAssembly module.
 type Module struct {
-	module *cWasmerModuleT
+	module  *cWasmerModuleT
+	Exports []ExportDescriptor
 }
 
 // Compile compiles a WebAssembly module from bytes.
@@ -55,7 +70,32 @@ func Compile(bytes []byte) (Module, error) {
 		return emptyModule, NewModuleError("Failed to compile the module.")
 	}
 
-	return Module{module}, nil
+	var exports = moduleExports(module)
+
+	return Module{module, exports}, nil
+}
+
+func moduleExports(module *cWasmerModuleT) []ExportDescriptor {
+	var exportDescriptors *cWasmerExportDescriptorsT
+	cWasmerExportDescriptors(module, &exportDescriptors)
+	defer cWasmerExportDescriptorsDestroy(exportDescriptors)
+
+	var numberOfExportDescriptors = int(cWasmerExportDescriptorsLen(exportDescriptors))
+	var exports = make([]ExportDescriptor, numberOfExportDescriptors)
+
+	for nth := 0; nth < numberOfExportDescriptors; nth++ {
+		var exportDescriptor = cWasmerExportDescriptorsGet(exportDescriptors, cInt(nth))
+		var exportKind = cWasmerExportDescriptorKind(exportDescriptor)
+		var wasmExportName = cWasmerExportDescriptorName(exportDescriptor)
+		var exportName = cGoStringN((*cChar)(unsafe.Pointer(wasmExportName.bytes)), (cInt)(wasmExportName.bytes_len))
+
+		exports[nth] = ExportDescriptor{
+			Name: exportName,
+			Kind: ExportKind(exportKind),
+		}
+	}
+
+	return exports
 }
 
 // Instantiate creates a new instance of the WebAssembly module.
@@ -129,7 +169,9 @@ func DeserializeModule(serializedModuleBytes []byte) (Module, error) {
 		return emptyModule, NewModuleError("Failed to deserialize the module.")
 	}
 
-	return Module{module}, nil
+	var exports = moduleExports(module)
+
+	return Module{module, exports}, nil
 }
 
 // Close closes/frees a `Module`.
