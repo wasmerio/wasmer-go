@@ -34,9 +34,38 @@ func (error *ModuleError) Error() string {
 	return error.message
 }
 
+// ExportDescriptor represents an export descriptor of a WebAssembly
+// module. It is different of an export of a WebAssembly instance. An
+// export descriptor only has a name and a kind/type.
+type ExportDescriptor struct {
+	// The export name.
+	Name string
+
+	// The export kind/type.
+	Kind ExportKind
+}
+
+// ExportKind represents an export descriptor kind/type.
+type ExportKind int
+
+const (
+	// ExportKindFunction represents an export descriptor of kind function.
+	ExportKindFunction = ExportKind(cWasmFunction)
+
+	// ExportKindGlobal represents an export descriptor of kind global.
+	ExportKindGlobal = ExportKind(cWasmGlobal)
+
+	// ExportKindMemory represents an export descriptor of kind memory.
+	ExportKindMemory = ExportKind(cWasmMemory)
+
+	// ExportKindTable represents an export descriptor of kind table.
+	ExportKindTable = ExportKind(cWasmTable)
+)
+
 // Module represents a WebAssembly module.
 type Module struct {
-	module *cWasmerModuleT
+	module  *cWasmerModuleT
+	Exports []ExportDescriptor
 }
 
 // Compile compiles a WebAssembly module from bytes.
@@ -55,7 +84,32 @@ func Compile(bytes []byte) (Module, error) {
 		return emptyModule, NewModuleError("Failed to compile the module.")
 	}
 
-	return Module{module}, nil
+	var exports = moduleExports(module)
+
+	return Module{module, exports}, nil
+}
+
+func moduleExports(module *cWasmerModuleT) []ExportDescriptor {
+	var exportDescriptors *cWasmerExportDescriptorsT
+	cWasmerExportDescriptors(module, &exportDescriptors)
+	defer cWasmerExportDescriptorsDestroy(exportDescriptors)
+
+	var numberOfExportDescriptors = int(cWasmerExportDescriptorsLen(exportDescriptors))
+	var exports = make([]ExportDescriptor, numberOfExportDescriptors)
+
+	for nth := 0; nth < numberOfExportDescriptors; nth++ {
+		var exportDescriptor = cWasmerExportDescriptorsGet(exportDescriptors, cInt(nth))
+		var exportKind = cWasmerExportDescriptorKind(exportDescriptor)
+		var wasmExportName = cWasmerExportDescriptorName(exportDescriptor)
+		var exportName = cGoStringN((*cChar)(unsafe.Pointer(wasmExportName.bytes)), (cInt)(wasmExportName.bytes_len))
+
+		exports[nth] = ExportDescriptor{
+			Name: exportName,
+			Kind: ExportKind(exportKind),
+		}
+	}
+
+	return exports
 }
 
 // Instantiate creates a new instance of the WebAssembly module.
@@ -129,7 +183,9 @@ func DeserializeModule(serializedModuleBytes []byte) (Module, error) {
 		return emptyModule, NewModuleError("Failed to deserialize the module.")
 	}
 
-	return Module{module}, nil
+	var exports = moduleExports(module)
+
+	return Module{module, exports}, nil
 }
 
 // Close closes/frees a `Module`.

@@ -14,6 +14,8 @@ type cUint C.uint
 type cUint32T C.uint32_t
 type cUint8T C.uint8_t
 type cWasmerByteArray C.wasmer_byte_array
+type cWasmerExportDescriptorT C.wasmer_export_descriptor_t
+type cWasmerExportDescriptorsT C.wasmer_export_descriptors_t
 type cWasmerExportFuncT C.wasmer_export_func_t
 type cWasmerExportT C.wasmer_export_t
 type cWasmerExportsT C.wasmer_exports_t
@@ -33,9 +35,11 @@ type cWasmerValueTag C.wasmer_value_tag
 const cWasmF32 = C.WASM_F32
 const cWasmF64 = C.WASM_F64
 const cWasmFunction = C.WASM_FUNCTION
+const cWasmGlobal = C.WASM_GLOBAL
 const cWasmI32 = C.WASM_I32
 const cWasmI64 = C.WASM_I64
 const cWasmMemory = C.WASM_MEMORY
+const cWasmTable = C.WASM_TABLE
 const cWasmerOk = C.WASMER_OK
 
 func cWasmerLastErrorLength() cInt {
@@ -188,6 +192,30 @@ func cWasmerSerializedModuleFromBytes(serializedModule **cWasmerSerializedModule
 
 func cWasmerSerializedModuleDestroy(serializedModule *cWasmerSerializedModuleT) {
 	C.wasmer_serialized_module_destroy((*C.wasmer_serialized_module_t)(serializedModule))
+}
+
+func cWasmerExportDescriptors(module *cWasmerModuleT, exportDescriptors **cWasmerExportDescriptorsT) {
+	C.wasmer_export_descriptors((*C.wasmer_module_t)(module), (**C.wasmer_export_descriptors_t)(unsafe.Pointer(exportDescriptors)))
+}
+
+func cWasmerExportDescriptorsDestroy(exportDescriptors *cWasmerExportDescriptorsT) {
+	C.wasmer_export_descriptors_destroy((*C.wasmer_export_descriptors_t)(exportDescriptors))
+}
+
+func cWasmerExportDescriptorsLen(exportDescriptors *cWasmerExportDescriptorsT) cInt {
+	return (cInt)(C.wasmer_export_descriptors_len((*C.wasmer_export_descriptors_t)(exportDescriptors)))
+}
+
+func cWasmerExportDescriptorsGet(exportDescriptors *cWasmerExportDescriptorsT, index cInt) *cWasmerExportDescriptorT {
+	return (*cWasmerExportDescriptorT)(C.wasmer_export_descriptors_get((*C.wasmer_export_descriptors_t)(exportDescriptors), (C.int)(index)))
+}
+
+func cWasmerExportDescriptorKind(exportDescriptor *cWasmerExportDescriptorT) cWasmerImportExportKind {
+	return cWasmerImportExportKind(C.wasmer_export_descriptor_kind((*C.wasmer_export_descriptor_t)(exportDescriptor)))
+}
+
+func cWasmerExportDescriptorName(exportDescriptor *cWasmerExportDescriptorT) cWasmerByteArray {
+	return (cWasmerByteArray)(C.wasmer_export_descriptor_name((*C.wasmer_export_descriptor_t)(exportDescriptor)))
 }
 
 func cGoString(string *cChar) string {
