@@ -42,30 +42,45 @@ type ExportDescriptor struct {
 	Name string
 
 	// The export kind/type.
-	Kind ExportKind
+	Kind ImportExportKind
 }
 
-// ExportKind represents an export descriptor kind/type.
-type ExportKind int
+// ImportExportKind represents an import/export descriptor kind/type.
+type ImportExportKind int
 
 const (
-	// ExportKindFunction represents an export descriptor of kind function.
-	ExportKindFunction = ExportKind(cWasmFunction)
+	// ImportExportKindFunction represents an import/export descriptor of kind function.
+	ImportExportKindFunction = ImportExportKind(cWasmFunction)
 
-	// ExportKindGlobal represents an export descriptor of kind global.
-	ExportKindGlobal = ExportKind(cWasmGlobal)
+	// ImportExportKindGlobal represents an import/export descriptor of kind global.
+	ImportExportKindGlobal = ImportExportKind(cWasmGlobal)
 
-	// ExportKindMemory represents an export descriptor of kind memory.
-	ExportKindMemory = ExportKind(cWasmMemory)
+	// ImportExportKindMemory represents an import/export descriptor of kind memory.
+	ImportExportKindMemory = ImportExportKind(cWasmMemory)
 
-	// ExportKindTable represents an export descriptor of kind table.
-	ExportKindTable = ExportKind(cWasmTable)
+	// ImportExportKindTable represents an import/export descriptor of kind table.
+	ImportExportKindTable = ImportExportKind(cWasmTable)
 )
+
+// ImportDescriptor represents an import descriptor of a WebAssembly
+// module. It is different of an import of a WebAssembly instance. An
+// import descriptor only has a name, a namespace, and a kind/type.
+type ImportDescriptor struct {
+	// The import name.
+	Name string
+
+	// The import namespace.
+	Namespace string
+
+	// The import kind/type.
+	Kind ImportExportKind
+}
 
 // Module represents a WebAssembly module.
 type Module struct {
 	module  *cWasmerModuleT
 	Exports []ExportDescriptor
+	Imports []ImportDescriptor
 }
 
 // Compile compiles a WebAssembly module from bytes.
@@ -85,8 +100,9 @@ func Compile(bytes []byte) (Module, error) {
 	}
 
 	var exports = moduleExports(module)
+	var imports = moduleImports(module)
 
-	return Module{module, exports}, nil
+	return Module{module, exports, imports}, nil
 }
 
 func moduleExports(module *cWasmerModuleT) []ExportDescriptor {
@@ -105,11 +121,37 @@ func moduleExports(module *cWasmerModuleT) []ExportDescriptor {
 
 		exports[nth] = ExportDescriptor{
 			Name: exportName,
-			Kind: ExportKind(exportKind),
+			Kind: ImportExportKind(exportKind),
 		}
 	}
 
 	return exports
+}
+
+func moduleImports(module *cWasmerModuleT) []ImportDescriptor {
+	var importDescriptors *cWasmerImportDescriptorsT
+	cWasmerImportDescriptors(module, &importDescriptors)
+	defer cWasmerImportDescriptorsDestroy(importDescriptors)
+
+	var numberOfImportDescriptors = int(cWasmerImportDescriptorsLen(importDescriptors))
+	var imports = make([]ImportDescriptor, numberOfImportDescriptors)
+
+	for nth := 0; nth < numberOfImportDescriptors; nth++ {
+		var importDescriptor = cWasmerImportDescriptorsGet(importDescriptors, cInt(nth))
+		var importKind = cWasmerImportDescriptorKind(importDescriptor)
+		var wasmImportName = cWasmerImportDescriptorName(importDescriptor)
+		var importName = cGoStringN((*cChar)(unsafe.Pointer(wasmImportName.bytes)), (cInt)(wasmImportName.bytes_len))
+		var wasmImportNamespace = cWasmerImportDescriptorModuleName(importDescriptor)
+		var importNamespace = cGoStringN((*cChar)(unsafe.Pointer(wasmImportNamespace.bytes)), (cInt)(wasmImportNamespace.bytes_len))
+
+		imports[nth] = ImportDescriptor{
+			Name:      importName,
+			Namespace: importNamespace,
+			Kind:      ImportExportKind(importKind),
+		}
+	}
+
+	return imports
 }
 
 // Instantiate creates a new instance of the WebAssembly module.
@@ -184,8 +226,9 @@ func DeserializeModule(serializedModuleBytes []byte) (Module, error) {
 	}
 
 	var exports = moduleExports(module)
+	var imports = moduleImports(module)
 
-	return Module{module, exports}, nil
+	return Module{module, exports, imports}, nil
 }
 
 // Close closes/frees a `Module`.
