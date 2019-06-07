@@ -94,3 +94,67 @@ func TestModuleDeserializeModuleWithRandomBytes(t *testing.T) {
 
 	assert.EqualError(t, err, "Failed to deserialize the module.")
 }
+
+func TestModuleExports(t *testing.T) {
+	module, _ := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	assert.Equal(
+		t,
+		[]wasm.ExportDescriptor{
+			wasm.ExportDescriptor{
+				Name: "void",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "i32_i64_f32_f64_f64",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "sum",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "__heap_base",
+				Kind: wasm.ExportKindGlobal,
+			},
+			wasm.ExportDescriptor{
+				Name: "arity_0",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "i32_i32",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "memory",
+				Kind: wasm.ExportKindMemory,
+			},
+			wasm.ExportDescriptor{
+				Name: "bool_casted_to_i32",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "__data_end",
+				Kind: wasm.ExportKindGlobal,
+			},
+			wasm.ExportDescriptor{
+				Name: "f32_f32",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "f64_f64",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "string",
+				Kind: wasm.ExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "i64_i64",
+				Kind: wasm.ExportKindFunction,
+			},
+		},
+		module.Exports,
+	)
+}
