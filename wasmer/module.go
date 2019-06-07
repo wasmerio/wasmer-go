@@ -62,10 +62,18 @@ const (
 	ImportExportKindTable = ImportExportKind(cWasmTable)
 )
 
+// ImportDescriptor represents an import descriptor of a WebAssembly
+// module. It is different of an import of a WebAssembly instance. An
+// import descriptor only has a name, a namespace, and a kind/type.
 type ImportDescriptor struct {
-	Name      string
+	// The import name.
+	Name string
+
+	// The import namespace.
 	Namespace string
-	Kind      ImportExportKind
+
+	// The import kind/type.
+	Kind ImportExportKind
 }
 
 // Module represents a WebAssembly module.
