@@ -34,18 +34,32 @@ func (error *ModuleError) Error() string {
 	return error.message
 }
 
+// ExportDescriptor represents an export descriptor of a WebAssembly
+// module. It is different of an export of a WebAssembly instance. An
+// export descriptor only has a name and a kind/type.
 type ExportDescriptor struct {
+	// The export name.
 	Name string
+
+	// The export kind/type.
 	Kind ExportKind
 }
 
+// ExportKind represents an export descriptor kind/type.
 type ExportKind int
 
 const (
+	// ExportKindFunction represents an export descriptor of kind function.
 	ExportKindFunction = ExportKind(cWasmFunction)
-	ExportKindGlobal   = ExportKind(cWasmGlobal)
-	ExportKindMemory   = ExportKind(cWasmMemory)
-	ExportKindTable    = ExportKind(cWasmTable)
+
+	// ExportKindGlobal represents an export descriptor of kind global.
+	ExportKindGlobal = ExportKind(cWasmGlobal)
+
+	// ExportKindMemory represents an export descriptor of kind memory.
+	ExportKindMemory = ExportKind(cWasmMemory)
+
+	// ExportKindTable represents an export descriptor of kind table.
+	ExportKindTable = ExportKind(cWasmTable)
 )
 
 // Module represents a WebAssembly module.
