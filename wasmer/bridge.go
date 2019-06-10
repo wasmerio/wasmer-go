@@ -1,6 +1,5 @@
 package wasmer
 
-// #cgo LDFLAGS: -Wl,-rpath,${SRCDIR} -L${SRCDIR} -lwasmer_runtime_c_api
 // #include "./wasmer.h"
 //
 import "C"
