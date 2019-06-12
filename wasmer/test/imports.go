@@ -74,6 +74,21 @@ func testModuleImport(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func testInstanceImportMissingImports(t *testing.T) {
+	_, err := wasm.NewInstance(getImportedFunctionBytes("examples", "imported_function.wasm"))
+
+	assert.EqualError(t, err, "Failed to instantiate the module:\n    link error: Import not found, namespace: env, name: sum")
+}
+
+func testModuleImportMissingImports(t *testing.T) {
+	module, _ := wasm.Compile(getImportedFunctionBytes("examples", "imported_function.wasm"))
+	defer module.Close()
+
+	_, err := module.Instantiate()
+
+	assert.EqualError(t, err, "Failed to instantiate the module:\n    error instantiating from module")
+}
+
 //export missingContext
 func missingContext() int32 {
 	return 7

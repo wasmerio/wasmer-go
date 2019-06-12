@@ -37,7 +37,7 @@ func TestInstantiateInvalidModule(t *testing.T) {
 	instance, err := wasm.NewInstance(GetInvalidBytes())
 	defer instance.Close()
 
-	assert.EqualError(t, err, "Failed to instantiate the module.")
+	assert.EqualError(t, err, "Failed to instantiate the module:\n    compile error: Validation error \"Invalid type\"")
 }
 
 func TestBasicSum(t *testing.T) {

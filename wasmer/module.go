@@ -1,6 +1,7 @@
 package wasmer
 
 import (
+	"fmt"
 	"io/ioutil"
 	"unsafe"
 )
@@ -174,7 +175,16 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 			)
 
 			if instantiateResult != cWasmerOk {
-				return nil, NewModuleError("Failed to instantiate the module.")
+				var lastError, err = GetLastError()
+				var errorMessage = "Failed to instantiate the module:\n    %s"
+
+				if err != nil {
+					errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+				} else {
+					errorMessage = fmt.Sprintf(errorMessage, lastError)
+				}
+
+				return nil, NewModuleError(errorMessage)
 			}
 
 			return instance, nil
