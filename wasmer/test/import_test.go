@@ -15,6 +15,10 @@ func TestModuleImport(t *testing.T) {
 	testModuleImport(t)
 }
 
+func TestInstanceImportMissingImports(t *testing.T) {
+	testInstanceImportMissingImports(t)
+}
+
 func TestImportNoAFunction(t *testing.T) {
 	_, err := wasm.NewImports().Append("sum", 42, unsafe.Pointer(nil))
 
