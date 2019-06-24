@@ -3,6 +3,9 @@ package wasmertest
 // #include <stdlib.h>
 //
 // extern int32_t sum(void *context, int32_t x, int32_t y);
+// extern int64_t sum_i64(void *context, int64_t x, int64_t y);
+// extern float sum_f32(void *context, float x, float y);
+// extern double sum_f64(void *context, double x, double y);
 // extern int32_t missingContext();
 // extern int32_t badInstanceContext(int32_t x);
 // extern int32_t badInput(void *context, char x);
@@ -48,6 +51,66 @@ func testInstanceImport(t *testing.T) {
 	result, err := add1(1, 2)
 
 	assert.Equal(t, wasm.I32(4), result)
+	assert.NoError(t, err)
+}
+
+//export sum_i64
+func sum_i64(context unsafe.Pointer, x int64, y int64) int64 {
+	return x + y
+}
+
+//export sum_f32
+func sum_f32(context unsafe.Pointer, x float32, y float32) float32 {
+	return x + y
+}
+
+//export sum_f64
+func sum_f64(context unsafe.Pointer, x float64, y float64) float64 {
+	return x + y
+}
+
+func testInstanceImportMultipleTypes(t *testing.T) {
+	imports := wasm.NewImports().Namespace("env")
+	imports.Append("sum_i32", sum, C.sum)
+	imports.Append("sum_i64", sum_i64, C.sum_i64)
+	imports.Append("sum_f32", sum_f32, C.sum_f32)
+	imports.Append("sum_f64", sum_f64, C.sum_f64)
+
+	instance, err := wasm.NewInstanceWithImports(getImportedFunctionBytes("imported_function.wasm"), imports)
+	defer instance.Close()
+
+	assert.NoError(t, err)
+
+	i32, exists := instance.Exports["sum_i32_and_add_one"]
+	assert.Equal(t, true, exists)
+
+	result, err := i32(1, 2)
+
+	assert.Equal(t, wasm.I32(4), result)
+	assert.NoError(t, err)
+
+	i64, exists := instance.Exports["sum_i64_and_add_one"]
+	assert.Equal(t, true, exists)
+
+	result, err = i64(1, 2)
+
+	assert.Equal(t, wasm.I64(4), result)
+	assert.NoError(t, err)
+
+	f32, exists := instance.Exports["sum_f32_and_add_one"]
+	assert.Equal(t, true, exists)
+
+	result, err = f32(float32(1.), float32(2.))
+
+	assert.Equal(t, wasm.F32(4.), result)
+	assert.NoError(t, err)
+
+	f64, exists := instance.Exports["sum_f64_and_add_one"]
+	assert.Equal(t, true, exists)
+
+	result, err = f64(1., 2.)
+
+	assert.Equal(t, wasm.F64(4.), result)
 	assert.NoError(t, err)
 }
 
