@@ -12,12 +12,21 @@ build go-build-args='-v':
 			;;
 		*)
 			dylib_extension="so"
+			staticlib_extension="a"
 	esac
 	if ! test -f libwasmer_runtime_c_api.${dylib_extension}; then
 		cargo build --release
 		ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
 	fi
 	go build {{go-build-args}} .
+
+	if test -n "${staticlib_extension}"; then
+		if ! test -f libwasmer_runtime_c_api.${staticlib_extension}; then
+			cargo build --release
+			ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${staticlib_extension} libwasmer_runtime_c_api.${staticlib_extension}
+		fi
+		go build {{go-build-args}} -tags "static_build" .
+	fi
 
 # Build the `go-wasmer` bin.
 build-bin go-build-args='-v':
@@ -44,6 +53,15 @@ test:
 	go test -test.v example_test.go
 	# Run the long examples.
 	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
+
+	if test -f libwasmer_runtime_c_api.a; then
+		# Run the tests.
+		GODEBUG=cgocheck=2 go test -tags "static_build" -test.v $(find test -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) test/imports.go
+		# Run the short examples.
+		go test -tags "static_build" -test.v example_test.go
+		# Run the long examples.
+		go test -tags "static_build" -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
+	fi
 
 # Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
 bench subject='wagon' filter='.*':
