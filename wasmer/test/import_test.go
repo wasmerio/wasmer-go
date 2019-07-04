@@ -11,8 +11,20 @@ func TestInstanceImport(t *testing.T) {
 	testInstanceImport(t)
 }
 
+func TestInstanceImportMultipleTypes(t *testing.T) {
+	testInstanceImportMultipleTypes(t)
+}
+
 func TestModuleImport(t *testing.T) {
 	testModuleImport(t)
+}
+
+func TestInstanceImportMissingImports(t *testing.T) {
+	testInstanceImportMissingImports(t)
+}
+
+func TestModuleImportMissingImports(t *testing.T) {
+	testModuleImportMissingImports(t)
 }
 
 func TestImportNoAFunction(t *testing.T) {

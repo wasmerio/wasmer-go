@@ -94,7 +94,16 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 			)
 
 			if compileResult != cWasmerOk {
-				return nil, NewInstanceError("Failed to instantiate the module.")
+				var lastError, err = GetLastError()
+				var errorMessage = "Failed to instantiate the module:\n    %s"
+
+				if err != nil {
+					errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+				} else {
+					errorMessage = fmt.Sprintf(errorMessage, lastError)
+				}
+
+				return nil, NewInstanceError(errorMessage)
 			}
 
 			return instance, nil
