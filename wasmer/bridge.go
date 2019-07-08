@@ -324,6 +324,13 @@ func cWasmerMemoryDataLength(memory *cWasmerMemoryT) cUint32T {
 	))
 }
 
+func cWasmerMemoryGrow(memory *cWasmerMemoryT, numberOfPages cUint32T) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_memory_grow(
+		(*C.wasmer_memory_t)(memory),
+		(C.uint32_t)(numberOfPages),
+	))
+}
+
 func cWasmerModuleDeserialize(module **cWasmerModuleT, serializedModule *cWasmerSerializedModuleT) cWasmerResultT {
 	return (cWasmerResultT)(C.wasmer_module_deserialize(
 		(**C.wasmer_module_t)(unsafe.Pointer(module)),
