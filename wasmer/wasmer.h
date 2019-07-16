@@ -133,6 +133,18 @@ typedef struct {
 
 } wasmer_serialized_module_t;
 
+typedef struct {
+
+} wasmer_trampoline_buffer_builder_t;
+
+typedef struct {
+
+} wasmer_trampoline_callable_t;
+
+typedef struct {
+
+} wasmer_trampoline_buffer_t;
+
 /**
  * Creates a new Module from the given wasm bytes.
  * Returns `wasmer_result_t::WASMER_OK` upon success.
@@ -321,12 +333,12 @@ void wasmer_import_descriptors_destroy(wasmer_import_descriptors_t *import_descr
  * Gets import descriptor by index
  */
 wasmer_import_descriptor_t *wasmer_import_descriptors_get(wasmer_import_descriptors_t *import_descriptors,
-                                                          int idx);
+                                                          unsigned int idx);
 
 /**
  * Gets the length of the import descriptors
  */
-int wasmer_import_descriptors_len(wasmer_import_descriptors_t *exports);
+unsigned int wasmer_import_descriptors_len(wasmer_import_descriptors_t *exports);
 
 /**
  * Frees memory for the given Func
@@ -339,9 +351,9 @@ void wasmer_import_func_destroy(wasmer_import_func_t *func);
  */
 wasmer_import_func_t *wasmer_import_func_new(void (*func)(void *data),
                                              const wasmer_value_tag *params,
-                                             int params_len,
+                                             unsigned int params_len,
                                              const wasmer_value_tag *returns,
-                                             int returns_len);
+                                             unsigned int returns_len);
 
 /**
  * Sets the params buffer to the parameter types of the given wasmer_import_func_t
@@ -351,7 +363,7 @@ wasmer_import_func_t *wasmer_import_func_new(void (*func)(void *data),
  */
 wasmer_result_t wasmer_import_func_params(const wasmer_import_func_t *func,
                                           wasmer_value_tag *params,
-                                          int params_len);
+                                          unsigned int params_len);
 
 /**
  * Sets the result parameter to the arity of the params of the wasmer_import_func_t
@@ -369,7 +381,7 @@ wasmer_result_t wasmer_import_func_params_arity(const wasmer_import_func_t *func
  */
 wasmer_result_t wasmer_import_func_returns(const wasmer_import_func_t *func,
                                            wasmer_value_tag *returns,
-                                           int returns_len);
+                                           unsigned int returns_len);
 
 /**
  * Sets the result parameter to the arity of the returns of the wasmer_import_func_t
@@ -583,6 +595,47 @@ uint32_t wasmer_table_length(wasmer_table_t *table);
  * and `wasmer_last_error_message` to get an error message.
  */
 wasmer_result_t wasmer_table_new(wasmer_table_t **table, wasmer_limits_t limits);
+
+/**
+ * Adds a callinfo trampoline to the builder.
+ */
+uintptr_t wasmer_trampoline_buffer_builder_add_callinfo_trampoline(wasmer_trampoline_buffer_builder_t *builder,
+                                                                   const wasmer_trampoline_callable_t *func,
+                                                                   const void *ctx,
+                                                                   uint32_t num_params);
+
+/**
+ * Adds a context trampoline to the builder.
+ */
+uintptr_t wasmer_trampoline_buffer_builder_add_context_trampoline(wasmer_trampoline_buffer_builder_t *builder,
+                                                                  const wasmer_trampoline_callable_t *func,
+                                                                  const void *ctx);
+
+/**
+ * Finalizes the trampoline builder into an executable buffer.
+ */
+wasmer_trampoline_buffer_t *wasmer_trampoline_buffer_builder_build(wasmer_trampoline_buffer_builder_t *builder);
+
+/**
+ * Creates a new trampoline builder.
+ */
+wasmer_trampoline_buffer_builder_t *wasmer_trampoline_buffer_builder_new(void);
+
+/**
+ * Destroys the trampoline buffer if not null.
+ */
+void wasmer_trampoline_buffer_destroy(wasmer_trampoline_buffer_t *buffer);
+
+/**
+ * Returns the callable pointer for the trampoline with index `idx`.
+ */
+const wasmer_trampoline_callable_t *wasmer_trampoline_buffer_get_trampoline(const wasmer_trampoline_buffer_t *buffer,
+                                                                            uintptr_t idx);
+
+/**
+ * Returns the context added by `add_context_trampoline`, from within the callee function.
+ */
+void *wasmer_trampoline_get_context(void);
 
 /**
  * Returns true for valid wasm bytes and false for invalid bytes

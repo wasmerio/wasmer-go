@@ -202,7 +202,7 @@ func cWasmerImportDescriptorsDestroy(importDescriptors *cWasmerImportDescriptors
 func cWasmerImportDescriptorsGet(importDescriptors *cWasmerImportDescriptorsT, index cInt) *cWasmerImportDescriptorT {
 	return (*cWasmerImportDescriptorT)(C.wasmer_import_descriptors_get(
 		(*C.wasmer_import_descriptors_t)(importDescriptors),
-		(C.int)(index),
+		(C.uint)(index),
 	))
 }
 
@@ -228,9 +228,9 @@ func cWasmerImportFuncNew(
 	return (*cWasmerImportFuncT)(C.wasmer_import_func_new(
 		(*[0]byte)(function),
 		(*C.wasmer_value_tag)(parametersSignature),
-		(C.int)(parametersLength),
+		(C.uint)(parametersLength),
 		(*C.wasmer_value_tag)(resultsSignature),
-		(C.int)(resultsLength),
+		(C.uint)(resultsLength),
 	))
 }
 
