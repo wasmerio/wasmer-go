@@ -149,7 +149,7 @@ func testModuleImportMissingImports(t *testing.T) {
 
 	_, err := module.Instantiate()
 
-	assert.EqualError(t, err, "Failed to instantiate the module:\n    error instantiating from module")
+	assert.EqualError(t, err, "Failed to instantiate the module:\n    link error: Import not found, namespace: env, name: sum")
 }
 
 //export missingContext

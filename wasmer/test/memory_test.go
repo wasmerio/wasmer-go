@@ -72,3 +72,31 @@ func TestMemoryDataReadWrite(t *testing.T) {
 
 	assert.Equal(t, "Aello, World!", string(memory3[pointer:pointer+13]))
 }
+
+func TestMemoryGrow(t *testing.T) {
+	instance, _ := wasm.NewInstance(GetBytes())
+	defer instance.Close()
+
+	memory := instance.Memory
+	oldMemoryLength := memory.Length()
+
+	assert.Equal(t, uint32(1114112), oldMemoryLength)
+
+	err := memory.Grow(1)
+
+	assert.NoError(t, err)
+
+	memoryLength := memory.Length()
+
+	assert.Equal(t, uint32(1179648), memoryLength)
+	assert.Equal(t, uint32(65536), memoryLength-oldMemoryLength)
+}
+
+func TestMemoryGrowTooMuch(t *testing.T) {
+	instance, _ := wasm.NewInstance(GetBytes())
+	defer instance.Close()
+
+	err := instance.Memory.Grow(100000)
+
+	assert.EqualError(t, err, "Failed to grow the memory:\n    Grow Error: Failed to add pages because would exceed maximum number of pages. Left: 17, Right: 100000, Pages added: 100017")
+}

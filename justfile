@@ -64,7 +64,7 @@ test:
 	fi
 
 # Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
-bench subject='wagon' filter='.*':
+bench subject='wasmer' filter='.*':
 	cd benchmarks/{{subject}} && go test -bench '{{filter}}' benchmarks_test.go
 
 # Local Variables:
