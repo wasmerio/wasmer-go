@@ -60,7 +60,7 @@ func NewInstance(bytes []byte) (Instance, error) {
 func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	return newInstanceWithImports(
 		imports,
-		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports uint) (*cWasmerInstanceT, error) {
 			var instance *cWasmerInstanceT
 
 			var compileResult = cWasmerInstantiate(
@@ -90,11 +90,11 @@ func NewInstanceFromModule(
 func NewInstanceWithModuleAndImportObject(
 	module *Module,
 	imports *Imports,
-	importObjectBuilder func(*cWasmerImportT, int) (*cWasmerImportObjectT, error),
+	importObjectBuilder func(*cWasmerImportT, uint) (*cWasmerImportObjectT, error),
 ) (Instance, error) {
 	return newInstanceWithImports(
 		imports,
-		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports uint) (*cWasmerInstanceT, error) {
 			var instance *cWasmerInstanceT
 
 			importObject, err := importObjectBuilder(wasmImportsCPointer, numberOfImports)
@@ -113,7 +113,7 @@ func NewInstanceWithModuleAndImportObject(
 
 func newInstanceWithImports(
 	imports *Imports,
-	instanceBuilder func(*cWasmerImportT, int) (*cWasmerInstanceT, error),
+	instanceBuilder func(*cWasmerImportT, uint) (*cWasmerInstanceT, error),
 ) (Instance, error) {
 	wasmImportsCPointer, numberOfImports := imports.ToWasmerImports()
 

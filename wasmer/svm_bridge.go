@@ -9,19 +9,17 @@ import "unsafe"
 
 func cWasmerSvmImportObject(
 	importObject **cWasmerImportObjectT,
-	addr unsafe.Pointer,
-	maxPages uint,
-	maxPagesSlices uint,
-	nodeDataPtr unsafe.Pointer,
 	imports *cWasmerImportT,
 	importsLength uint,
+	config *SvmInstanceConfig,
 ) cWasmerResultT {
 	return (cWasmerResultT)(C.wasmer_svm_import_object(
 		(**C.wasmer_import_object_t)(unsafe.Pointer(importObject)),
-		addr,
-		(C.uint)(maxPages),
-		(C.uint)(maxPagesSlices),
-		nodeDataPtr,
+		nil,
+		// config.addr,
+		(C.uint)(config.maxPages),
+		(C.uint)(config.maxPagesSlices),
+		config.nodeDataPtr,
 		(*C.wasmer_import_t)(imports),
 		(C.uint)(importsLength),
 	))

@@ -164,7 +164,7 @@ func (module *Module) Instantiate() (Instance, error) {
 func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error) {
 	return newInstanceWithImports(
 		imports,
-		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports uint) (*cWasmerInstanceT, error) {
 			var instance *cWasmerInstanceT
 
 			var instantiateResult = cWasmerModuleInstantiate(

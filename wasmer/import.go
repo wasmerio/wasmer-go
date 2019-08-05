@@ -77,7 +77,7 @@ type ImportObject struct {
 	importObject *cWasmerImportObjectT
 }
 
-func DefaultImportObjectBuilder(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerImportObjectT, error) {
+func DefaultImportObjectBuilder(wasmImportsCPointer *cWasmerImportT, numberOfImports uint) (*cWasmerImportObjectT, error) {
 	var importObject *cWasmerImportObjectT = cWasmerImportObjectNew()
 
 	extendResult := cWasmerImportObjectExtend(importObject, wasmImportsCPointer, cUint(numberOfImports))
@@ -195,7 +195,7 @@ func (imports *Imports) Close() {
 }
 
 // Returns a C-Pointer to the an array of imported functions, and the total number of imported functions
-func (imports *Imports) ToWasmerImports() (*cWasmerImportT, int) {
+func (imports *Imports) ToWasmerImports() (*cWasmerImportT, uint) {
 	var importFunctionNth = 0
 	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
@@ -239,7 +239,7 @@ func (imports *Imports) ToWasmerImports() (*cWasmerImportT, int) {
 		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
 	}
 
-	return wasmImportsCPointer, numberOfImports
+	return wasmImportsCPointer, uint(numberOfImports)
 }
 
 // InstanceContext represents a way to access instance API from within
