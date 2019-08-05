@@ -85,31 +85,23 @@ func NewInstanceWithModuleAndImportObject(
 	imports *Imports,
 	importObjectBuilder func(*cWasmerImportT, int) (*cWasmerImportObjectT, error),
 ) (Instance, error) {
-	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: Memory {} }
+	return newInstanceWithImports(
+		imports,
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+			var instance *cWasmerInstanceT
 
-	wasmImportsCPointer, numberOfImports := imports.ToWasmerImports()
-	importObject, err := importObjectBuilder(wasmImportsCPointer, numberOfImports)
+			importObject, err := importObjectBuilder(wasmImportsCPointer, numberOfImports)
+			if err != nil {
+				return nil, err
+			}
 
-	if err != nil {
-		return emptyInstance, nil
-	}
+			var compileResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject);
+			if compileResult != cWasmerOk {
+				return nil, buildInstantiateError()
+			}
 
-	var instance *cWasmerInstanceT
-	var compileResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject);
-	if compileResult != cWasmerOk {
-		return emptyInstance, buildInstantiateError()
-	}
-
-	exports, err := instanceExports(instance)
-	if err != nil {
-		return emptyInstance, err
-	}
-
-	if exports.memory == nil {
-		return emptyInstance, NewInstanceError("No memory exported.")
-	}
-
-	return Instance{instance: instance, imports: imports, Exports: exports.functions, Memory: *exports.memory}, nil
+			return instance, nil
+		})
 }
 
 func newInstanceWithImports(
