@@ -78,7 +78,8 @@ func instanceExports(instance *cWasmerInstanceT) (*Exports, error) {
 
 func wrapInstanceExportedFunction(instance *cWasmerInstanceT, f *ExportedFunction) ExportFunctionT {
 	return func(arguments ...interface{}) (Value, error) {
-		wasmInputs, err := prepareInstanceCall(f.name, int(f.inputsArity), f.inputsSignature, arguments);
+		wasmInputs, err := prepareInstanceCall(f.name, int(f.inputsArity), f.inputsSignature, arguments...);
+
 		if err != nil {
 			return I32(0), err
 		}
