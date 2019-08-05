@@ -286,6 +286,22 @@ func cWasmerInstanceExports(instance *cWasmerInstanceT, exports **cWasmerExports
 	)
 }
 
+func cWasmerImportObjectNew() *cWasmerImportObjectT {
+	return (*cWasmerImportObjectT)(C.wasmer_import_object_new())
+}
+
+func cWasmerImportObjectExtend(
+	importObject *cWasmerImportObjectT,
+	imports *cWasmerImportT,
+	importsLength cUint,
+) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_import_object_extend(
+		(*C.wasmer_import_object_t)(importObject),
+		(*C.wasmer_import_t)(imports),
+		(C.uint)(importsLength),
+	))
+}
+
 func cWasmerInstantiate(
 	instance **cWasmerInstanceT,
 	wasmBytes *cUchar,
