@@ -23,28 +23,6 @@ func (error *InstanceError) Error() string {
 	return error.message
 }
 
-// ExportedFunctionError represents any kind of errors related to a
-// WebAssembly exported function. It is returned by `Instance`
-// functions only.
-type ExportedFunctionError struct {
-	functionName string
-	message      string
-}
-
-// NewExportedFunctionError constructs a new `ExportedFunctionError`,
-// where `functionName` is the name of the exported function, and
-// `message` is the error message. If the error message contains `%s`,
-// then this parameter will be replaced by `functionName`.
-func NewExportedFunctionError(functionName string, message string) *ExportedFunctionError {
-	return &ExportedFunctionError{functionName, message}
-}
-
-// ExportedFunctionError is an actual error. The `Error` function
-// returns the error message.
-func (error *ExportedFunctionError) Error() string {
-	return fmt.Sprintf(error.message, error.functionName)
-}
-
 // Instance represents a WebAssembly instance.
 type Instance struct {
 	// The underlying WebAssembly instance.

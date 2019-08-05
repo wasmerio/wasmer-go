@@ -35,15 +35,16 @@ type ExportedFunction struct {
 }
 
 type Exports struct {
-	memory *Memory
-
 	functions map[string]ExportFunctionT
+
+	memory *Memory
 }
 
 func instanceExports(instance *cWasmerInstanceT) (*Exports, error) {
 	var err error
 	var memory *Memory
 	var functions = make(map[string]ExportFunctionT)
+
 	var wasmExports *cWasmerExportsT
 
 	cWasmerInstanceExports(instance, &wasmExports)
