@@ -93,60 +93,16 @@ func newInstanceWithImports(
 	imports *Imports,
 	instanceBuilder func(*cWasmerImportT, int) (*cWasmerInstanceT, error),
 ) (Instance, error) {
-	var numberOfImports = len(imports.imports)
-	var wasmImports = make([]cWasmerImportT, numberOfImports)
-	var importFunctionNth = 0
+	wasmImportsCPointer, numberOfImports := imports.ToWasmerImports()
 
-	for importName, importFunction := range imports.imports {
-		var wasmInputsArity = len(importFunction.wasmInputs)
-		var wasmOutputsArity = len(importFunction.wasmOutputs)
-
-		var importFunctionInputsCPointer *cWasmerValueTag
-		var importFunctionOutputsCPointer *cWasmerValueTag
-
-		if wasmInputsArity > 0 {
-			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
-		}
-
-		if wasmOutputsArity > 0 {
-			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
-		}
-
-		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
-			importFunction.cgoPointer,
-			importFunctionInputsCPointer,
-			cUint(wasmInputsArity),
-			importFunctionOutputsCPointer,
-			cUint(wasmOutputsArity),
-		)
-
-		var importedFunction = cNewWasmerImportT(
-			importFunction.namespace,
-			importName,
-			importFunction.importedFunctionPointer,
-		)
-
-		wasmImports[importFunctionNth] = importedFunction
-		importFunctionNth++
-	}
-
-	var wasmImportsCPointer *cWasmerImportT
-
-	if numberOfImports > 0 {
-		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
-	}
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: Memory {} }
 
 	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
-
-	var memory Memory
-	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
-
 	if err != nil {
 		return emptyInstance, err
 	}
 
 	exports, err := instanceExports(instance)
-
 	if err != nil {
 		return emptyInstance, err
 	}
