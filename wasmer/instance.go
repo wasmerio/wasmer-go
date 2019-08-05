@@ -95,7 +95,7 @@ func newInstanceWithImports(
 ) (Instance, error) {
 	wasmImportsCPointer, numberOfImports := imports.ToWasmerImports()
 
-	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: Memory {} }
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: Memory{}}
 
 	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
 	if err != nil {
