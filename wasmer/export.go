@@ -28,9 +28,9 @@ func (error *ExportedFunctionError) Error() string {
 type ExportFunctionT = func(...interface{}) (Value, error)
 
 type ExportedFunction struct {
-	name string
-	inputsArity  cUint32T
-	outputsArity cUint32T
+	name            string
+	inputsArity     cUint32T
+	outputsArity    cUint32T
 	inputsSignature []cWasmerValueTag
 }
 
@@ -73,12 +73,12 @@ func instanceExports(instance *cWasmerInstanceT) (*Exports, error) {
 		}
 	}
 
-	return &Exports { functions, memory }, nil
+	return &Exports{functions, memory}, nil
 }
 
 func wrapInstanceExportedFunction(instance *cWasmerInstanceT, f *ExportedFunction) ExportFunctionT {
 	return func(arguments ...interface{}) (Value, error) {
-		wasmInputs, err := prepareInstanceCall(f.name, int(f.inputsArity), f.inputsSignature, arguments...);
+		wasmInputs, err := prepareInstanceCall(f.name, int(f.inputsArity), f.inputsSignature, arguments...)
 
 		if err != nil {
 			return I32(0), err
@@ -146,7 +146,7 @@ func prepareInstanceCall(exportedFunctionName string, numberOfExpectedArguments 
 		switch wasmInputType {
 		case cWasmI32:
 			wasmInputs[nth].tag = cWasmI32
-			wasmerValue, err := castArgToWasmerI32(exportedFunctionName, nth, value);
+			wasmerValue, err := castArgToWasmerI32(exportedFunctionName, nth, value)
 
 			if err != nil {
 				return nil, err
@@ -157,7 +157,7 @@ func prepareInstanceCall(exportedFunctionName string, numberOfExpectedArguments 
 
 		case cWasmI64:
 			wasmInputs[nth].tag = cWasmI64
-			wasmerValue, err := castArgToWasmerI64(exportedFunctionName, nth, value);
+			wasmerValue, err := castArgToWasmerI64(exportedFunctionName, nth, value)
 
 			if err != nil {
 				return nil, err
@@ -167,7 +167,7 @@ func prepareInstanceCall(exportedFunctionName string, numberOfExpectedArguments 
 			*pointer = wasmerValue
 		case cWasmF32:
 			wasmInputs[nth].tag = cWasmF32
-			wasmerValue, err := castArgToWasmerF32(exportedFunctionName, nth, value);
+			wasmerValue, err := castArgToWasmerF32(exportedFunctionName, nth, value)
 
 			if err != nil {
 				return nil, err
@@ -178,7 +178,7 @@ func prepareInstanceCall(exportedFunctionName string, numberOfExpectedArguments 
 
 		case cWasmF64:
 			wasmInputs[nth].tag = cWasmF64
-			wasmerValue, err := castArgToWasmerF64(exportedFunctionName, nth, value);
+			wasmerValue, err := castArgToWasmerF64(exportedFunctionName, nth, value)
 
 			if err != nil {
 				return nil, err
@@ -214,12 +214,12 @@ func castArgToWasmerI32(exportedFunctionName string, nth int, value interface{})
 		var value = value.(Value)
 
 		if value.GetType() != TypeI32 {
-			return 0, NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth + 1))
+			return 0, NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
 		}
 
 		return value.ToI32(), nil
 	default:
-		return 0, NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth + 1))
+		return 0, NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Argument #%d of the `%%s` exported function must be of type `i32`, cannot cast given value to this type.", nth+1))
 	}
 }
 
@@ -356,10 +356,10 @@ func handleFunctionExport(wasmExport *cWasmerExportT) (*ExportedFunction, error)
 		return nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
 	}
 
-	return &ExportedFunction {
-		name: exportedFunctionName,
-		inputsArity: wasmFunctionInputsArity,
-		outputsArity: wasmFunctionOutputsArity,
+	return &ExportedFunction{
+		name:            exportedFunctionName,
+		inputsArity:     wasmFunctionInputsArity,
+		outputsArity:    wasmFunctionOutputsArity,
 		inputsSignature: wasmFunctionInputSignatures,
 	}, nil
 }
