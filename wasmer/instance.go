@@ -72,21 +72,44 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 			)
 
 			if compileResult != cWasmerOk {
-				var lastError, err = GetLastError()
-				var errorMessage = "Failed to instantiate the module:\n    %s"
-
-				if err != nil {
-					errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
-				} else {
-					errorMessage = fmt.Sprintf(errorMessage, lastError)
-				}
-
-				return nil, NewInstanceError(errorMessage)
+				return nil, buildInstantiateError()
 			}
 
 			return instance, nil
 		},
 	)
+}
+
+func NewInstanceWithModuleAndImportObject(
+	module *Module,
+	imports *Imports,
+	importObjectBuilder func(*cWasmerImportT, int) (*cWasmerImportObjectT, error),
+) (Instance, error) {
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: Memory {} }
+
+	wasmImportsCPointer, numberOfImports := imports.ToWasmerImports()
+	importObject, err := importObjectBuilder(wasmImportsCPointer, numberOfImports)
+
+	if err != nil {
+		return emptyInstance, nil
+	}
+
+	var instance *cWasmerInstanceT
+	var compileResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject);
+	if compileResult != cWasmerOk {
+		return emptyInstance, buildInstantiateError()
+	}
+
+	exports, err := instanceExports(instance)
+	if err != nil {
+		return emptyInstance, err
+	}
+
+	if exports.memory == nil {
+		return emptyInstance, NewInstanceError("No memory exported.")
+	}
+
+	return Instance{instance: instance, imports: imports, Exports: exports.functions, Memory: *exports.memory}, nil
 }
 
 func newInstanceWithImports(
@@ -133,4 +156,17 @@ func (instance *Instance) Close() {
 	if instance.instance != nil {
 		cWasmerInstanceDestroy(instance.instance)
 	}
+}
+
+func buildInstantiateError() error {
+	var lastError, err = GetLastError()
+	var errorMessage = "Failed to instantiate the module:\n    %s"
+
+	if err != nil {
+		errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+	} else {
+		errorMessage = fmt.Sprintf(errorMessage, lastError)
+	}
+
+	return NewInstanceError(errorMessage)
 }

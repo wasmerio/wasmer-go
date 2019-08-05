@@ -61,6 +61,10 @@ type Imports struct {
 	currentNamespace string
 }
 
+type ImportObject struct {
+	importObject *cWasmerImportObjectT
+}
+
 // NewImports constructs a new empty `Imports`.
 func NewImports() *Imports {
 	var imports = make(map[string]Import)

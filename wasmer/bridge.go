@@ -25,6 +25,7 @@ type cWasmerImportExportKind C.wasmer_import_export_kind
 type cWasmerImportExportValue C.wasmer_import_export_value
 type cWasmerImportFuncT C.wasmer_import_func_t
 type cWasmerImportT C.wasmer_import_t
+type cWasmerImportObjectT C.wasmer_import_object_t
 type cWasmerInstanceContextT C.wasmer_instance_context_t
 type cWasmerInstanceT C.wasmer_instance_t
 type cWasmerMemoryT C.wasmer_memory_t
@@ -298,6 +299,17 @@ func cWasmerInstantiate(
 		(C.uint)(wasmBytesLength),
 		(*C.wasmer_import_t)(imports),
 		(C.int)(importsLength),
+	))
+}
+
+func cWasmerModuleImportInstantiate(
+	instance **cWasmerInstanceT,
+	module *cWasmerModuleT,
+	import_object *cWasmerImportObjectT) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_module_import_instantiate(
+		(**C.wasmer_instance_t)(unsafe.Pointer(instance)),
+		(*C.wasmer_module_t)(unsafe.Pointer(module)),
+		(*C.wasmer_import_object_t)(unsafe.Pointer(import_object)),
 	))
 }
 
