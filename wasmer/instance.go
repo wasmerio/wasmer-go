@@ -72,21 +72,43 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 			)
 
 			if compileResult != cWasmerOk {
-				var lastError, err = GetLastError()
-				var errorMessage = "Failed to instantiate the module:\n    %s"
-
-				if err != nil {
-					errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
-				} else {
-					errorMessage = fmt.Sprintf(errorMessage, lastError)
-				}
-
-				return nil, NewInstanceError(errorMessage)
+				return nil, buildInstantiateError()
 			}
 
 			return instance, nil
 		},
 	)
+}
+
+func NewInstanceFromModule(
+	module *Module,
+	imports *Imports,
+) (Instance, error) {
+	return NewInstanceWithModuleAndImportObject(module, imports, DefaultImportObjectBuilder)
+}
+
+func NewInstanceWithModuleAndImportObject(
+	module *Module,
+	imports *Imports,
+	importObjectBuilder func(*cWasmerImportT, int) (*cWasmerImportObjectT, error),
+) (Instance, error) {
+	return newInstanceWithImports(
+		imports,
+		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
+			var instance *cWasmerInstanceT
+
+			importObject, err := importObjectBuilder(wasmImportsCPointer, numberOfImports)
+			if err != nil {
+				return nil, err
+			}
+
+			var compileResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject)
+			if compileResult != cWasmerOk {
+				return nil, buildInstantiateError()
+			}
+
+			return instance, nil
+		})
 }
 
 func newInstanceWithImports(
@@ -133,4 +155,17 @@ func (instance *Instance) Close() {
 	if instance.instance != nil {
 		cWasmerInstanceDestroy(instance.instance)
 	}
+}
+
+func buildInstantiateError() error {
+	var lastError, err = GetLastError()
+	var errorMessage = "Failed to instantiate the module:\n    %s"
+
+	if err != nil {
+		errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+	} else {
+		errorMessage = fmt.Sprintf(errorMessage, lastError)
+	}
+
+	return NewInstanceError(errorMessage)
 }

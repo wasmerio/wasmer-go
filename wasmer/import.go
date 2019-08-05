@@ -28,6 +28,18 @@ func (error *ImportedFunctionError) Error() string {
 	return fmt.Sprintf(error.message, error.functionName)
 }
 
+type ImportObjectError struct {
+	message string
+}
+
+func NewImportObjectError(message string) *ImportObjectError {
+	return &ImportObjectError{message}
+}
+
+func (error *ImportObjectError) Error() string {
+	return error.message
+}
+
 // Import represents an WebAssembly instance imported function.
 type Import struct {
 	// An implementation must be of type:
@@ -59,6 +71,31 @@ type Imports struct {
 
 	// Current namespace where to register the import.
 	currentNamespace string
+}
+
+type ImportObject struct {
+	importObject *cWasmerImportObjectT
+}
+
+func DefaultImportObjectBuilder(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerImportObjectT, error) {
+	var importObject *cWasmerImportObjectT = cWasmerImportObjectNew()
+
+	extendResult := cWasmerImportObjectExtend(importObject, wasmImportsCPointer, cUint(numberOfImports))
+
+	if extendResult != cWasmerOk {
+		var lastError, err = GetLastError()
+		var errorMessage = "Failed to build Import Object:\n    %s"
+
+		if err != nil {
+			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+		} else {
+			errorMessage = fmt.Sprintf(errorMessage, lastError)
+		}
+
+		return nil, NewImportObjectError(errorMessage)
+	}
+
+	return importObject, nil
 }
 
 // NewImports constructs a new empty `Imports`.
