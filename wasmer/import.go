@@ -82,7 +82,7 @@ func DefaultImportObjectBuilder(wasmImportsCPointer *cWasmerImportT, numberOfImp
 
 	extendResult := cWasmerImportObjectExtend(importObject, wasmImportsCPointer, cUint(numberOfImports))
 
-	if extendResult != cWasmerOk  {
+	if extendResult != cWasmerOk {
 		var lastError, err = GetLastError()
 		var errorMessage = "Failed to build Import Object:\n    %s"
 
