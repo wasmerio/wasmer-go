@@ -3,14 +3,14 @@ package wasmer
 import "unsafe"
 
 type SvmInstanceConfig struct {
-	addr           []byte
-	maxPages       uint
-	maxPagesSlices uint
-	nodeDataPtr    unsafe.Pointer
+	Addr           []byte
+	MaxPages       uint
+	MaxPagesSlices uint
+	NodeDataPtr    unsafe.Pointer
 }
 
 func NewSvmInstanceConfig(addr []byte, maxPages uint, maxPagesSlices uint, nodeDataPtr unsafe.Pointer) *SvmInstanceConfig {
-	return &SvmInstanceConfig{addr, maxPages, maxPagesSlices, nodeDataPtr}
+	return &SvmInstanceConfig{Addr: addr, MaxPages: maxPages, MaxPagesSlices: maxPagesSlices, NodeDataPtr: nodeDataPtr}
 }
 
 func NewSvmInstance(

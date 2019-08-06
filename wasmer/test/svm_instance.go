@@ -8,6 +8,7 @@ package wasmertest
 import "C"
 
 import (
+	"runtime"
 	"github.com/stretchr/testify/assert"
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"testing"
@@ -28,14 +29,14 @@ func NewCounter(initValue int32) *Counter {
 //export inc
 func inc(context unsafe.Pointer, x int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
-	counter := (*Counter)(instanceContext.Data())
+	counter := (*Counter)(instanceContext.NodeData())
 	counter.Value += x
 }
 
 //export get
 func get(context unsafe.Pointer) int32 {
 	var instanceContext = wasm.IntoInstanceContext(context)
-	counter := (*Counter)(instanceContext.Data())
+	counter := (*Counter)(instanceContext.NodeData())
 	return counter.Value
 }
 
@@ -49,7 +50,9 @@ func NewTestSvmConfig(nodeDataPtr unsafe.Pointer) *wasm.SvmInstanceConfig {
 
 	maxPages := uint(5)
 	maxPagesSlices := uint(100)
-	return wasm.NewSvmInstanceConfig(addr[:], maxPages, maxPagesSlices, nodeDataPtr)
+	config := wasm.NewSvmInstanceConfig(addr[:], maxPages, maxPagesSlices, nodeDataPtr)
+
+	return config
 }
 
 func compileModule(t *testing.T, dir string, file string) *wasm.Module {
@@ -61,8 +64,8 @@ func compileModule(t *testing.T, dir string, file string) *wasm.Module {
 	return &module
 }
 
-func svmInstantiate(t *testing.T, module *wasm.Module, imports *wasm.Imports, cofig *wasm.SvmInstanceConfig) *wasm.Instance {
-	instance, err := wasm.NewSvmInstance(module, imports, NewTestSvmConfig(NewDummyNodeData()))
+func svmInstantiate(t *testing.T, module *wasm.Module, imports *wasm.Imports, config *wasm.SvmInstanceConfig) *wasm.Instance {
+	instance, err := wasm.NewSvmInstance(module, imports, config)
 	assert.NoError(t, err)
 
 	return &instance
@@ -102,13 +105,20 @@ func testNewSvmInstanceWithImportsAndNodeData(t *testing.T) {
 
 	module := compileModule(t, "examples", "counter.wasm")
 	counter := NewCounter(2)
-	instance := svmInstantiate(t, module, imports, NewTestSvmConfig(unsafe.Pointer(counter)))
+	runtime.KeepAlive(counter)
+
+	nodeDataPtr := unsafe.Pointer(counter)
+	instance := svmInstantiate(t, module, imports, NewTestSvmConfig(nodeDataPtr))
 
 	inc_and_get := instance.Exports["inc_and_get"]
 	result, err := inc_and_get(5)
-
-	assert.Equal(t, 7, counter.Value)
-
+	assert.Equal(t, int32(7), counter.Value)
 	assert.Equal(t, wasm.I32(7), result)
+	assert.NoError(t, err)
+
+	inc_and_get = instance.Exports["inc_and_get"]
+	result, err = inc_and_get(5)
+	assert.Equal(t, int32(12), counter.Value)
+	assert.Equal(t, wasm.I32(12), result)
 	assert.NoError(t, err)
 }

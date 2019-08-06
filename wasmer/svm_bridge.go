@@ -28,15 +28,15 @@ func cWasmerSvmImportObject(
 	importsLength uint,
 	config *SvmInstanceConfig,
 ) cWasmerResultT {
-	addrHeader := (*reflect.SliceHeader)(unsafe.Pointer(&config.addr))
+	addrHeader := (*reflect.SliceHeader)(unsafe.Pointer(&config.Addr))
 	addrPtr := (unsafe.Pointer)(addrHeader.Data)
 
 	return (cWasmerResultT)(C.wasmer_svm_import_object(
 		(**C.wasmer_import_object_t)(unsafe.Pointer(importObject)),
 		addrPtr,
-		(C.uint)(config.maxPages),
-		(C.uint)(config.maxPagesSlices),
-		config.nodeDataPtr,
+		(C.uint)(config.MaxPages),
+		(C.uint)(config.MaxPagesSlices),
+		config.NodeDataPtr,
 		(*C.wasmer_import_t)(imports),
 		(C.uint)(importsLength),
 	))
