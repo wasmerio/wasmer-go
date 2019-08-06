@@ -9,7 +9,6 @@ import "C"
 import (
 	"unsafe"
 	"reflect"
-	"fmt"
 )
 
 const sizeOfUintPtr = unsafe.Sizeof(uintptr(0))
