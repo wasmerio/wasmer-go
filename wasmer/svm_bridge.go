@@ -18,6 +18,10 @@ func castAddrPtrToBytes(u uintptr) []byte {
     return (*[32]byte)(unsafe.Pointer(u))[0:32]
 }
 
+func cWasmerSvmInstanceContextNodeDataGet(instanceContext *cWasmerInstanceContextT) unsafe.Pointer {
+	return (unsafe.Pointer)(C.wasmer_svm_instance_context_node_data_get((*C.wasmer_instance_context_t)(instanceContext)))
+}
+
 func cWasmerSvmImportObject(
 	importObject **cWasmerImportObjectT,
 	imports *cWasmerImportT,
