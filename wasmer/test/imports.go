@@ -15,7 +15,7 @@ package wasmertest
 import "C"
 import (
 	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
+	wasm "github.com/spacemeshos/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
 	"testing"

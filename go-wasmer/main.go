@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/urfave/cli"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
+	wasm "github.com/spacemeshos/go-ext-wasm/wasmer"
 	"log"
 	"os"
 	"strconv"
