@@ -322,6 +322,7 @@ func cWasmerModuleImportInstantiate(
 	instance **cWasmerInstanceT,
 	module *cWasmerModuleT,
 	import_object *cWasmerImportObjectT) cWasmerResultT {
+
 	return (cWasmerResultT)(C.wasmer_module_import_instantiate(
 		(**C.wasmer_instance_t)(unsafe.Pointer(instance)),
 		(*C.wasmer_module_t)(unsafe.Pointer(module)),
