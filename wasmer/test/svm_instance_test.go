@@ -15,3 +15,7 @@ func TestNewSvmInstanceWithImports(t *testing.T) {
 func TestNewSvmInstanceWithImportsAndNodeData(t *testing.T) {
 	testNewSvmInstanceWithImportsAndNodeData(t)
 }
+
+func TestNewSvmInstanceWithRegisters(t *testing.T) {
+	testNewSvmInstanceWithRegisters(t)
+}

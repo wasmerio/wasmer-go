@@ -48,10 +48,10 @@ func cWasmerSvmImportObject(
 	))
 }
 
-func cWasmerSvmRegisterGet(regBuf **byte, instanceContext *cWasmerInstanceContextT, regIndex uint) cWasmerResultT {
-	*regBuf = (*byte)(C.wasmer_svm_register_get(
+func cWasmerSvmRegisterGet(regBuf *unsafe.Pointer, instanceContext *cWasmerInstanceContextT, regIndex C.uint) cWasmerResultT {
+	*regBuf = (unsafe.Pointer)(C.wasmer_svm_register_get(
 		(*C.wasmer_instance_context_t)(instanceContext),
-		(C.uint)(regIndex)))
+		(regIndex)))
 
 	return cWasmerOk
 }
