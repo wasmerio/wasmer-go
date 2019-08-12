@@ -146,6 +146,11 @@ func (instance *Instance) SetContextData(data unsafe.Pointer) {
 	cWasmerInstanceContextDataSet(instance.instance, data)
 }
 
+/// Returns an `Unsafe.Pointer`	to the underlying instance context.
+func (instance *Instance) Context() unsafe.Pointer {
+	return (unsafe.Pointer)(cInstanceContextGet(instance.instance))
+}
+
 // Close closes/frees an `Instance`.
 func (instance *Instance) Close() {
 	if instance.imports != nil {
