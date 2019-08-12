@@ -22,22 +22,47 @@ func cWasmerSvmInstanceContextNodeDataGet(instanceContext *cWasmerInstanceContex
 	return (unsafe.Pointer)(C.wasmer_svm_instance_context_node_data_get((*C.wasmer_instance_context_t)(instanceContext)))
 }
 
+func cSliceUnsafePointer(slice []byte) unsafe.Pointer {
+	header := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
+	return (unsafe.Pointer)(header.Data)
+}
+
 func cWasmerSvmImportObject(
 	importObject **cWasmerImportObjectT,
 	imports *cWasmerImportT,
 	importsLength uint,
 	config *SvmInstanceConfig,
 ) cWasmerResultT {
-	addrHeader := (*reflect.SliceHeader)(unsafe.Pointer(&config.Addr))
-	addrPtr := (unsafe.Pointer)(addrHeader.Data)
+	addr := cSliceUnsafePointer(config.Addr)
+	state := cSliceUnsafePointer(config.State)
 
 	return (cWasmerResultT)(C.wasmer_svm_import_object(
 		(**C.wasmer_import_object_t)(unsafe.Pointer(importObject)),
-		addrPtr,
+		addr,
+		state,
 		(C.uint)(config.MaxPages),
 		(C.uint)(config.MaxPagesSlices),
 		config.NodeDataPtr,
 		(*C.wasmer_import_t)(imports),
 		(C.uint)(importsLength),
 	))
+}
+
+func cWasmerSvmRegisterGet(regBuf **byte, instanceContext *cWasmerInstanceContextT, regIndex uint) cWasmerResultT {
+	*regBuf = (*byte)(C.wasmer_svm_register_get(
+		(*C.wasmer_instance_context_t)(instanceContext),
+		(C.uint)(regIndex)))
+
+	return cWasmerOk
+}
+
+func cWasmerSvmRegisterSet(instanceContext *cWasmerInstanceContextT, regIndex uint, buf []byte) cWasmerResultT {
+	C.wasmer_svm_register_set(
+		(*C.wasmer_instance_context_t)(instanceContext),
+		(C.uint)(regIndex),
+		cSliceUnsafePointer(buf),
+		(C.uint8_t)(len(buf)),
+	)
+
+	return cWasmerOk
 }

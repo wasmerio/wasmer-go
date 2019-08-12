@@ -4,13 +4,14 @@ import "unsafe"
 
 type SvmInstanceConfig struct {
 	Addr           []byte
+	State          []byte
 	MaxPages       uint
 	MaxPagesSlices uint
 	NodeDataPtr    unsafe.Pointer
 }
 
-func NewSvmInstanceConfig(addr []byte, maxPages uint, maxPagesSlices uint, nodeDataPtr unsafe.Pointer) *SvmInstanceConfig {
-	return &SvmInstanceConfig{Addr: addr, MaxPages: maxPages, MaxPagesSlices: maxPagesSlices, NodeDataPtr: nodeDataPtr}
+func NewSvmInstanceConfig(addr []byte, state []byte, maxPages uint, maxPagesSlices uint, nodeDataPtr unsafe.Pointer) *SvmInstanceConfig {
+	return &SvmInstanceConfig{Addr: addr, State: state, MaxPages: maxPages, MaxPagesSlices: maxPagesSlices, NodeDataPtr: nodeDataPtr}
 }
 
 func NewSvmInstance(
