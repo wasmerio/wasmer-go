@@ -9,6 +9,8 @@ extern "C" {
     fn get() -> i32;
 
     fn copy_from_reg(reg_idx: i32);
+
+    fn copy_to_reg(reg_idx: i32);
 }
 
 #[no_mangle]
@@ -23,6 +25,14 @@ pub extern "C" fn inc_and_get(x: i32) -> i32 {
 pub extern "C" fn copy_from_reg_and_get(reg_idx: i32) -> i32 {
     unsafe {
         copy_from_reg(reg_idx);
+        get()
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn copy_to_reg_and_get(reg_idx: i32) -> i32 {
+    unsafe {
+        copy_to_reg(reg_idx);
         get()
     }
 }
