@@ -16,14 +16,15 @@ void *wasmer_svm_instance_context_node_data_get(const wasmer_instance_context_t 
 /**
  * Returns a pointer to register internal bytes array
  */
-void *wasmer_svm_register_get(const wasmer_instance_context_t *ctx, uint32_t reg_idx);
+void *wasmer_svm_register_get(const wasmer_instance_context_t *ctx, int32_t reg_bits, int32_t reg_idx);
 
 
 /**
   Copies `bytes_len` bytes from raw pointer `bytes` into `wasmer svm` register indexed `reg_idx`.
  */
 void wasmer_svm_register_set(const wasmer_instance_context_t *ctx,
-                             uint32_t reg_idx,
+                             int32_t reg_bits,
+                             int32_t reg_idx,
                              void *bytes_ptr,
                              uint8_t bytes_len);
 

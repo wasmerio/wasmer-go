@@ -48,18 +48,21 @@ func cWasmerSvmImportObject(
 	))
 }
 
-func cWasmerSvmRegisterGet(regBuf *unsafe.Pointer, instanceContext *cWasmerInstanceContextT, regIndex C.uint) cWasmerResultT {
+func cWasmerSvmRegisterGet(regBuf *unsafe.Pointer, instanceContext *cWasmerInstanceContextT, regBits int, regIndex int) cWasmerResultT {
 	*regBuf = (unsafe.Pointer)(C.wasmer_svm_register_get(
 		(*C.wasmer_instance_context_t)(instanceContext),
-		(regIndex)))
+		(C.int)(regBits),
+		(C.int)(regIndex),
+		))
 
 	return cWasmerOk
 }
 
-func cWasmerSvmRegisterSet(instanceContext *cWasmerInstanceContextT, regIndex uint, buf []byte) cWasmerResultT {
+func cWasmerSvmRegisterSet(instanceContext *cWasmerInstanceContextT, regBits int, regIndex int, buf []byte) cWasmerResultT {
 	C.wasmer_svm_register_set(
 		(*C.wasmer_instance_context_t)(instanceContext),
-		(C.uint)(regIndex),
+		(C.int)(regBits),
+		(C.int)(regIndex),
 		cSliceUnsafePointer(buf),
 		(C.uint8_t)(len(buf)),
 	)

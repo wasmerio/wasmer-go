@@ -5,8 +5,8 @@ package wasmertest
 // extern int32_t sum(void *context, int32_t x, int32_t y);
 // extern void inc(void *context, int32_t x);
 // extern int32_t get(void *context);
-// extern void copy_from_reg(void *context, int32_t regIdx);
-// extern void copy_to_reg(void *context, int32_t regIdx);
+// extern void copy_from_reg(void *context, int32_t regBits, int32_t regIdx);
+// extern void copy_to_reg(void *context, int32_t regBits, int32_t regIdx);
 import "C"
 
 import (
@@ -43,24 +43,24 @@ func get(context unsafe.Pointer) int32 {
 }
 
 //export copy_from_reg
-func copy_from_reg(context unsafe.Pointer, regIdx int32) {
+func copy_from_reg(context unsafe.Pointer, regBits int32, regIdx int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
 	counter := (*Counter)(instanceContext.NodeData())
 
-	slice := wasm.WasmerSvmRegisterGet(instanceContext, regIdx)
+	slice := wasm.WasmerSvmRegisterGet(instanceContext, regBits, regIdx)
 	value := binary.LittleEndian.Uint32(slice)
 	counter.Value = int32(value);
 }
 
 //export copy_to_reg
-func copy_to_reg(context unsafe.Pointer, regIdx int32) {
+func copy_to_reg(context unsafe.Pointer, regBits int32, regIdx int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
 	counter := (*Counter)(instanceContext.NodeData())
 
 	regBuf := make([]byte, 4)
     binary.LittleEndian.PutUint32(regBuf, uint32(counter.Value))
 
-	wasm.WasmerSvmRegisterSet(instanceContext, uint(regIdx), regBuf)
+	wasm.WasmerSvmRegisterSet(instanceContext, regBits, regIdx, regBuf)
 }
 
 func NewDummyNodeData() unsafe.Pointer {
@@ -164,15 +164,16 @@ func testNewSvmInstanceWithRegisters(t *testing.T) {
 	nodeDataPtr := unsafe.Pointer(counter)
 	instance := svmInstantiate(t, module, imports, NewTestSvmConfig(nodeDataPtr))
 
-	regIndex := uint(2)
+	regBits := int32(64)
+	regIndex := int32(2)
 	context := instance.Context()
-	wasm.WasmerSvmContextRegisterSet(context, regIndex, []byte{10})
+	wasm.WasmerSvmContextRegisterSet(context, regBits, regIndex, []byte{10})
 
-	slice := wasm.WasmerSvmContextRegisterGet(instance.Context(), int32(regIndex))
+	slice := wasm.WasmerSvmContextRegisterGet(instance.Context(), regBits, regIndex)
 	assert.Equal(t, uint32(10), binary.LittleEndian.Uint32(slice))
 
 	copy_reg := instance.Exports["copy_from_reg_and_get"]
-	result, err := copy_reg(regIndex)
+	result, err := copy_reg(regBits, regIndex)
 	assert.Equal(t, int32(10), counter.Value)
 	assert.Equal(t, wasm.I32(10), result)
 	assert.NoError(t, err)
@@ -184,6 +185,6 @@ func testNewSvmInstanceWithRegisters(t *testing.T) {
 	assert.Equal(t, wasm.I32(15), result)
 	assert.NoError(t, err)
 
-	slice = wasm.WasmerSvmContextRegisterGet(instance.Context(), int32(regIndex))
+	slice = wasm.WasmerSvmContextRegisterGet(instance.Context(), regBits, regIndex)
 	assert.Equal(t, uint32(15), binary.LittleEndian.Uint32(slice))
 }
