@@ -20,7 +20,7 @@ build go-build-args='-v':
 	fi
 	go build {{go-build-args}} .
 
-	if test -n "${staticlib_extension}"; then
+	if test ! -z "${staticlib_extension:-}"; then
 		if ! test -f libwasmer_runtime_c_api.${staticlib_extension}; then
 			cargo build --release
 			ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${staticlib_extension} libwasmer_runtime_c_api.${staticlib_extension}
