@@ -414,6 +414,11 @@ func newInstanceWithImports(
 	return Instance{instance: instance, imports: imports, Exports: exports, Memory: &memory}, nil
 }
 
+// HasMemory checks whether the instance has at least one exported memory.
+func (instance *Instance) HasMemory() bool {
+	return nil != instance.Memory
+}
+
 // SetContextData assigns a data that can be used by all imported
 // functions. Indeed, each imported function receives as its first
 // argument an instance context (see `InstanceContext`). An instance

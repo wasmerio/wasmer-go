@@ -37,11 +37,19 @@ func newMemory(memory *cWasmerMemoryT) Memory {
 
 // Length calculates the memory length (in bytes).
 func (memory *Memory) Length() uint32 {
+	if nil == memory.memory {
+		return 0
+	}
+
 	return uint32(cWasmerMemoryDataLength(memory.memory))
 }
 
 // Data returns a slice of bytes over the WebAssembly memory.
 func (memory *Memory) Data() []byte {
+	if nil == memory.memory {
+		return make([]byte, 0)
+	}
+
 	var length = memory.Length()
 	var data = (*uint8)(cWasmerMemoryData(memory.memory))
 
@@ -57,6 +65,10 @@ func (memory *Memory) Data() []byte {
 
 // Grow the memory by a number of pages (65kb each).
 func (memory *Memory) Grow(numberOfPages uint32) error {
+	if nil == memory.memory {
+		return nil
+	}
+
 	var growResult = cWasmerMemoryGrow(memory.memory, cUint32T(numberOfPages))
 
 	if growResult != cWasmerOk {

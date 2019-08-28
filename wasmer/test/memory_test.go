@@ -17,6 +17,7 @@ func TestMemoryIsAbsent(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Nil(t, instance.Memory)
+	assert.Equal(t, false, instance.HasMemory())
 }
 
 func TestMemoryLength(t *testing.T) {
@@ -26,6 +27,7 @@ func TestMemoryLength(t *testing.T) {
 	var memoryLength uint32 = instance.Memory.Length()
 
 	assert.Equal(t, uint32(0x110000), memoryLength)
+	assert.Equal(t, true, instance.HasMemory())
 }
 
 func TestMemoryDataIsASlice(t *testing.T) {
