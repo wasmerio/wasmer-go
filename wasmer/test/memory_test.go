@@ -13,9 +13,10 @@ func TestMemoryIsAbsent(t *testing.T) {
 	modulePath := path.Join(path.Dir(filename), "testdata", "no_memory.wasm")
 
 	bytes, _ := wasm.ReadBytes(modulePath)
-	_, err := wasm.NewInstance(bytes)
+	instance, err := wasm.NewInstance(bytes)
 
-	assert.EqualError(t, err, "No memory exported.")
+	assert.NoError(t, err)
+	assert.Nil(t, instance.Memory)
 }
 
 func TestMemoryLength(t *testing.T) {
