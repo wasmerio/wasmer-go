@@ -70,7 +70,7 @@ type Instance struct {
 	Exports map[string]func(...interface{}) (Value, error)
 
 	// The exported memory of a WebAssembly instance.
-	Memory Memory
+	Memory *Memory
 }
 
 // NewInstance constructs a new `Instance` with no imported functions.
@@ -161,7 +161,7 @@ func newInstanceWithImports(
 	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
 
 	var memory Memory
-	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: nil}
 
 	if err != nil {
 		return emptyInstance, err
@@ -408,10 +408,15 @@ func newInstanceWithImports(
 	}
 
 	if hasMemory == false {
-		return emptyInstance, NewInstanceError("No memory exported.")
+		return Instance{instance: instance, imports: imports, Exports: exports, Memory: nil}, nil
 	}
 
-	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: &memory}, nil
+}
+
+// HasMemory checks whether the instance has at least one exported memory.
+func (instance *Instance) HasMemory() bool {
+	return nil != instance.Memory
 }
 
 // SetContextData assigns a data that can be used by all imported
