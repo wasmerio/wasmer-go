@@ -14,4 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime-c-api = "0.6.0"
+wasmer-runtime-c-api =  { git = "https://github.com/wasmerio/wasmer", tag = "0.6.0" }
