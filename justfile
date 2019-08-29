@@ -23,7 +23,7 @@ build go-build-args='-v':
 build-bin go-build-args='-v':
 	cd go-wasmer && go build {{go-build-args}} -o ../target/go/go-wasmer .
 
-# Compile the Rust part for this specific system.
+# Compile the Rust part for your specific system.
 rust:
 	cargo build --release
 
