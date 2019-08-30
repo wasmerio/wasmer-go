@@ -102,6 +102,31 @@ func TestModuleRunWithLimit(t *testing.T) {
 	assert.Equal(t, points, uint64(127))
 }
 
+// TODO: this only passes if the metering feature flag is enabled in the rust binary
+func TestModuleRunExceedsLimit(t *testing.T) {
+	module, err := wasm.CompileWithLimit(GetBytes(), 5)
+	defer module.Close()
+	assert.NoError(t, err)
+
+	instance, err := module.Instantiate()
+	defer instance.Close()
+	assert.NoError(t, err)
+
+	// we start at 0
+	points := instance.GetPointsUsed()
+	assert.Equal(t, points, uint64(0))
+	// but let's hit the limit
+	instance.SetPointsUsed(1001)
+
+	// this should be out-of-gas
+	_, err = instance.Exports["sum"](1, 2)
+	assert.Error(t, err)
+
+	// and 4 points are added anyway :(
+	points = instance.GetPointsUsed()
+	assert.Equal(t, points, uint64(1005))
+}
+
 func TestModuleSerialize(t *testing.T) {
 	module1, err := wasm.Compile(GetBytes())
 	defer module1.Close()
