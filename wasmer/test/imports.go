@@ -3,7 +3,7 @@ package wasmertest
 // #include <stdlib.h>
 //
 // extern int32_t sum(void *context, int32_t x, int32_t y);
-// extern int64_t sum_i64(void *context, int64_t x, int64_t y);
+// extern long long sum_i64(void *context, long long x, long long y);
 // extern float sum_f32(void *context, float x, float y);
 // extern double sum_f64(void *context, double x, double y);
 // extern int32_t missingContext();
