@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/**
+ * List of export/import kinds.
+ */
 enum wasmer_import_export_kind {
   WASM_FUNCTION,
   WASM_GLOBAL,
@@ -31,6 +34,9 @@ typedef struct {
 
 } wasmer_module_t;
 
+/**
+ * Opaque pointer to `NamedExportDescriptor`.
+ */
 typedef struct {
 
 } wasmer_export_descriptor_t;
@@ -40,10 +46,16 @@ typedef struct {
   uint32_t bytes_len;
 } wasmer_byte_array;
 
+/**
+ * Opaque pointer to `NamedExportDescriptors`.
+ */
 typedef struct {
 
 } wasmer_export_descriptors_t;
 
+/**
+ * Opaque pointer to `wasmer_export_t`.
+ */
 typedef struct {
 
 } wasmer_export_func_t;
@@ -60,6 +72,9 @@ typedef struct {
   wasmer_value value;
 } wasmer_value_t;
 
+/**
+ * Opaque pointer to `NamedExport`.
+ */
 typedef struct {
 
 } wasmer_export_t;
@@ -68,6 +83,9 @@ typedef struct {
 
 } wasmer_memory_t;
 
+/**
+ * Opaque pointer to `NamedExports`.
+ */
 typedef struct {
 
 } wasmer_exports_t;
@@ -95,16 +113,15 @@ typedef struct {
 
 typedef struct {
 
-} wasmer_instance_t;
-
-typedef struct {
-
-} wasmer_instance_context_t;
+} wasmer_import_object_t;
 
 typedef struct {
 
 } wasmer_table_t;
 
+/**
+ * Union of import/export value.
+ */
 typedef union {
   const wasmer_import_func_t *func;
   const wasmer_table_t *table;
@@ -118,6 +135,14 @@ typedef struct {
   wasmer_import_export_kind tag;
   wasmer_import_export_value value;
 } wasmer_import_t;
+
+typedef struct {
+
+} wasmer_instance_t;
+
+typedef struct {
+
+} wasmer_instance_context_t;
 
 typedef struct {
   bool has_some;
@@ -155,12 +180,16 @@ wasmer_result_t wasmer_compile(wasmer_module_t **module,
                                uint8_t *wasm_bytes,
                                uint32_t wasm_bytes_len);
 
-// TODO: I am almost CERTAIN I should not be hand-editing this
+/**
+ * Creates a new Module with gas limit from the given wasm bytes.
+ * Returns `wasmer_result_t::WASMER_OK` upon success.
+ * Returns `wasmer_result_t::WASMER_ERROR` upon failure. Use `wasmer_last_error_length`
+ * and `wasmer_last_error_message` to get an error message.
+ */
 wasmer_result_t wasmer_compile_with_limit(wasmer_module_t **module,
-                                         uint8_t *wasm_bytes,
-                                         uint32_t wasm_bytes_len,
-                                         uint64_t gas_limit);
-
+                                          uint8_t *wasm_bytes,
+                                          uint32_t wasm_bytes_len,
+                                          uint64_t gas_limit);
 
 /**
  * Gets export descriptor kind
@@ -400,6 +429,24 @@ wasmer_result_t wasmer_import_func_returns_arity(const wasmer_import_func_t *fun
                                                  uint32_t *result);
 
 /**
+ * Frees memory of the given ImportObject
+ */
+void wasmer_import_object_destroy(wasmer_import_object_t *import_object);
+
+/**
+ * Extends an existing import object with new imports
+ */
+wasmer_result_t wasmer_import_object_extend(wasmer_import_object_t *import_object,
+                                            wasmer_import_t *imports,
+                                            unsigned int imports_len);
+
+/**
+ * Creates a new empty import object.
+ * See also `wasmer_import_object_append`
+ */
+wasmer_import_object_t *wasmer_import_object_new(void);
+
+/**
  * Calls an instances exported function by `name` with the provided parameters.
  * Results are set using the provided `results` pointer.
  * Returns `wasmer_result_t::WASMER_OK` upon success.
@@ -425,6 +472,11 @@ void *wasmer_instance_context_data_get(const wasmer_instance_context_t *ctx);
 void wasmer_instance_context_data_set(wasmer_instance_t *instance, void *data_ptr);
 
 /**
+ * Extracts the instance's context and returns it.
+ */
+const wasmer_instance_context_t *wasmer_instance_context_get(wasmer_instance_t *instance);
+
+/**
  * Gets the memory within the context at the index `memory_idx`.
  * The index is always 0 until multiple memories are supported.
  */
@@ -441,6 +493,10 @@ void wasmer_instance_destroy(wasmer_instance_t *instance);
  * The caller owns the object and should call `wasmer_exports_destroy` to free it.
  */
 void wasmer_instance_exports(wasmer_instance_t *instance, wasmer_exports_t **exports);
+
+uint64_t wasmer_instance_get_points_used(wasmer_instance_t *instance);
+
+void wasmer_instance_set_points_used(wasmer_instance_t *instance, uint64_t new_gas);
 
 /**
  * Creates a new Instance from the given wasm bytes and imports.
@@ -532,6 +588,16 @@ wasmer_result_t wasmer_module_deserialize(wasmer_module_t **module,
  * Frees memory for the given Module
  */
 void wasmer_module_destroy(wasmer_module_t *module);
+
+/**
+ * Given:
+ *  A prepared `wasmer` import-object
+ *  A compiled wasmer module
+ * Instantiates a wasmer instance
+ */
+wasmer_result_t wasmer_module_import_instantiate(wasmer_instance_t **instance,
+                                                 const wasmer_module_t *module,
+                                                 const wasmer_import_object_t *import_object);
 
 /**
  * Creates a new Instance from the given module and imports.
