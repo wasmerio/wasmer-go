@@ -224,10 +224,14 @@ To build both parts, run the following commands:
 
 ```sh
 $ just rust
-$ just go
+$ just build
 ```
 
 To build the Go part, run:
+
+```sh
+$ just build
+```
 
 (Yes, you need [`just`]).
 
