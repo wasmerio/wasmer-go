@@ -75,6 +75,19 @@ func cWasmerCompileWithLimit(module **cWasmerModuleT, wasmBytes *cUchar, wasmByt
 	))
 }
 
+func cWasmerInstanceGetPointsUsed(instance *cWasmerInstanceT) uint64 {
+	return uint64(C.wasmer_instance_get_points_used(
+		(*C.wasmer_instance_t)(instance),
+	))
+}
+
+func cWasmerInstanceSetPointsUsed(instance *cWasmerInstanceT, points uint64) {
+	C.wasmer_instance_set_points_used(
+		(*C.wasmer_instance_t)(instance),
+		(C.uint64_t)(points),
+	)
+}
+// End TODO: autogen?
 
 func cWasmerExportDescriptorKind(exportDescriptor *cWasmerExportDescriptorT) cWasmerImportExportKind {
 	return (cWasmerImportExportKind)(C.wasmer_export_descriptor_kind(

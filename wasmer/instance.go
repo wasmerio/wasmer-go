@@ -439,3 +439,11 @@ func (instance *Instance) Close() {
 		cWasmerInstanceDestroy(instance.instance)
 	}
 }
+
+func (instance *Instance) GetPointsUsed() uint64 {
+	return cWasmerInstanceGetPointsUsed(instance.instance)
+}
+
+func (instance *Instance) SetPointsUsed(points uint64) {
+	cWasmerInstanceSetPointsUsed(instance.instance, points)
+}
