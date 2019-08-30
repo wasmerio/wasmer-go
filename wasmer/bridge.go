@@ -64,6 +64,18 @@ func cWasmerCompile(module **cWasmerModuleT, wasmBytes *cUchar, wasmBytesLength 
 	))
 }
 
+
+// TODO: is this an auto-gen file? how should I create this?
+func cWasmerCompileWithLimit(module **cWasmerModuleT, wasmBytes *cUchar, wasmBytesLength cUint, gasLimit uint64) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_compile_with_limit(
+		(**C.wasmer_module_t)(unsafe.Pointer(module)),
+		(*C.uchar)(wasmBytes),
+		(C.uint)(wasmBytesLength),
+		(C.uint64_t)(gasLimit),
+	))
+}
+
+
 func cWasmerExportDescriptorKind(exportDescriptor *cWasmerExportDescriptorT) cWasmerImportExportKind {
 	return (cWasmerImportExportKind)(C.wasmer_export_descriptor_kind(
 		(*C.wasmer_export_descriptor_t)(exportDescriptor),

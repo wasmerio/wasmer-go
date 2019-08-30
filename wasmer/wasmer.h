@@ -155,6 +155,13 @@ wasmer_result_t wasmer_compile(wasmer_module_t **module,
                                uint8_t *wasm_bytes,
                                uint32_t wasm_bytes_len);
 
+// TODO: I am almost CERTAIN I should not be hand-editing this
+wasmer_result_t wasmer_compile_with_limit(wasmer_module_t **module,
+                                         uint8_t *wasm_bytes,
+                                         uint32_t wasm_bytes_len,
+                                         uint64_t gas_limit);
+
+
 /**
  * Gets export descriptor kind
  */
