@@ -75,6 +75,33 @@ func TestModuleInstantiateWithLimit(t *testing.T) {
 	assert.Equal(t, wasm.I32(3), result)
 }
 
+// TODO: this only passes if the metering feature flag is enabled in the rust binary
+func TestModuleRunWithLimit(t *testing.T) {
+	module, err := wasm.CompileWithLimit(GetBytes(), 20000)
+	defer module.Close()
+	assert.NoError(t, err)
+
+	instance, err := module.Instantiate()
+	defer instance.Close()
+	assert.NoError(t, err)
+
+	// we start at 0
+	points := instance.GetPointsUsed()
+	assert.Equal(t, points, uint64(0))
+
+	// if we set it, it is updated in get
+	instance.SetPointsUsed(123)
+	points = instance.GetPointsUsed()
+	assert.Equal(t, points, uint64(123))
+
+	result, _ := instance.Exports["sum"](1, 2)
+	assert.Equal(t, wasm.I32(3), result)
+
+	// running the contract adds 4 points
+	points = instance.GetPointsUsed()
+	assert.Equal(t, points, uint64(127))
+}
+
 func TestModuleSerialize(t *testing.T) {
 	module1, err := wasm.Compile(GetBytes())
 	defer module1.Close()
