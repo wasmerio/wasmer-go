@@ -14,5 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime-c-api =  { git = "https://github.com/confio/wasmer", branch = "master" }
-# wasmer-runtime-c-api =  { git = "https://github.com/confio/wasmer", branch = "metering", features = ["metering"] }
+wasmer-runtime-c-api =  { git = "https://github.com/confio/wasmer", branch = "metering", features = ["metering"] }

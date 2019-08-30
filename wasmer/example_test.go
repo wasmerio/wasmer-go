@@ -82,13 +82,9 @@ func ExampleModule_Serialize() {
 	defer module2.Close()
 	// And enjoy!
 
-	// panic("food")
-
 	// Instantiates the WebAssembly module.
 	instance, _ := module2.Instantiate()
 	defer instance.Close()
-
-	panic("bar")
 
 	// Gets an exported function.
 	sum, functionExists := instance.Exports["sum"]
