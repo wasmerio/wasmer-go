@@ -1,11 +1,12 @@
 package wasmertest
 
 import (
-	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
 func TestValidate(t *testing.T) {
@@ -44,6 +45,22 @@ func TestCompileInvalidModule(t *testing.T) {
 
 func TestModuleInstantiate(t *testing.T) {
 	module, err := wasm.Compile(GetBytes())
+	defer module.Close()
+
+	assert.NoError(t, err)
+
+	instance, err := module.Instantiate()
+	defer instance.Close()
+
+	assert.NoError(t, err)
+
+	result, _ := instance.Exports["sum"](1, 2)
+
+	assert.Equal(t, wasm.I32(3), result)
+}
+
+func TestModuleInstantiateWithLimit(t *testing.T) {
+	module, err := wasm.CompileWithLimit(GetBytes(), 20000)
 	defer module.Close()
 
 	assert.NoError(t, err)
