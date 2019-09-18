@@ -106,6 +106,29 @@ func Compile(bytes []byte) (Module, error) {
 	return Module{module, exports, imports}, nil
 }
 
+// Compile compiles a WebAssembly module from bytes, with a fixed gas limit
+func CompileWithLimit(bytes []byte, gasLimit uint64) (Module, error) {
+	var module *cWasmerModuleT
+
+	var compileResult = cWasmerCompileWithLimit(
+		&module,
+		(*cUchar)(unsafe.Pointer(&bytes[0])),
+		cUint(len(bytes)),
+		gasLimit,
+	)
+
+	var emptyModule = Module{module: nil}
+
+	if compileResult != cWasmerOk {
+		return emptyModule, NewModuleError("Failed to compile the module.")
+	}
+
+	var exports = moduleExports(module)
+	var imports = moduleImports(module)
+
+	return Module{module, exports, imports}, nil
+}
+
 func moduleExports(module *cWasmerModuleT) []ExportDescriptor {
 	var exportDescriptors *cWasmerExportDescriptorsT
 	cWasmerExportDescriptors(module, &exportDescriptors)

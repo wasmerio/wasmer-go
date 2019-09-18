@@ -2,9 +2,10 @@ package wasmer_test
 
 import (
 	"fmt"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
+
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
 func GetBytes() []byte {

@@ -27,6 +27,12 @@ build-bin go-build-args='-v':
 rust:
 	cargo build --release
 
+rust-install:
+	cargo build --release
+	# grabs the most recent *.so file - TODO: only works on linux
+	ls -ltR target/release/deps/libwasmer_runtime_c_api-*.so | head -1
+	cp $(ls -tR target/release/deps/libwasmer_runtime_c_api-*.so | head -1) wasmer/libwasmer_runtime_c_api.so
+
 # Generate cgo debug objects.
 debug-cgo:
 	cd wasmer/ && \
@@ -41,9 +47,9 @@ test:
 	# Run the tests.
 	GODEBUG=cgocheck=2 go test -test.v $(find test -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) test/imports.go
 	# Run the short examples.
-	go test -test.v example_test.go
+	go test -count=1 -test.v example_test.go
 	# Run the long examples.
-	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
+	go test -count=1 -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
 
 # Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
 bench subject='wasmer' filter='.*':
