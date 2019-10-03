@@ -258,6 +258,12 @@ func IntoInstanceContext(instanceContext unsafe.Pointer) InstanceContext {
 	return InstanceContext{context, memory}
 }
 
+/// Returns an `cWasmerInstanceContextT` pointer to the underlying instance context.
+func (instanceContext *InstanceContext) Context() *cWasmerInstanceContextT {
+	return instanceContext.context
+}
+
+
 // Memory returns the current instance memory.
 func (instanceContext *InstanceContext) Memory() *Memory {
 	return &instanceContext.memory
