@@ -61,6 +61,10 @@ type Imports struct {
 	currentNamespace string
 }
 
+type ImportObject struct {
+	importObject *cWasmerImportObjectT
+}
+
 // NewImports constructs a new empty `Imports`.
 func NewImports() *Imports {
 	var imports = make(map[string]Import)
@@ -155,6 +159,54 @@ func (imports *Imports) Close() {
 			cWasmerImportFuncDestroy(importFunction.importedFunctionPointer)
 		}
 	}
+}
+
+// Returns a C-Pointer to the an array of imported functions, and the total number of imported functions
+func (imports *Imports) ToWasmerImports() (*cWasmerImportT, int) {
+	var importFunctionNth = 0
+	var numberOfImports = len(imports.imports)
+	var wasmImports = make([]cWasmerImportT, numberOfImports)
+
+	for importName, importFunction := range imports.imports {
+		var wasmInputsArity = len(importFunction.wasmInputs)
+		var wasmOutputsArity = len(importFunction.wasmOutputs)
+
+		var importFunctionInputsCPointer *cWasmerValueTag
+		var importFunctionOutputsCPointer *cWasmerValueTag
+
+		if wasmInputsArity > 0 {
+			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
+		}
+
+		if wasmOutputsArity > 0 {
+			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
+		}
+
+		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
+			importFunction.cgoPointer,
+			importFunctionInputsCPointer,
+			cUint(wasmInputsArity),
+			importFunctionOutputsCPointer,
+			cUint(wasmOutputsArity),
+		)
+
+		var importedFunction = cNewWasmerImportT(
+			importFunction.namespace,
+			importName,
+			importFunction.importedFunctionPointer,
+		)
+
+		wasmImports[importFunctionNth] = importedFunction
+		importFunctionNth++
+	}
+
+	var wasmImportsCPointer *cWasmerImportT
+
+	if numberOfImports > 0 {
+		wasmImportsCPointer = (*cWasmerImportT)(unsafe.Pointer(&wasmImports[0]))
+	}
+
+	return wasmImportsCPointer, numberOfImports
 }
 
 // InstanceContext represents a way to access instance API from within
