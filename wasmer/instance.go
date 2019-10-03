@@ -125,7 +125,7 @@ func newInstanceWithImports(
 	}
 
 	if exports.memory == nil {
-		return emptyInstance, NewInstanceError("No memory exported.")
+		return emptyInstance, nil
 	}
 
 	return Instance{instance: instance, imports: imports, Exports: exports.functions, Memory: exports.memory}, nil
