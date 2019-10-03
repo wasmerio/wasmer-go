@@ -80,6 +80,12 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	)
 }
 
+func NewInstanceFromModule(
+	module *Module,
+	imports *Imports,
+) (Instance, error) {
+	return NewInstanceWithModuleAndImportObject(module, imports, DefaultImportObjectBuilder)
+}
 
 func NewInstanceWithModuleAndImportObject(
 	module *Module,

@@ -54,6 +54,27 @@ func testInstanceImport(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func testNewInstanceFromModule(t *testing.T) {
+	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
+	assert.NoError(t, err)
+
+	bytes := getImportedFunctionBytes("examples", "imported_function.wasm")
+	module, err := wasm.Compile(bytes)
+	assert.NoError(t, err)
+
+	instance, err := wasm.NewInstanceFromModule(&module, imports)
+	defer instance.Close()
+	assert.NoError(t, err)
+
+	add1, exists := instance.Exports["add1"]
+	assert.Equal(t, true, exists)
+
+	result, err := add1(1, 2)
+
+	assert.Equal(t, wasm.I32(4), result)
+	assert.NoError(t, err)
+}
+
 //export sum_i64
 func sum_i64(context unsafe.Pointer, x int64, y int64) int64 {
 	return x + y
