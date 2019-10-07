@@ -14,6 +14,44 @@ type ImportedFunctionError struct {
 	message      string
 }
 
+type ImportObject struct {
+	inner *cWasmerImportObjectT
+}
+
+// NewDefaultWasiImportObject constructs a new `ImportObject`
+// with WASI host imports.
+// To specify WASI program arguments, environment variables,
+// preopened directories, and more, see `NewWasiImportObject`
+func NewDefaultWasiImportObject() *ImportObject {
+	var inner = cNewWasmerDefaultWasiImportObject()
+
+	return &ImportObject{inner}
+}
+
+/*
+TODO:
+func NewWasiImportObject() *ImportObject {
+}*/
+
+func NewImportObject() *ImportObject {
+	var inner = cNewWasmerImportObject();
+
+	return &ImportObject { inner }
+}
+
+// TODO: document this
+// TODO: error return values in Go? look at other instance of wasmer_result_t
+/*func (importObject *ImportObject) Extend(imports *Import, length int32) error {
+	cWasmerImportObjectExtend(importObject.inner, imports, (cUint)(length))
+
+	return nil
+}*/
+
+// TODO: document this
+func (importObject *ImportObject) Close() {
+	cWasmerImportObjectDestroy(importObject.inner)
+}
+
 // NewImportedFunctionError constructs a new `ImportedFunctionError`,
 // where `functionName` is the name of the imported function, and
 // `message` is the error message. If the error message contains `%s`,
@@ -68,6 +106,12 @@ func NewImports() *Imports {
 
 	return &Imports{imports, currentNamespace}
 }
+
+/*
+// Get default WASI imports
+func DefaultWasiImports() *Imports {
+	cWasmer
+}*/
 
 // Namespace changes the current namespace of the next imported functions.
 func (imports *Imports) Namespace(namespace string) *Imports {

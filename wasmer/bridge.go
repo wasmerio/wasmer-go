@@ -24,6 +24,7 @@ type cWasmerImportDescriptorsT C.wasmer_import_descriptors_t
 type cWasmerImportExportKind C.wasmer_import_export_kind
 type cWasmerImportExportValue C.wasmer_import_export_value
 type cWasmerImportFuncT C.wasmer_import_func_t
+type cWasmerImportObjectT C.wasmer_import_object_t
 type cWasmerImportT C.wasmer_import_t
 type cWasmerInstanceContextT C.wasmer_instance_context_t
 type cWasmerInstanceT C.wasmer_instance_t
@@ -54,6 +55,25 @@ func cNewWasmerImportT(moduleName string, importName string, function *cWasmerIm
 	*pointer = (*C.wasmer_import_func_t)(function)
 
 	return (cWasmerImportT)(importedFunction)
+}
+
+func cNewWasmerDefaultWasiImportObject() *cWasmerImportObjectT {
+	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_default_import_object())
+}
+
+func cWasmerImportObjectDestroy(importObject *cWasmerImportObjectT) {
+	C.wasmer_import_object_destroy((*C.wasmer_import_object_t)(importObject))
+}
+
+func cWasmerImportObjectExtend(importObject *cWasmerImportObjectT, imports *cWasmerImportT, importLen cUint) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_import_object_extend((*C.wasmer_import_object_t)(importObject),
+		(*C.wasmer_import_t)(imports),
+		(C.uint)(importLen),
+	))
+}
+
+func cNewWasmerImportObject() *cWasmerImportObjectT {
+	return (*cWasmerImportObjectT)(C.wasmer_import_object_new())
 }
 
 func cWasmerCompile(module **cWasmerModuleT, wasmBytes *cUchar, wasmBytesLength cUint) cWasmerResultT {
@@ -340,6 +360,18 @@ func cWasmerModuleDeserialize(module **cWasmerModuleT, serializedModule *cWasmer
 
 func cWasmerModuleDestroy(module *cWasmerModuleT) {
 	C.wasmer_module_destroy((*C.wasmer_module_t)(module))
+}
+
+func cWasmerModuleImportInstantiate(
+	instance **cWasmerInstanceT,
+	module *cWasmerModuleT,
+	importObject *cWasmerImportObjectT,
+) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_module_import_instantiate(
+		(**C.wasmer_instance_t)(unsafe.Pointer(instance)),
+		(*C.wasmer_module_t)(module),
+		(*C.wasmer_import_object_t)(importObject),
+	))
 }
 
 func cWasmerModuleInstantiate(
