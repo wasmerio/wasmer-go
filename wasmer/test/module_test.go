@@ -103,20 +103,20 @@ func TestModuleExports(t *testing.T) {
 		t,
 		[]wasm.ExportDescriptor{
 			wasm.ExportDescriptor{
-				Name: "void",
-				Kind: wasm.ImportExportKindFunction,
-			},
-			wasm.ExportDescriptor{
-				Name: "i32_i64_f32_f64_f64",
-				Kind: wasm.ImportExportKindFunction,
-			},
-			wasm.ExportDescriptor{
-				Name: "sum",
-				Kind: wasm.ImportExportKindFunction,
+				Name: "memory",
+				Kind: wasm.ImportExportKindMemory,
 			},
 			wasm.ExportDescriptor{
 				Name: "__heap_base",
 				Kind: wasm.ImportExportKindGlobal,
+			},
+			wasm.ExportDescriptor{
+				Name: "__data_end",
+				Kind: wasm.ImportExportKindGlobal,
+			},
+			wasm.ExportDescriptor{
+				Name: "sum",
+				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
 				Name: "arity_0",
@@ -127,16 +127,8 @@ func TestModuleExports(t *testing.T) {
 				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
-				Name: "memory",
-				Kind: wasm.ImportExportKindMemory,
-			},
-			wasm.ExportDescriptor{
-				Name: "bool_casted_to_i32",
+				Name: "i64_i64",
 				Kind: wasm.ImportExportKindFunction,
-			},
-			wasm.ExportDescriptor{
-				Name: "__data_end",
-				Kind: wasm.ImportExportKindGlobal,
 			},
 			wasm.ExportDescriptor{
 				Name: "f32_f32",
@@ -147,11 +139,19 @@ func TestModuleExports(t *testing.T) {
 				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
+				Name: "i32_i64_f32_f64_f64",
+				Kind: wasm.ImportExportKindFunction,
+			},
+			wasm.ExportDescriptor{
+				Name: "bool_casted_to_i32",
+				Kind: wasm.ImportExportKindFunction,
+			},
+			wasm.ExportDescriptor{
 				Name: "string",
 				Kind: wasm.ImportExportKindFunction,
 			},
 			wasm.ExportDescriptor{
-				Name: "i64_i64",
+				Name: "void",
 				Kind: wasm.ImportExportKindFunction,
 			},
 		},
