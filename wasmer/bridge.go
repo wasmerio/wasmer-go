@@ -28,6 +28,7 @@ type cWasmerImportObjectT C.wasmer_import_object_t
 type cWasmerImportT C.wasmer_import_t
 type cWasmerInstanceContextT C.wasmer_instance_context_t
 type cWasmerInstanceT C.wasmer_instance_t
+type cWasmerWasiMapDirEntryT C.wasmer_wasi_map_dir_entry_t
 type cWasmerMemoryT C.wasmer_memory_t
 type cWasmerModuleT C.wasmer_module_t
 type cWasmerResultT C.wasmer_result_t
@@ -59,6 +60,20 @@ func cNewWasmerImportT(moduleName string, importName string, function *cWasmerIm
 
 func cNewWasmerDefaultWasiImportObject() *cWasmerImportObjectT {
 	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_default_import_object())
+}
+
+func cNewWasmerWasiImportObject(
+	args *cWasmerByteArray, argsLen int,
+	envs *cWasmerByteArray, envsLen int,
+	preopenedFiles *cWasmerByteArray, preopenFilesLen int,
+	mappedDirs *cWasmerWasiMapDirEntryT, mappedDirsLen int,
+) *cWasmerImportObjectT {
+	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_import_object(
+		(*C.wasmer_byte_array)(args), (C.uint)(argsLen),
+		(*C.wasmer_byte_array)(envs), (C.uint)(envsLen),
+		(*C.wasmer_byte_array)(preopenedFiles), (C.uint)(preopenFilesLen),
+		(*C.wasmer_wasi_map_dir_entry_t)(mappedDirs), (C.uint)(mappedDirsLen),
+	))
 }
 
 func cWasmerImportObjectDestroy(importObject *cWasmerImportObjectT) {
@@ -452,4 +467,12 @@ func cGoStringToWasmerByteArray(string string) cWasmerByteArray {
 	byteArray.bytes_len = (C.uint)(len(string))
 
 	return byteArray
+}
+
+func cAliasAndHostPathToWasiDirEntry(alias string, hostPath string) cWasmerWasiMapDirEntryT {
+	var wasiMappedDir cWasmerWasiMapDirEntryT
+	wasiMappedDir.alias = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(alias))
+	wasiMappedDir.host_file_path = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(hostPath))
+
+	return wasiMappedDir
 }
