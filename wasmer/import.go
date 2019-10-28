@@ -84,18 +84,52 @@ func NewImportObject() *ImportObject {
 	return &ImportObject { inner }
 }
 
+// Returns `*Imports` for a given `ImportObject`
+func (importObject *ImportObject) GetImports() *Imports {
+	imports := cWasmerImportObjectGetFunctions(importObject.inner)
+	if imports == nil {
+		return nil
+	}
+	outImports := NewImports()
+	for _, imp := range imports {
+		rawFunc := cGetFunctionFromImport(&imp)
+		if rawFunc == nil {
+			// this should never happen
+			continue
+		}
+		moduleName, importName := cGetInfoFromImport(&imp)
+		fmt.Println("Found %s %s", moduleName, importName)
+
+		oi, err := outImports.Append(importName, nil, rawFunc)
+		outImports = oi
+		if err != nil {
+			return nil
+		}
+	}
+	fmt.Println("FINISHED getting imports in GetImports");
+
+	return outImports
+}
+
 // Adds the given imports to the exsiting import object
-/*
-TODO:
-func (importObject *ImportObject) Extend(imports *Import, length int) error {
-	var extendResult = cWasmerImportObjectExtend(importObject.inner, (*cWasmerImportT)(imports), (cUint)(length))
+func (importObject *ImportObject) Extend(imports Imports) error {
+	var cImports = []cWasmerImportT{}
+	for name, imp := range imports.imports {
+		cImports = append(cImports, cNewWasmerImportT(
+			imp.namespace,
+			name,
+			imp.importedFunctionPointer,
+		))
+	}
+
+	var extendResult = cWasmerImportObjectExtend(importObject.inner, (*cWasmerImportT)(unsafe.Pointer(&cImports)), (cUint)(len(imports.imports)))
 
 	if extendResult != cWasmerOk {
 		return NewImportObjectError("Could not extend import object with the given imports")
 	}
 
 	return nil
-}*/
+}
 
 // Frees the `ImportObject`
 func (importObject *ImportObject) Close() {
@@ -167,12 +201,6 @@ func NewImports() *Imports {
 
 	return &Imports{imports, currentNamespace}
 }
-
-/*
-// Get default WASI imports
-func DefaultWasiImports() *Imports {
-	cWasmer
-}*/
 
 // Namespace changes the current namespace of the next imported functions.
 func (imports *Imports) Namespace(namespace string) *Imports {

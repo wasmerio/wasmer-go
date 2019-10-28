@@ -91,6 +91,28 @@ func cNewWasmerImportObject() *cWasmerImportObjectT {
 	return (*cWasmerImportObjectT)(C.wasmer_import_object_new())
 }
 
+func cWasmerImportObjectGetFunctions(importObject *cWasmerImportObjectT) []cWasmerImportT {
+	var numFns = C.wasmer_import_object_get_num_functions((*C.wasmer_import_object_t)(importObject))
+	if numFns == -1 {
+		return nil
+	}
+
+	var imports = make([]cWasmerImportT, numFns)
+
+	var numFnsWritten = C.wasmer_import_object_get_functions(
+		(*C.wasmer_import_object_t)(importObject),
+		(*C.wasmer_import_t)(unsafe.Pointer(&imports)),
+		(C.uint)(numFns))
+	if numFns != numFnsWritten {
+		C.wasmer_import_object_imports_destroy(
+			(*C.wasmer_import_t)(unsafe.Pointer(&imports)),
+			(C.uint)(numFnsWritten))
+		return nil;
+	}
+
+	return imports
+}
+
 func cWasmerCompile(module **cWasmerModuleT, wasmBytes *cUchar, wasmBytesLength cUint) cWasmerResultT {
 	return (cWasmerResultT)(C.wasmer_compile(
 		(**C.wasmer_module_t)(unsafe.Pointer(module)),
@@ -475,4 +497,26 @@ func cAliasAndHostPathToWasiDirEntry(alias string, hostPath string) cWasmerWasiM
 	wasiMappedDir.host_file_path = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(hostPath))
 
 	return wasiMappedDir
+}
+
+// returns the module name and import name for a given import
+func cGetInfoFromImport(inner *cWasmerImportT) (string, string) {
+	moduleName := string(C.GoBytes(
+		unsafe.Pointer(inner.module_name.bytes),
+		(C.int)(inner.module_name.bytes_len)))
+	importName := string(C.GoBytes(
+		unsafe.Pointer(inner.import_name.bytes),
+		(C.int)(inner.import_name.bytes_len)))
+
+	return moduleName, importName
+}
+
+// returns the raw pointer to the inner function or nil if it's not a function
+func cGetFunctionFromImport(inner *cWasmerImportT) unsafe.Pointer {
+	if inner.tag == C.WASM_FUNCTION {
+		var funcPtrBytes [8]byte = inner.value;
+		var funcAddr *byte = &funcPtrBytes[0]
+		return unsafe.Pointer(funcAddr)
+	}
+	return nil
 }
