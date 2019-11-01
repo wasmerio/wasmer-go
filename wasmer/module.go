@@ -160,7 +160,6 @@ func (module *Module) Instantiate() (Instance, error) {
 	return module.InstantiateWithImports(NewImports())
 }
 
-
 // InstantiateWithImports creates a new instance with imports of the WebAssembly module.
 func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error) {
 	return newInstanceWithImports(
@@ -185,7 +184,6 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 					errorMessage = fmt.Sprintf(errorMessage, lastError)
 				}
 
-
 				return nil, NewModuleError(errorMessage)
 			}
 
@@ -204,7 +202,7 @@ func (module *Module) InstantiateWithImportObject(importObject *ImportObject) (I
 	if instantiateResult != cWasmerOk {
 		var lastError, err = GetLastError()
 		var errorMessage = "Failed to instantiate the module:\n    %s"
-		
+
 		if err != nil {
 			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
 		} else {
@@ -212,22 +210,18 @@ func (module *Module) InstantiateWithImportObject(importObject *ImportObject) (I
 		}
 		return emptyInstance, NewModuleError(errorMessage)
 	}
-	var memory Memory
 
-	exports, hasMemory, err := getExportsFromInstance(instance, &memory)
+	exports, memoryPtr, err := getExportsFromInstance(instance)
 	if err != nil {
 		return emptyInstance, err
 	}
-	imports := importObject.GetImports()
-	if imports == nil {
-		return emptyInstance, NewModuleError("Could not get imports from ImportObject")
+
+	imports, err := importObject.GetImports()
+	if err != nil {
+		return emptyInstance, NewModuleError(fmt.Sprintf("Could not get imports from ImportObject: %s", err))
 	}
 
-	if hasMemory == false {
-		return Instance { instance: instance, imports: imports, Exports: exports, Memory: nil }, nil
-	}
-
-	return Instance { instance: instance, imports: imports, Exports: exports, Memory: &memory }, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memoryPtr}, nil
 }
 
 // Serialize serializes the current module into a sequence of

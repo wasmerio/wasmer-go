@@ -25,70 +25,18 @@ type ImportObject struct {
 	inner *cWasmerImportObjectT
 }
 
-// An entry that can be passed to `NewWasiImportObject`.
-// Preopens a file for the WASI module but renames it to the given name
-type MapDirEntry struct {
-	alias string
-	hostPath string
-}
-
-// NewDefaultWasiImportObject constructs a new `ImportObject`
-// with WASI host imports.
-// To specify WASI program arguments, environment variables,
-// preopened directories, and more, see `NewWasiImportObject`
-func NewDefaultWasiImportObject() *ImportObject {
-	var inner = cNewWasmerDefaultWasiImportObject()
-
-	return &ImportObject{inner}
-}
-
-
-// Creates an `ImportObject` with the default WASI imports.
-// Specify arguments (the first is the program name),
-// environment variables ("envvar=value"), preopened directories
-// (host file paths), and mapped directories (host file paths with an
-// alias, see `MapDirEntry`)
-func NewWasiImportObject(args []string, envs []string,
-	preopenedDirs []string, mappedDirs []MapDirEntry) *ImportObject {
-	var argBytes = []cWasmerByteArray{}
-	for _, arg := range args {
-		argBytes = append(argBytes, cGoStringToWasmerByteArray(arg))
-	}
-	var envBytes = []cWasmerByteArray{}
-	for _, env := range envs {
-		envBytes = append(envBytes, cGoStringToWasmerByteArray(env))
-	}
-	var poDirBytes = []cWasmerByteArray{}
-	for _, poDir := range preopenedDirs {
-		poDirBytes = append(poDirBytes, cGoStringToWasmerByteArray(poDir))
-	}
-	var mappedDirBytes = []cWasmerWasiMapDirEntryT{}
-	for _, mappedDir := range mappedDirs {
-		var wasiMappedDir = cAliasAndHostPathToWasiDirEntry(mappedDir.alias, mappedDir.hostPath)
-		mappedDirBytes = append(mappedDirBytes, wasiMappedDir)
-	}
-
-	var inner = cNewWasmerWasiImportObject((*cWasmerByteArray)(unsafe.Pointer(&argBytes)), len(argBytes),
-		(*cWasmerByteArray)(unsafe.Pointer(&envBytes)), len(envBytes),
-		(*cWasmerByteArray)(unsafe.Pointer(&poDirBytes)), len(poDirBytes),
-		(*cWasmerWasiMapDirEntryT)(unsafe.Pointer(&mappedDirBytes)), len(mappedDirBytes),
-	)
-
-	return &ImportObject{inner}
-}
-
 // Creates an empty `ImportObject`
 func NewImportObject() *ImportObject {
-	var inner = cNewWasmerImportObject();
+	var inner = cNewWasmerImportObject()
 
-	return &ImportObject { inner }
+	return &ImportObject{inner}
 }
 
 // Returns `*Imports` for a given `ImportObject`
-func (importObject *ImportObject) GetImports() *Imports {
+func (importObject *ImportObject) GetImports() (*Imports, error) {
 	imports := cWasmerImportObjectGetFunctions(importObject.inner)
 	if imports == nil {
-		return nil
+		return nil, NewImportObjectError("Could not get functions from import object")
 	}
 	outImports := NewImports()
 	for _, imp := range imports {
@@ -97,32 +45,35 @@ func (importObject *ImportObject) GetImports() *Imports {
 			// this should never happen
 			continue
 		}
-		moduleName, importName := cGetInfoFromImport(&imp)
-		fmt.Println("Found %s %s", moduleName, importName)
+		namespaceName, importName := cGetInfoFromImport(&imp)
 
-		oi, err := outImports.Append(importName, nil, rawFunc)
-		outImports = oi
+		oi, err := outImports.appendRaw(namespaceName, importName, rawFunc)
 		if err != nil {
-			return nil
+			return nil, err
 		}
+		outImports = oi
 	}
-	fmt.Println("FINISHED getting imports in GetImports");
 
-	return outImports
+	return outImports, nil
 }
 
 // Adds the given imports to the exsiting import object
 func (importObject *ImportObject) Extend(imports Imports) error {
-	var cImports = []cWasmerImportT{}
-	for name, imp := range imports.imports {
-		cImports = append(cImports, cNewWasmerImportT(
-			imp.namespace,
-			name,
-			imp.importedFunctionPointer,
-		))
+	var numberOfImports = len(imports.imports)
+	if numberOfImports == 0 {
+		return nil
+	}
+	var cImports = make([]cWasmerImportT, numberOfImports)
+	var importFunctionNth = 0
+
+	for importName, importFunction := range imports.imports {
+		cImports[importFunctionNth] = *getCWasmerImport(importName, importFunction)
+		importFunctionNth++
 	}
 
-	var extendResult = cWasmerImportObjectExtend(importObject.inner, (*cWasmerImportT)(unsafe.Pointer(&cImports)), (cUint)(len(imports.imports)))
+	var extendResult = cWasmerImportObjectExtend(importObject.inner,
+		(*cWasmerImportT)(unsafe.Pointer(&cImports[0])),
+		(cUint)(len(imports.imports)))
 
 	if extendResult != cWasmerOk {
 		return NewImportObjectError("Could not extend import object with the given imports")
@@ -281,6 +232,29 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	return imports, nil
 }
 
+// Like Append but not for Go imports
+func (imports *Imports) appendRaw(namespace string, importName string, wasmerImportFunc *cWasmerImportFuncT) (*Imports, error) {
+	params := cGetParamsForImportFunc(wasmerImportFunc)
+	if params == nil {
+		return imports, NewImportedFunctionError(importName, fmt.Sprintf("could not get parameters for %s %s", namespace, importName))
+	}
+	returns := cGetParamsForImportFunc(wasmerImportFunc)
+	if returns == nil {
+		return imports, NewImportedFunctionError(importName, fmt.Sprintf("could not get returns for %s %s", namespace, importName))
+	}
+
+	imports.imports[importName] = Import{
+		nil,
+		unsafe.Pointer(wasmerImportFunc),
+		wasmerImportFunc,
+		params,
+		returns,
+		namespace,
+	}
+
+	return imports, nil
+}
+
 // Close closes/frees all imported functions that have been registered by Wasmer.
 func (imports *Imports) Close() {
 	for _, importFunction := range imports.imports {
@@ -288,6 +262,38 @@ func (imports *Imports) Close() {
 			cWasmerImportFuncDestroy(importFunction.importedFunctionPointer)
 		}
 	}
+}
+
+// Helper function: Get a C import for a given import
+func getCWasmerImport(importName string, importFunction Import) *cWasmerImportT {
+	var wasmInputsArity = len(importFunction.wasmInputs)
+	var wasmOutputsArity = len(importFunction.wasmOutputs)
+
+	var importFunctionInputsCPointer *cWasmerValueTag
+	var importFunctionOutputsCPointer *cWasmerValueTag
+
+	if wasmInputsArity > 0 {
+		importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
+	}
+
+	if wasmOutputsArity > 0 {
+		importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
+	}
+
+	importFunction.importedFunctionPointer = cWasmerImportFuncNew(
+		importFunction.cgoPointer,
+		importFunctionInputsCPointer,
+		cUint(wasmInputsArity),
+		importFunctionOutputsCPointer,
+		cUint(wasmOutputsArity),
+	)
+	var newImport = cNewWasmerImportT(
+		importFunction.namespace,
+		importName,
+		importFunction.importedFunctionPointer,
+	)
+
+	return &newImport
 }
 
 // InstanceContext represents a way to access instance API from within

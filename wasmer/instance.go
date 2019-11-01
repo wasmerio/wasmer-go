@@ -120,35 +120,7 @@ func newInstanceWithImports(
 	var importFunctionNth = 0
 
 	for importName, importFunction := range imports.imports {
-		var wasmInputsArity = len(importFunction.wasmInputs)
-		var wasmOutputsArity = len(importFunction.wasmOutputs)
-
-		var importFunctionInputsCPointer *cWasmerValueTag
-		var importFunctionOutputsCPointer *cWasmerValueTag
-
-		if wasmInputsArity > 0 {
-			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
-		}
-
-		if wasmOutputsArity > 0 {
-			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
-		}
-
-		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
-			importFunction.cgoPointer,
-			importFunctionInputsCPointer,
-			cUint(wasmInputsArity),
-			importFunctionOutputsCPointer,
-			cUint(wasmOutputsArity),
-		)
-
-		var importedFunction = cNewWasmerImportT(
-			importFunction.namespace,
-			importName,
-			importFunction.importedFunctionPointer,
-		)
-
-		wasmImports[importFunctionNth] = importedFunction
+		wasmImports[importFunctionNth] = *getCWasmerImport(importName, importFunction)
 		importFunctionNth++
 	}
 
@@ -160,30 +132,25 @@ func newInstanceWithImports(
 
 	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
 
-	var memory Memory
 	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: nil}
 
 	if err != nil {
 		return emptyInstance, err
 	}
 
-	exports, hasMemory, err := getExportsFromInstance(instance, &memory)
+	exports, memoryPtr, err := getExportsFromInstance(instance)
 	if err != nil {
 		return emptyInstance, err
 	}
-	
-	if hasMemory == false {
-		return Instance{instance: instance, imports: imports, Exports: exports, Memory: nil}, nil
-	}
 
-	return Instance{instance: instance, imports: imports, Exports: exports, Memory: &memory}, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memoryPtr}, nil
 }
 
 // Returns the exports, whether it has memory or an error
-func getExportsFromInstance(instance *cWasmerInstanceT, memory *Memory) (map[string]func(...interface{}) (Value, error), bool, error) {
+func getExportsFromInstance(instance *cWasmerInstanceT) (map[string]func(...interface{}) (Value, error), *Memory, error) {
 	var exports = make(map[string]func(...interface{}) (Value, error))
-	var hasMemory = false
 	var wasmExports *cWasmerExportsT
+	var memoryPtr *Memory = nil
 	cWasmerInstanceExports(instance, &wasmExports)
 	defer cWasmerExportsDestroy(wasmExports)
 
@@ -198,11 +165,11 @@ func getExportsFromInstance(instance *cWasmerInstanceT, memory *Memory) (map[str
 			var wasmMemory *cWasmerMemoryT
 
 			if cWasmerExportToMemory(wasmExport, &wasmMemory) != cWasmerOk {
-				return nil, hasMemory, NewInstanceError("Failed to extract the exported memory.")
+				return nil, nil, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			*memory = newMemory(wasmMemory)
-			hasMemory = true
+			var memory = newMemory(wasmMemory)
+			memoryPtr = &memory
 
 		case cWasmFunction:
 			var wasmExportName = cWasmerExportName(wasmExport)
@@ -211,7 +178,7 @@ func getExportsFromInstance(instance *cWasmerInstanceT, memory *Memory) (map[str
 			var wasmFunctionInputsArity cUint32T
 
 			if cWasmerExportFuncParamsArity(wasmFunction, &wasmFunctionInputsArity) != cWasmerOk {
-				return nil, false, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
+				return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
 			}
 
 			var wasmFunctionInputSignatures = make([]cWasmerValueTag, int(wasmFunctionInputsArity))
@@ -220,14 +187,14 @@ func getExportsFromInstance(instance *cWasmerInstanceT, memory *Memory) (map[str
 				var wasmFunctionInputSignaturesCPointer = (*cWasmerValueTag)(unsafe.Pointer(&wasmFunctionInputSignatures[0]))
 
 				if cWasmerExportFuncParams(wasmFunction, wasmFunctionInputSignaturesCPointer, wasmFunctionInputsArity) != cWasmerOk {
-					return nil, hasMemory, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
+					return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
 				}
 			}
 
 			var wasmFunctionOutputsArity cUint32T
 
 			if cWasmerExportFuncResultsArity(wasmFunction, &wasmFunctionOutputsArity) != cWasmerOk {
-				return nil, hasMemory, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
+				return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
 			}
 
 			var numberOfExpectedArguments = int(wasmFunctionInputsArity)
@@ -418,7 +385,7 @@ func getExportsFromInstance(instance *cWasmerInstanceT, memory *Memory) (map[str
 			}
 		}
 	}
-	return exports, hasMemory, nil
+	return exports, memoryPtr, nil
 }
 
 // HasMemory checks whether the instance has at least one exported memory.

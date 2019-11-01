@@ -256,7 +256,7 @@ func testImportInstanceContextData(t *testing.T) {
 	assert.Equal(t, "hello", contextData.message)
 }
 
-/*func testWasiImportObject(t *testing.T) {
+func testWasiImportObject(t *testing.T) {
 	importObject := wasm.NewDefaultWasiImportObject()
 	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
 	assert.NoError(t, err)
@@ -264,17 +264,15 @@ func testImportInstanceContextData(t *testing.T) {
 	err = importObject.Extend(*imports)
 	assert.NoError(t, err)
 
-	module, err := wasm.Compile(getImportedFunctionBytes("examples", "wasi_hello_world.wat"))
+	module, err := wasm.Compile(getImportedFunctionBytes("wasi_hello_world.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := module.InstantiateWithImportObject(importObject)
 	defer instance.Close()
-
 	assert.NoError(t, err)
-
 	start, exists := instance.Exports["_start"]
 	assert.Equal(t, true, exists)
 
 	_, err = start()
 	assert.NoError(t, err)
-}*/
+}

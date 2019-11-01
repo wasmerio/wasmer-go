@@ -58,6 +58,54 @@ func cNewWasmerImportT(moduleName string, importName string, function *cWasmerIm
 	return (cWasmerImportT)(importedFunction)
 }
 
+func cGetParamsForImportFunc(function *cWasmerImportFuncT) []cWasmerValueTag {
+	var arity C.uint32_t = 0
+	var result = C.wasmer_import_func_params_arity((*C.wasmer_import_func_t)(function), &arity)
+
+	if result != C.WASMER_OK {
+		return nil
+	}
+
+	var params = make([]cWasmerValueTag, (int)(arity))
+	if arity == 0 {
+		return params
+	}
+
+	result = C.wasmer_import_func_params(
+		(*C.wasmer_import_func_t)(function),
+		(*C.wasmer_value_tag)(unsafe.Pointer(&params[0])),
+		arity)
+	if result != C.WASMER_OK {
+		return nil
+	}
+
+	return params
+}
+
+func cGetReturnsForImportFunc(function *cWasmerImportFuncT) []cWasmerValueTag {
+	var arity C.uint32_t = 0
+	var result = C.wasmer_import_func_returns_arity((*C.wasmer_import_func_t)(function), &arity)
+
+	if result != C.WASMER_OK {
+		return nil
+	}
+
+	var returns = make([]cWasmerValueTag, (int)(arity))
+	if arity == 0 {
+		return returns
+	}
+
+	result = C.wasmer_import_func_returns(
+		(*C.wasmer_import_func_t)(function),
+		(*C.wasmer_value_tag)(unsafe.Pointer(&returns[0])),
+		arity)
+	if result != C.WASMER_OK {
+		return nil
+	}
+
+	return returns
+}
+
 func cNewWasmerDefaultWasiImportObject() *cWasmerImportObjectT {
 	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_default_import_object())
 }
@@ -92,22 +140,22 @@ func cNewWasmerImportObject() *cWasmerImportObjectT {
 }
 
 func cWasmerImportObjectGetFunctions(importObject *cWasmerImportObjectT) []cWasmerImportT {
-	var numFns = C.wasmer_import_object_get_num_functions((*C.wasmer_import_object_t)(importObject))
-	if numFns == -1 {
+	var iter = C.wasmer_import_object_iterate_functions((*C.wasmer_import_object_t)(importObject))
+	if iter == nil {
 		return nil
 	}
+	var imports []cWasmerImportT
 
-	var imports = make([]cWasmerImportT, numFns)
-
-	var numFnsWritten = C.wasmer_import_object_get_functions(
-		(*C.wasmer_import_object_t)(importObject),
-		(*C.wasmer_import_t)(unsafe.Pointer(&imports)),
-		(C.uint)(numFns))
-	if numFns != numFnsWritten {
-		C.wasmer_import_object_imports_destroy(
-			(*C.wasmer_import_t)(unsafe.Pointer(&imports)),
-			(C.uint)(numFnsWritten))
-		return nil;
+	for !C.wasmer_import_object_iter_at_end(iter) {
+		var imp cWasmerImportT
+		result := C.wasmer_import_object_iter_next(iter, (*C.wasmer_import_t)(&imp))
+		if result != C.WASMER_OK {
+			C.wasmer_import_object_imports_destroy((*C.wasmer_import_t)(&imports[0]), (C.uint)(len(imports)))
+			C.wasmer_import_object_iter_destroy(iter)
+			return nil
+			break
+		}
+		imports = append(imports, imp)
 	}
 
 	return imports
@@ -512,11 +560,12 @@ func cGetInfoFromImport(inner *cWasmerImportT) (string, string) {
 }
 
 // returns the raw pointer to the inner function or nil if it's not a function
-func cGetFunctionFromImport(inner *cWasmerImportT) unsafe.Pointer {
+func cGetFunctionFromImport(inner *cWasmerImportT) *cWasmerImportFuncT {
 	if inner.tag == C.WASM_FUNCTION {
-		var funcPtrBytes [8]byte = inner.value;
-		var funcAddr *byte = &funcPtrBytes[0]
-		return unsafe.Pointer(funcAddr)
+		var funcPtrBytes [8]byte = inner.value
+		var funcPtrAddr *byte = &funcPtrBytes[0]
+		var funcPtrPtr = (**cWasmerImportFuncT)(unsafe.Pointer(funcPtrAddr))
+		return *funcPtrPtr
 	}
 	return nil
 }

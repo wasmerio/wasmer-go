@@ -56,3 +56,7 @@ func TestImportInstanceContext(t *testing.T) {
 func TestImportInstanceContextData(t *testing.T) {
 	testImportInstanceContextData(t)
 }
+
+func TestWasiImportObject(t *testing.T) {
+	testWasiImportObject(t)
+}
