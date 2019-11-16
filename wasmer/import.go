@@ -338,10 +338,11 @@ func (instanceContext *InstanceContext) Memory() *Memory {
 	return &instanceContext.memory
 }
 
-// Data returns the instance context data as an `interface{}`. It's
-// up to the user to cast it appropriately.
+// Data returns the instance context data as an `interface{}`. It's up to the
+// user to assert the proper type.
 func (instanceContext *InstanceContext) Data() interface{} {
-	dataPtr := *(*unsafe.Pointer)(cWasmerInstanceContextDataGet(instanceContext.context))
-
-	return *(*interface{})(dataPtr)
+	ctxDataIdx := *(*int)(cWasmerInstanceContextDataGet(instanceContext.context))
+	ctxDataMtx.RLock()
+	defer ctxDataMtx.RUnlock()
+	return ctxData[ctxDataIdx]
 }
