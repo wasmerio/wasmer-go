@@ -226,7 +226,7 @@ func testImportInstanceContext(t *testing.T) {
 func logMessageWithContextData(context unsafe.Pointer, pointer int32, length int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
 	var memory = instanceContext.Memory().Data()
-	var logMessage = (*logMessageContext)(instanceContext.Data())
+	var logMessage = instanceContext.Data().(*logMessageContext)
 
 	logMessage.message = string(memory[pointer : pointer+length])
 }
@@ -245,7 +245,7 @@ func testImportInstanceContextData(t *testing.T) {
 	defer instance.Close()
 
 	contextData := logMessageContext{message: "first"}
-	instance.SetContextData(unsafe.Pointer(&contextData))
+	instance.SetContextData(&contextData)
 
 	doSomething := instance.Exports["do_something"]
 
