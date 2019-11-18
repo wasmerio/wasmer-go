@@ -233,6 +233,10 @@ func logMessageWithContextData(context unsafe.Pointer, pointer int32, length int
 
 type logMessageContext struct {
 	message string
+
+	// Ensure that Context Data may include Go pointers & reference types.
+	slice []string
+	ptr   *string
 }
 
 func testImportInstanceContextData(t *testing.T) {
@@ -244,7 +248,10 @@ func testImportInstanceContextData(t *testing.T) {
 
 	defer instance.Close()
 
-	contextData := logMessageContext{message: "first"}
+	str := "test"
+	contextData := logMessageContext{message: "first",
+		slice: []string{str, str},
+		ptr:   &str}
 	instance.SetContextData(unsafe.Pointer(&contextData))
 
 	doSomething := instance.Exports["do_something"]

@@ -71,6 +71,11 @@ type Instance struct {
 
 	// The exported memory of a WebAssembly instance.
 	Memory *Memory
+
+	// ctxDataC and ctxDataGo ensure that InstanceContext data is not GC'd
+	// for the lifetime of the Instance.
+	ctxDataC  *uintptr
+	ctxDataGo unsafe.Pointer
 }
 
 // NewInstance constructs a new `Instance` with no imported functions.
@@ -426,7 +431,14 @@ func (instance *Instance) HasMemory() bool {
 // understand that this data is shared by all imported function, it's
 // global to the instance.
 func (instance *Instance) SetContextData(data unsafe.Pointer) {
-	cWasmerInstanceContextDataSet(instance.instance, data)
+	// Cache the data and the new uintptr to protect it from GC for the
+	// lifetime of instance.
+	instance.ctxDataGo = data
+	instance.ctxDataC = new(uintptr)
+	*instance.ctxDataC = uintptr(data)
+
+	cWasmerInstanceContextDataSet(instance.instance,
+		unsafe.Pointer(instance.ctxDataC))
 }
 
 // Close closes/frees an `Instance`.
