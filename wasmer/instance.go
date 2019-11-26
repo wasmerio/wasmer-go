@@ -75,7 +75,7 @@ type Instance struct {
 	// ctxDataC and ctxDataGo ensure that InstanceContext data is not GC'd
 	// for the lifetime of the Instance.
 	ctxDataC  *uintptr
-	ctxDataGo unsafe.Pointer
+	ctxDataGo interface{}
 }
 
 // NewInstance constructs a new `Instance` with no imported functions.
@@ -424,18 +424,18 @@ func (instance *Instance) HasMemory() bool {
 	return nil != instance.Memory
 }
 
-// SetContextData assigns a data that can be used by all imported
-// functions. Indeed, each imported function receives as its first
-// argument an instance context (see `InstanceContext`). An instance
-// context can hold a pointer to any kind of data. It is important to
-// understand that this data is shared by all imported function, it's
-// global to the instance.
-func (instance *Instance) SetContextData(data unsafe.Pointer) {
+// SetContextData assigns a data that can be used by all imported functions.
+// Each imported function receives as its first argument an instance context
+// (see `InstanceContext`). An instance context can hold any kind of data,
+// including data that contain Go references such as slices, maps, or structs
+// with reference types or pointers. It is important to understand that data is
+// global to the instance, and thus is shared by all imported functions.
+func (instance *Instance) SetContextData(data interface{}) {
 	// Cache the data and the new uintptr to protect it from GC for the
 	// lifetime of instance.
 	instance.ctxDataGo = data
 	instance.ctxDataC = new(uintptr)
-	*instance.ctxDataC = uintptr(data)
+	*instance.ctxDataC = uintptr(unsafe.Pointer(&instance.ctxDataGo))
 
 	cWasmerInstanceContextDataSet(instance.instance,
 		unsafe.Pointer(instance.ctxDataC))

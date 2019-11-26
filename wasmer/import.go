@@ -180,7 +180,8 @@ func (instanceContext *InstanceContext) Memory() *Memory {
 
 // Data returns the instance context data as an `unsafe.Pointer`. It's
 // up to the user to cast it appropriately as a pointer to a data.
-func (instanceContext *InstanceContext) Data() unsafe.Pointer {
-	dataPtr := *(*uintptr)(cWasmerInstanceContextDataGet(instanceContext.context))
-	return unsafe.Pointer(dataPtr)
+func (instanceContext *InstanceContext) Data() interface{} {
+	dataPtr := *(*unsafe.Pointer)(
+		cWasmerInstanceContextDataGet(instanceContext.context))
+	return *(*interface{})(dataPtr)
 }
