@@ -275,11 +275,15 @@ func testWasiImportObject(t *testing.T) {
 	assert.NoError(t, err)
 
 	instance, err := module.InstantiateWithImportObject(importObject)
-	defer instance.Close()
 	assert.NoError(t, err)
+
+	defer instance.Close()
+
 	start, exists := instance.Exports["_start"]
+
 	assert.Equal(t, true, exists)
 
 	_, err = start()
+
 	assert.NoError(t, err)
 }

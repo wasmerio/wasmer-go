@@ -144,19 +144,26 @@ func newInstanceWithImports(
 		return emptyInstance, err
 	}
 
-	exports, memoryPtr, err := getExportsFromInstance(instance)
+	exports, memoryPointer, err := getExportsFromInstance(instance)
+
 	if err != nil {
 		return emptyInstance, err
 	}
 
-	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memoryPtr}, nil
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memoryPointer}, nil
 }
 
 // Returns the exports, whether it has memory or an error
-func getExportsFromInstance(instance *cWasmerInstanceT) (map[string]func(...interface{}) (Value, error), *Memory, error) {
+func getExportsFromInstance(
+	instance *cWasmerInstanceT,
+) (
+	map[string]func(...interface{}) (Value, error),
+	*Memory,
+	error,
+) {
 	var exports = make(map[string]func(...interface{}) (Value, error))
 	var wasmExports *cWasmerExportsT
-	var memoryPtr *Memory = nil
+	var memoryPointer *Memory
 	cWasmerInstanceExports(instance, &wasmExports)
 	defer cWasmerExportsDestroy(wasmExports)
 
@@ -175,7 +182,7 @@ func getExportsFromInstance(instance *cWasmerInstanceT) (map[string]func(...inte
 			}
 
 			var memory = newMemory(wasmMemory)
-			memoryPtr = &memory
+			memoryPointer = &memory
 
 		case cWasmFunction:
 			var wasmExportName = cWasmerExportName(wasmExport)
@@ -391,7 +398,7 @@ func getExportsFromInstance(instance *cWasmerInstanceT) (map[string]func(...inte
 			}
 		}
 	}
-	return exports, memoryPtr, nil
+	return exports, memoryPointer, nil
 }
 
 // HasMemory checks whether the instance has at least one exported memory.

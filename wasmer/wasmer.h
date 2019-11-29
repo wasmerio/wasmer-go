@@ -215,21 +215,6 @@ typedef struct {
 } wasmer_wasi_map_dir_entry_t;
 
 /**
- * Opens a directory that's visible to the WASI module as `alias` but
- * is backed by the host file at `host_file_path`
- */
-typedef struct {
-  /**
-   * What the WASI module will see in its virtual root
-   */
-  wasmer_byte_array alias;
-  /**
-   * The backing file that the WASI module will interact with via the alias
-   */
-  wasmer_byte_array host_file_path;
-} wasmer_wasi_map_dir_entry_t;
-
-/**
  * Creates a new Module from the given wasm bytes.
  *
  * Returns `wasmer_result_t::WASMER_OK` upon success.

@@ -14,55 +14,64 @@ type ImportedFunctionError struct {
 	message      string
 }
 
-// ImportObjectError represents errors related to `ImportObject`s
+// ImportObjectError represents errors related to `ImportObject`s.
 type ImportObjectError struct {
 	message string
 }
 
-// A type that owns a set of imports.
-// It can be combined with a `Module` to create an `Instance`
+// ImportObject owns a set of imports.
+// It can be combined with a `Module` to create an `Instance`.
 type ImportObject struct {
 	inner *cWasmerImportObjectT
 }
 
-// Creates an empty `ImportObject`
+// NewImportObject creates an empty `ImportObject`.
 func NewImportObject() *ImportObject {
 	var inner = cNewWasmerImportObject()
 
 	return &ImportObject{inner}
 }
 
-// Returns `*Imports` for a given `ImportObject`
+// GetImports returns `*Imports` for a given `ImportObject`
 func (importObject *ImportObject) GetImports() (*Imports, error) {
 	imports := cWasmerImportObjectGetFunctions(importObject.inner)
+
 	if imports == nil {
-		return nil, NewImportObjectError("Could not get functions from import object")
+		return nil, NewImportObjectError("Could not get functions from the given import object")
 	}
-	outImports := NewImports()
-	for _, imp := range imports {
-		rawFunc := cGetFunctionFromImport(&imp)
-		if rawFunc == nil {
-			// this should never happen
+
+	output := NewImports()
+
+	for _, impoort := range imports {
+		rawFunction := cGetFunctionFromImport(&impoort)
+
+		if rawFunction == nil {
+			// This is expected to never happen
 			continue
 		}
-		namespaceName, importName := cGetInfoFromImport(&imp)
 
-		oi, err := outImports.appendRaw(namespaceName, importName, rawFunc)
+		namespaceName, importName := cGetInfoFromImport(&impoort)
+
+		nextOutput, err := output.appendRaw(namespaceName, importName, rawFunction)
+
 		if err != nil {
 			return nil, err
 		}
-		outImports = oi
+
+		output = nextOutput
 	}
 
-	return outImports, nil
+	return output, nil
 }
 
-// Adds the given imports to the exsiting import object
+// Extend adds the given imports to the existing import object
 func (importObject *ImportObject) Extend(imports Imports) error {
 	var numberOfImports = len(imports.imports)
+
 	if numberOfImports == 0 {
 		return nil
 	}
+
 	var cImports = make([]cWasmerImportT, numberOfImports)
 	var importFunctionNth = 0
 
@@ -71,9 +80,15 @@ func (importObject *ImportObject) Extend(imports Imports) error {
 		importFunctionNth++
 	}
 
-	var extendResult = cWasmerImportObjectExtend(importObject.inner,
+	if importFunctionNth == 0 {
+		return nil
+	}
+
+	var extendResult = cWasmerImportObjectExtend(
+		importObject.inner,
 		(*cWasmerImportT)(unsafe.Pointer(&cImports[0])),
-		(cUint)(len(imports.imports)))
+		(cUint)(len(imports.imports)),
+	)
 
 	if extendResult != cWasmerOk {
 		return NewImportObjectError("Could not extend import object with the given imports")
@@ -82,17 +97,17 @@ func (importObject *ImportObject) Extend(imports Imports) error {
 	return nil
 }
 
-// Frees the `ImportObject`
+// Close frees the `ImportObject`
 func (importObject *ImportObject) Close() {
 	cWasmerImportObjectDestroy(importObject.inner)
 }
 
-// Constructs a new `ImportObjectError`
+// NewImportObjectError constructs a new `ImportObjectError`
 func NewImportObjectError(message string) *ImportObjectError {
 	return &ImportObjectError{message}
 }
 
-// ImportedFunctionError is an actual error. The `Error` function
+// ImportObjectError is an actual error. The `Error` function
 // returns the error message.
 func (error *ImportObjectError) Error() string {
 	return fmt.Sprintf(error.message)
@@ -232,23 +247,30 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	return imports, nil
 }
 
-// Like Append but not for Go imports
-func (imports *Imports) appendRaw(namespace string, importName string, wasmerImportFunc *cWasmerImportFuncT) (*Imports, error) {
-	params := cGetParamsForImportFunc(wasmerImportFunc)
-	if params == nil {
-		return imports, NewImportedFunctionError(importName, fmt.Sprintf("could not get parameters for %s %s", namespace, importName))
+// Like Append but not for Go imports.
+func (imports *Imports) appendRaw(
+	namespace string,
+	importName string,
+	wasmerImportFunc *cWasmerImportFuncT,
+) (*Imports, error) {
+	wasmInputs := cGetParamsForImportFunc(wasmerImportFunc)
+
+	if wasmInputs == nil {
+		return imports, NewImportedFunctionError(importName, fmt.Sprintf("Could not get the inputs for `%%s` in namespace `%s`", namespace))
 	}
-	returns := cGetParamsForImportFunc(wasmerImportFunc)
-	if returns == nil {
-		return imports, NewImportedFunctionError(importName, fmt.Sprintf("could not get returns for %s %s", namespace, importName))
+
+	wasmOutputs := cGetReturnsForImportFunc(wasmerImportFunc)
+
+	if wasmOutputs == nil {
+		return imports, NewImportedFunctionError(importName, fmt.Sprintf("Could not get the outputs for `%%s` in namespace `%s`", namespace))
 	}
 
 	imports.imports[importName] = Import{
 		nil,
 		unsafe.Pointer(wasmerImportFunc),
 		wasmerImportFunc,
-		params,
-		returns,
+		wasmInputs,
+		wasmOutputs,
 		namespace,
 	}
 
