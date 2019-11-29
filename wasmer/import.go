@@ -32,8 +32,8 @@ func NewImportObject() *ImportObject {
 	return &ImportObject{inner}
 }
 
-// GetImports returns `*Imports` for a given `ImportObject`
-func (importObject *ImportObject) GetImports() (*Imports, error) {
+// Imports returns `*Imports` for a given `ImportObject`
+func (importObject *ImportObject) Imports() (*Imports, error) {
 	imports := cWasmerImportObjectGetFunctions(importObject.inner)
 
 	if imports == nil {
@@ -51,7 +51,6 @@ func (importObject *ImportObject) GetImports() (*Imports, error) {
 		}
 
 		namespaceName, importName := cGetInfoFromImport(&impoort)
-
 		nextOutput, err := output.appendRaw(namespaceName, importName, rawFunction)
 
 		if err != nil {

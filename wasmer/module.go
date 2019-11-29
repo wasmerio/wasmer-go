@@ -196,8 +196,9 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 // `ImportObject`
 func (module *Module) InstantiateWithImportObject(importObject *ImportObject) (Instance, error) {
 	var instance *cWasmerInstanceT
-	var instantiateResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject.inner)
 	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: nil}
+
+	var instantiateResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject.inner)
 
 	if instantiateResult != cWasmerOk {
 		var lastError, err = GetLastError()
@@ -218,7 +219,7 @@ func (module *Module) InstantiateWithImportObject(importObject *ImportObject) (I
 		return emptyInstance, err
 	}
 
-	imports, err := importObject.GetImports()
+	imports, err := importObject.Imports()
 
 	if err != nil {
 		return emptyInstance, NewModuleError(fmt.Sprintf("Could not get imports from ImportObject: %s", err))
