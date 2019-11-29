@@ -71,6 +71,12 @@ type Instance struct {
 
 	// The exported memory of a WebAssembly instance.
 	Memory *Memory
+
+	// `contextDataC` and `contextDataGo` ensure thata`
+	// InstanceContext` data is not garbage-collected // for the
+	// lifetime of the `Instance`.
+	contextDataC  *uintptr
+	contextDataGo interface{}
 }
 
 // NewInstance constructs a new `Instance` with no imported functions.
@@ -393,14 +399,23 @@ func (instance *Instance) HasMemory() bool {
 	return nil != instance.Memory
 }
 
-// SetContextData assigns a data that can be used by all imported
-// functions. Indeed, each imported function receives as its first
-// argument an instance context (see `InstanceContext`). An instance
-// context can hold a pointer to any kind of data. It is important to
-// understand that this data is shared by all imported function, it's
-// global to the instance.
-func (instance *Instance) SetContextData(data unsafe.Pointer) {
-	cWasmerInstanceContextDataSet(instance.instance, data)
+// SetContextData assigns a data that can be used by all imported functions.
+// Each imported function receives as its first argument an instance context
+// (see `InstanceContext`). An instance context can hold any kind of data,
+// including data that contain Go references such as slices, maps, or structs
+// with reference types or pointers. It is important to understand that data is
+// global to the instance, and thus is shared by all imported functions.
+func (instance *Instance) SetContextData(data interface{}) {
+	// Cache the data with the `new(uintptr)` to prevent it to be
+	// garbage collected for the lifetime of the instance.
+	instance.contextDataGo = data
+	instance.contextDataC = new(uintptr)
+	*instance.contextDataC = uintptr(unsafe.Pointer(&instance.contextDataGo))
+
+	cWasmerInstanceContextDataSet(
+		instance.instance,
+		unsafe.Pointer(instance.contextDataC),
+	)
 }
 
 // Close closes/frees an `Instance`.

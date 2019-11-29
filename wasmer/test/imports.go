@@ -226,13 +226,17 @@ func testImportInstanceContext(t *testing.T) {
 func logMessageWithContextData(context unsafe.Pointer, pointer int32, length int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
 	var memory = instanceContext.Memory().Data()
-	var logMessage = (*logMessageContext)(instanceContext.Data())
+	var logMessage = instanceContext.Data().(*logMessageContext)
 
 	logMessage.message = string(memory[pointer : pointer+length])
 }
 
 type logMessageContext struct {
 	message string
+
+	// Ensure that Context Data may include Go pointers & reference types.
+	slice []string
+	ptr   *string
 }
 
 func testImportInstanceContextData(t *testing.T) {
@@ -244,8 +248,11 @@ func testImportInstanceContextData(t *testing.T) {
 
 	defer instance.Close()
 
-	contextData := logMessageContext{message: "first"}
-	instance.SetContextData(unsafe.Pointer(&contextData))
+	str := "test"
+	contextData := logMessageContext{message: "first",
+		slice: []string{str, str},
+		ptr:   &str}
+	instance.SetContextData(&contextData)
 
 	doSomething := instance.Exports["do_something"]
 
