@@ -265,7 +265,6 @@ func testImportInstanceContextData(t *testing.T) {
 
 func testWasiImportObject(t *testing.T) {
 	importObject := wasm.NewDefaultWasiImportObject()
-	imports, _ := importObject.Imports()
 
 	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
 	assert.NoError(t, err)
