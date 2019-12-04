@@ -29,15 +29,15 @@ enum Version {
   /**
    * Version cannot be detected or is unknown.
    */
-  Unknown,
+  Unknown = 0,
   /**
    * `wasi_unstable`.
    */
-  Snapshot0,
+  Snapshot0 = 1,
   /**
    * `wasi_snapshot_preview1`.
    */
-  Snapshot1,
+  Snapshot1 = 2,
 };
 typedef uint8_t Version;
 
@@ -907,12 +907,14 @@ wasmer_import_object_t *wasmer_wasi_generate_import_object(const wasmer_byte_arr
                                                            unsigned int mapped_dirs_len);
 
 /**
- * Creates a WASI import object.
+ * Creates a WASI import object for a specific version.
  *
  * This function is similar to `wasmer_wasi_generate_import_object`
  * except that the first argument describes the WASI version.
+ *
+ * The version is expected to be of kind `Version`.
  */
-wasmer_import_object_t *wasmer_wasi_generate_import_object_for_version(Version version,
+wasmer_import_object_t *wasmer_wasi_generate_import_object_for_version(unsigned char version,
                                                                        const wasmer_byte_array *args,
                                                                        unsigned int args_len,
                                                                        const wasmer_byte_array *envs,
