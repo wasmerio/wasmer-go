@@ -341,8 +341,10 @@ func (instanceContext *InstanceContext) Memory() *Memory {
 // Data returns the instance context data as an `interface{}`. It's up to the
 // user to assert the proper type.
 func (instanceContext *InstanceContext) Data() interface{} {
-	ctxDataIdx := *(*int)(cWasmerInstanceContextDataGet(instanceContext.context))
-	ctxDataMtx.RLock()
-	defer ctxDataMtx.RUnlock()
-	return ctxData[ctxDataIdx]
+	contextDataIndex := *(*int)(cWasmerInstanceContextDataGet(instanceContext.context))
+
+	instancesContextDataMutex.RLock()
+	defer instancesContextDataMutex.RUnlock()
+
+	return instancesContextData[contextDataIndex]
 }
