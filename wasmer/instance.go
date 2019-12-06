@@ -2,6 +2,8 @@ package wasmer
 
 import (
 	"fmt"
+	"runtime"
+	"sync"
 	"unsafe"
 )
 
@@ -72,11 +74,7 @@ type Instance struct {
 	// The exported memory of a WebAssembly instance.
 	Memory *Memory
 
-	// `contextDataC` and `contextDataGo` ensure thata`
-	// InstanceContext` data is not garbage-collected // for the
-	// lifetime of the `Instance`.
-	contextDataC  *uintptr
-	contextDataGo interface{}
+	contextDataIndex *int
 }
 
 // NewInstance constructs a new `Instance` with no imported functions.
@@ -406,6 +404,18 @@ func (instance *Instance) HasMemory() bool {
 	return nil != instance.Memory
 }
 
+var (
+
+	// In order to avoid passing illegal Go pointers across the
+	// CGo FFI, store Instance Context Data in instanceContextData
+	// and simply pass the index through the FFI instead.
+	//
+	// See `Instance.SetContextData` and `InstanceContext.Data`.
+	instancesContextData      = make(map[int]interface{})
+	nextContextDataIndex      int
+	instancesContextDataMutex sync.RWMutex
+)
+
 // SetContextData assigns a data that can be used by all imported functions.
 // Each imported function receives as its first argument an instance context
 // (see `InstanceContext`). An instance context can hold any kind of data,
@@ -413,15 +423,36 @@ func (instance *Instance) HasMemory() bool {
 // with reference types or pointers. It is important to understand that data is
 // global to the instance, and thus is shared by all imported functions.
 func (instance *Instance) SetContextData(data interface{}) {
-	// Cache the data with the `new(uintptr)` to prevent it to be
-	// garbage collected for the lifetime of the instance.
-	instance.contextDataGo = data
-	instance.contextDataC = new(uintptr)
-	*instance.contextDataC = uintptr(unsafe.Pointer(&instance.contextDataGo))
+	instancesContextDataMutex.Lock()
+
+	if instance.contextDataIndex == nil {
+		instance.contextDataIndex = new(int)
+		*instance.contextDataIndex = nextContextDataIndex
+		nextContextDataIndex++
+
+		// When instance is garbage-collected, clean up its
+		// `instanceContextData`.  Set the finalizer on the
+		// unexported `instance.contextDataIndex`, instead of
+		// directly on the instance, to allow users of this
+		// package to set their own finalizer on the `Instance`
+		// for other reasons.
+		runtime.SetFinalizer(instance.contextDataIndex, func(index *int) {
+			// Launch a goroutine to avoid blocking other
+			// finalizers while waiting for the mutex lock.
+			go func() {
+				instancesContextDataMutex.Lock()
+				delete(instancesContextData, *index)
+				instancesContextDataMutex.Unlock()
+			}()
+		})
+	}
+
+	instancesContextData[*instance.contextDataIndex] = data
+	instancesContextDataMutex.Unlock()
 
 	cWasmerInstanceContextDataSet(
 		instance.instance,
-		unsafe.Pointer(instance.contextDataC),
+		unsafe.Pointer(instance.contextDataIndex),
 	)
 }
 
