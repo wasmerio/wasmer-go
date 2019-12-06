@@ -2,6 +2,7 @@ package wasmer
 
 import (
 	"fmt"
+	wasm_exec "github.com/wasmerio/go-ext-wasm/wasmexec"
 	"reflect"
 	"unsafe"
 )
@@ -344,4 +345,25 @@ func (instanceContext *InstanceContext) Data() interface{} {
 	dataPtr := *(*unsafe.Pointer)(cWasmerInstanceContextDataGet(instanceContext.context))
 
 	return *(*interface{})(dataPtr)
+}
+
+// ImportsForGo prepares an `Imports` instance containing all host
+// functions for the TinyGo or the Go compilers. See the `wasmexec`
+// package.
+func ImportsForGo() (*Imports, error) {
+	imports := NewImports()
+
+	for namespace, hostFunctions := range wasm_exec.HostFunctions() {
+		imports.Namespace(namespace)
+
+		for name, hostFunction := range hostFunctions {
+			_, err := imports.Append(name, hostFunction.Go, hostFunction.C)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return imports, nil
 }

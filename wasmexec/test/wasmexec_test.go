@@ -18,7 +18,7 @@ func GetBytes(file string) []byte {
 }
 
 func TestTinyGo(t *testing.T) {
-	imports, err := wasm.ImportsForGo(t)
+	imports, err := wasm.ImportsForGo()
 	assert.NoError(t, err)
 
 	defer imports.Close()
