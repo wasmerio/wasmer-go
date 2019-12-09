@@ -28,14 +28,16 @@ $ export CGO_ENABLED=1; export CC=gcc;
 $ go get github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
-To install the `go-wasmer` CLI, follow the classical:
+It will work on many macOS and Linux distributions. It will not work
+on Windows yet, we are working on it.
+
+If the pre-compiled shared libraries are not compatible with your system, try installing manually with the following command:
 
 ```sh
-$ go install github.com/wasmerio/go-ext-wasm/go-wasmer
+$ just build-runtime
+$ just build
+$ go install github.com/wasmerio/go-ext-wasm/wasmer
 ```
-
-`go install` will work on many macOS and Linux distributions. It will
-not work on Windows yet, we are working on it.
 
 # Documentation
 
