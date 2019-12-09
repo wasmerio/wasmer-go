@@ -42,7 +42,7 @@ import "unsafe"
 //     |       v              |       |
 //     |  +----+--------------+----+  |
 //     |  |                        |  |
-//     |  |       bridge.go        |  |   go-ext-wasm
+//     |  |       bridge.go        |  |   go-ext-wasm/wasmer
 //     |  |                        |  |
 //     |  +----+--------------+----+  |
 //     |       |              ^       |
