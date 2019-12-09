@@ -11,7 +11,7 @@ import "unsafe"
 // [Wasmer] is the WebAssembly runtime used by this package to run
 // WebAssembly modules. It is written in [Rust]. The runtime exposes a C
 // API through [the `wasmer-runtime-c-api` crate][wasmer-runtime-c-api],
-// which is also written in Rust but compiles to a C compatible shared
+// which is also written in Rust but compiles to C compatible shared
 // libraries. C and C++ headers are also automatically built at
 // compile-time. [Wasmer releases][wasmer-releases] come with
 // pre-compiled `.dylib` and `.so` shared libraries. It is also possible
@@ -19,7 +19,7 @@ import "unsafe"
 // package, they are located in the root as
 // `libwasmer_runtime_c_api\..*`.
 //
-// Go provides [cgo] that enabled the creation of Go packages that
+// Go provides [cgo] that enables the creation of Go packages that
 // call C code. This package uses cgo to communicate with Wasmer through
 // C.
 //
