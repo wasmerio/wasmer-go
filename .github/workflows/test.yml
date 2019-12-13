@@ -1,14 +1,6 @@
 name: Test
 
-on:
-  # Run the workflow when a commit is pushed on the `trying` or
-  # the `staging` branch, or on any tag.
-  push:
-    branches:
-      - trying
-      - staging
-    tags:
-      - '**' 
+on: [push]
 
 jobs:
   # The `test` job.
