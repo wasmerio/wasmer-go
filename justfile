@@ -32,7 +32,7 @@ build-runtime:
 
 # Build the `wasmer` library.
 build go-build-args='-v':
-	go build {{go-build-args}} .
+	cd wasmer && go build {{go-build-args}} .
 
 # Build the `go-wasmer` bin.
 build-bin go-build-args='-v':
