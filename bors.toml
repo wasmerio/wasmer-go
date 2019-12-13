@@ -1,6 +1,5 @@
 status = [
-    "ci/circleci: build-and-test",
-    "ci/circleci: build-and-test-macos",
+    "wasmerio/go-ext-wasm",
 ]
 required_approvals = 0
 timeout_sec = 900

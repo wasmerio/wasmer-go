@@ -228,7 +228,7 @@ The Go library is written in Go and Rust.
 To build both parts, run the following commands:
 
 ```sh
-$ just rust
+$ just build-runtime
 $ just build
 ```
 
