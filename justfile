@@ -9,20 +9,20 @@ build-runtime:
 	# Find the shared library extension.
 	case "{{os()}}" in
 		"macos")
-			dylib_extension="dylib"
+			shared_library="libwasmer_runtime_c_api.dylib"
 			;;
 		"windows")
-			dylib_extension="dll"
+			shared_library="wasmer_runtime_c_api.dll"
 			;;
 		*)
-			dylib_extension="so"
+			shared_library="libwasmer_runtime_c_api.so"
 	esac
 
-	# Link `wasmer/libwasmer_runtime_c_api.*`.
-	rm -f wasmer/libwasmer_runtime_c_api.${dylib_extension}
+	# Link `wasmer/*wasmer_runtime_c_api.*`.
+	rm -f wasmer/${shared_library}
 	ln -s \
-		'../'$( ls -t target/release/deps/libwasmer_runtime_c_api*.${dylib_extension} | head -n 1 ) \
-		wasmer/libwasmer_runtime_c_api.${dylib_extension}
+		'../'$( ls -t target/release/deps/${shared_library} | head -n 1 ) \
+		wasmer/${shared_library}
 
 	# Link `src/wasmer.h`.
 	rm -f wasmer/wasmer.h
