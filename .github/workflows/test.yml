@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  # Run the workflow when a commit is pushed on the `trying` or
+  # the `staging` branch, or on any tag.
+  push:
+    branches:
+      - trying
+      - staging
+    tags:
+      - '**' 
+
+jobs:
+  # The `test` job.
+  test:
+    name: Build and test
+
+    strategy:
+      matrix:
+        # The job runs on 3 different OS.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      # As soon as one job fails in the matrix, all the other
+      # in-progress jobs are canceled.
+      fail-fast: true
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '1.13'
+
+      - name: Set up Rust
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+      - name: Set up just
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cargo install just
+
+      - name: Build the runtime
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just build-runtime
+
+      - name: Build the library
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just build
+
+      - name: Run all the tests
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just test
