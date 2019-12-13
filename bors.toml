@@ -1,5 +1,5 @@
 status = [
-    "wasmerio/go-ext-wasm",
+    "Test",
 ]
 required_approvals = 0
 timeout_sec = 900

@@ -5,7 +5,7 @@ on: [push]
 jobs:
   # The `test` job.
   test:
-    name: Build and test
+    name: Test
 
     strategy:
       matrix:
