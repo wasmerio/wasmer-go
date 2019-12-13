@@ -21,13 +21,13 @@ build-runtime:
 	# Link `wasmer/libwasmer_runtime_c_api.*`.
 	rm -f wasmer/libwasmer_runtime_c_api.${dylib_extension}
 	ln -s \
-		'../'$( find target/release -name "libwasmer_runtime_c_api*.${dylib_extension}" -exec stat -n -f '%m ' {} ';' -print | sort -r | head -n 1 | cut -d ' ' -f 2 ) \
+		'../'$( ls -t target/release/deps/libwasmer_runtime_c_api*.${dylib_extension} | head -n 1 ) \
 		wasmer/libwasmer_runtime_c_api.${dylib_extension}
 
 	# Link `src/wasmer.h`.
 	rm -f wasmer/wasmer.h
 	ln -s \
-		'../'$( find target/release/build -name 'wasmer.h' -exec stat -n -f '%m ' {} ';' -print | sort -r | head -n 1 | cut -d ' ' -f 2 ) \
+		'../'$( ls -t target/release/build/*/out/wasmer.h | head -n 1 ) \
 		wasmer/wasmer.h
 
 # Build the `wasmer` library.
