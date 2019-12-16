@@ -25,6 +25,12 @@ build-runtime:
 	rm -f wasmer/${shared_library}
 	ln -s "../${shared_library_path}" wasmer/${shared_library}
 
+	case "{{os()}}" in
+		"windows")
+			ldd "../${shared_library_path}"
+			;;
+	esac
+
 	# Link `src/wasmer.h`.
 	rm -f wasmer/wasmer.h
 	ln -s \
