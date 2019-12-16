@@ -27,7 +27,7 @@ build-runtime:
 
 	case "{{os()}}" in
 		"windows")
-			ldd "../${shared_library_path}"
+			ldd "${shared_library_path}"
 			;;
 	esac
 
