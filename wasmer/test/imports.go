@@ -1,7 +1,6 @@
 package wasmertest
 
 // #include <stdlib.h>
-// #include <stdint.h>
 //
 // extern int32_t sum(void *context, int32_t x, int32_t y);
 // extern long long sum_i64(void *context, long long x, long long y);
