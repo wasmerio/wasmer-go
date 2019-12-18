@@ -9,8 +9,8 @@ jobs:
 
     strategy:
       matrix:
-        # The job runs on 3 different OS.
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # The job runs on 2 different OS.
+        os: [ubuntu-latest, macos-latest]
       # As soon as one job fails in the matrix, all the other
       # in-progress jobs are canceled.
       fail-fast: true
