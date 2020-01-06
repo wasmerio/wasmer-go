@@ -221,6 +221,67 @@ For a more complete example, see the [Greet Example][greet-example].
 
 [greet-example]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer#example-package--Greet
 
+# Use with bazel
+
+To use this with bazel. Instead of installing it with `go get` (which will not compile with gazelle generated `BUILD.bazel`), add the following to your `WORKSPACE` file:
+
+```
+git_repository(
+    name = "com_github_wasmerio_go_ext_wasm",
+    remote = "https://github.com/wasmerio/go-ext-wasm",
+    commit = "90c00ac78c6cc99bf1ed3755f828cc63e5f3920a", // replace with commits of your preference.
+    patch_args = ["-p1"],
+    patches = ["//external:com_github_wasmerio_go_ext_wasm.patch"],
+)
+```
+
+and add `external/com_github_wasmerio_go_ext_wasm.patch` file with following:
+
+```
+diff --git a/wasmer/BUILD.bazel b/wasmer/BUILD.bazel
+new file mode 100644
+index 0000000..d3ee99a
+--- /dev/null
++++ b/wasmer/BUILD.bazel
+@@ -0,0 +1,36 @@
++package(default_visibility = ["//visibility:public"])
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++cc_library(
++    name = "wasm",
++    srcs = glob(["*.h"]) + select({
++        "@io_bazel_rules_go//go/platform:darwin": ["libwasmer_runtime_c_api.dylib"],
++        "@io_bazel_rules_go//go/platform:linux_amd64": ["libwasmer_runtime_c_api.so"],
++        "@io_bazel_rules_go//go/platform:windows_amd64": ["lwasmer_runtime_c_api.dll"],
++    }),
++    hdrs = glob(["*.h"]),
++    visibility = ["//visibility:public"],
++    includes = ["."],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "bridge.go",
++        "error.go",
++        "import.go",
++        "instance.go",
++        "memory.go",
++        "module.go",
++        "value.go",
++        "wasi.go",
++        "wasmer.go",
++        "wasmer.h",
++     ],
++    cgo = True,
++    clinkopts = ["-Wl,-rpath,wasmer -Lwasmer/wasmer -lwasmer_runtime_c_api"],
++    importpath = "github.com/wasmerio/go-ext-wasm/wasmer",
++    visibility = ["//visibility:public"],
++    cdeps = [":wasm"],
++)
+```
+
 # Development
 
 The Go library is written in Go and Rust.
