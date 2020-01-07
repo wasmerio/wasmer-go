@@ -57,7 +57,7 @@ func NewWasiImportObject(
 	mappedDirs []MapDirEntry,
 ) *ImportObject {
 	return NewWasiImportObjectForVersion(
-		Snapshot1,
+		Latest,
 		arguments,
 		environmentVariables,
 		preopenedDirs,
