@@ -113,6 +113,7 @@ type cWasmerValueT C.wasmer_value_t
 type cWasmerValueTag C.wasmer_value_tag
 type cWasmerWasiMapDirEntryT C.wasmer_wasi_map_dir_entry_t
 
+const cVersionLatest = C.Latest
 const cVersionSnapshot0 = C.Snapshot0
 const cVersionSnapshot1 = C.Snapshot1
 const cVersionUnknown = C.Unknown

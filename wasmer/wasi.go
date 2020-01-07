@@ -11,6 +11,9 @@ const (
 	// Unknown represents an unknown WASI version.
 	Unknown = WasiVersion(cVersionUnknown)
 
+	// Latest represents the latest WASI version.
+	Latest = WasiVersion(cVersionSnapshot0)
+
 	// Snapshot0 represents the `wasi_unstable` WASI version.
 	Snapshot0 = WasiVersion(cVersionSnapshot0)
 
@@ -31,7 +34,7 @@ type MapDirEntry struct {
 // To specify WASI program arguments, environment variables,
 // preopened directories, and more, see `NewWasiImportObject`
 func NewDefaultWasiImportObject() *ImportObject {
-	return NewDefaultWasiImportObjectForVersion(Snapshot1)
+	return NewDefaultWasiImportObjectForVersion(Latest)
 }
 
 // NewDefaultWasiImportObjectForVersion is similar to
