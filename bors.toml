@@ -1,6 +1,6 @@
 status = [
-    "ci/circleci: build-and-test",
-    "ci/circleci: build-and-test-macos",
+    "Test (ubuntu-latest)",
+    "Test (macos-latest)",
 ]
 required_approvals = 0
 timeout_sec = 900

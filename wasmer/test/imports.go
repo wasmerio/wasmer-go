@@ -2,16 +2,16 @@ package wasmertest
 
 // #include <stdlib.h>
 //
-// extern int32_t sum(void *context, int32_t x, int32_t y);
+// extern int sum(void *context, int x, int y);
 // extern long long sum_i64(void *context, long long x, long long y);
 // extern float sum_f32(void *context, float x, float y);
 // extern double sum_f64(void *context, double x, double y);
-// extern int32_t missingContext();
-// extern int32_t badInstanceContext(int32_t x);
-// extern int32_t badInput(void *context, char x);
+// extern int missingContext();
+// extern int badInstanceContext(int x);
+// extern int badInput(void *context, char x);
 // extern char badOutput(void *context);
-// extern void logMessage(void *context, int32_t pointer, int32_t length);
-// extern void logMessageWithContextData(void *context, int32_t pointer, int32_t length);
+// extern void logMessage(void *context, int pointer, int length);
+// extern void logMessageWithContextData(void *context, int pointer, int length);
 import "C"
 import (
 	"github.com/stretchr/testify/assert"

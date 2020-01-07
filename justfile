@@ -1,23 +1,39 @@
-# Build the `wasmer` library.
-build go-build-args='-v':
+# Build the runtime shared library for this specific system.
+build-runtime:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	cd wasmer
+
+	# Build the shared library.
+	cargo build --release
+
+	# Find the shared library extension.
 	case "{{os()}}" in
 		"macos")
-			dylib_extension="dylib"
+			shared_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.dylib | head -n 1 )
+			shared_library=libwasmer_runtime_c_api.dylib
 			;;
 		"windows")
-			dylib_extension="dll"
+			shared_library_path=$( ls -t target/release/deps/wasmer_runtime_c_api*.dll | head -n 1 )
+			shared_library=wasmer_runtime_c_api.dll
 			;;
 		*)
-			dylib_extension="so"
+			shared_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.so | head -n 1 )
+			shared_library=libwasmer_runtime_c_api.so
 	esac
-	if ! test -f libwasmer_runtime_c_api.${dylib_extension}; then
-		cargo build --release
-		ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
-	fi
-	go build {{go-build-args}} .
+
+	# Link `wasmer/*wasmer_runtime_c_api.*`.
+	rm -f wasmer/${shared_library}
+	ln -s "../${shared_library_path}" wasmer/${shared_library}
+
+	# Link `src/wasmer.h`.
+	rm -f wasmer/wasmer.h
+	ln -s \
+		'../'$( ls -t target/release/build/*/out/wasmer.h | head -n 1 ) \
+		wasmer/wasmer.h
+
+# Build the `wasmer` library.
+build go-build-args='-v':
+	cd wasmer && go build {{go-build-args}} .
 
 # Build the `go-wasmer` bin.
 build-bin go-build-args='-v':
