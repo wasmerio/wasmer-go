@@ -39,6 +39,16 @@ $ just build
 $ go install github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
+If you are a bazel user, add following to your WORKSPACE file 
+
+```
+git_repository(
+    name = "com_github_wasmerio_go_ext_wasm",
+    remote = "https://github.com/wasmerio/go-ext-wasm",
+    commit = "",
+)
+```
+
 # Documentation
 
 [The documentation can be read online on godoc.org][documentation]. It
