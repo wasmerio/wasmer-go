@@ -25,12 +25,6 @@ build-runtime:
 	rm -f wasmer/${shared_library}
 	ln -s "../${shared_library_path}" wasmer/${shared_library}
 
-	# Link `src/wasmer.h`.
-	rm -f wasmer/wasmer.h
-	ln -s \
-		'../'$( ls -t target/release/build/*/out/wasmer.h | head -n 1 ) \
-		wasmer/wasmer.h
-
 # Build the `wasmer` library.
 build go-build-args='-v':
 	cd wasmer && go build {{go-build-args}} .
