@@ -348,3 +348,10 @@ func (instanceContext *InstanceContext) Data() interface{} {
 
 	return instancesContextData[contextDataIndex]
 }
+
+// Trap bla bla
+func Trap(instanceContext *InstanceContext, errorMessage string) bool {
+	result := cWasmerTrap(instanceContext.context, errorMessage)
+
+	return result == cWasmerOk
+}

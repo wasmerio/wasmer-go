@@ -12,6 +12,7 @@ package wasmertest
 // extern char badOutput(void *context);
 // extern void logMessage(void *context, int pointer, int length);
 // extern void logMessageWithContextData(void *context, int pointer, int length);
+// extern int trap(void *context, int x, int y);
 import "C"
 import (
 	"github.com/stretchr/testify/assert"
@@ -291,4 +292,29 @@ func testWasiImportObject(t *testing.T) {
 	_, err = start()
 	assert.NoError(t, err)
 
+}
+
+//export trap
+func trap(context unsafe.Pointer, x int32, y int32) int32 {
+	var instanceContext = wasm.IntoInstanceContext(context)
+	wasm.Trap(&instanceContext, "Hello")
+
+	return 0
+}
+
+func testImportTrap(t *testing.T) {
+	imports, err := wasm.NewImports().Namespace("env").Append("sum", trap, C.trap)
+	assert.NoError(t, err)
+
+	instance, err := wasm.NewInstanceWithImports(getImportedFunctionBytes("examples", "imported_function.wasm"), imports)
+	defer instance.Close()
+
+	assert.NoError(t, err)
+
+	add1, exists := instance.Exports["add1"]
+	assert.Equal(t, true, exists)
+
+	result, err := add1(1, 2)
+
+	_ = result
 }

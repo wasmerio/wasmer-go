@@ -644,6 +644,16 @@ func cWasmerSerializedModuleFromBytes(
 	))
 }
 
+func cWasmerTrap(
+	instanceContext *cWasmerInstanceContextT,
+	errorMessage string,
+) cWasmerResultT {
+	return (cWasmerResultT)(C.wasmer_trap(
+		(*C.wasmer_instance_context_t)(instanceContext),
+		(*C.char)(cCString(errorMessage)),
+	))
+}
+
 func cWasmerValidate(wasmBytes *cUchar, wasmBytesLength cUint) cBool {
 	return (cBool)(C.wasmer_validate(
 		(*C.uchar)(wasmBytes),
