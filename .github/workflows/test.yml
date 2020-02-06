@@ -9,8 +9,8 @@ jobs:
 
     strategy:
       matrix:
-        # The job runs on 3 different OS.
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # The job runs on 2 different OS.
+        os: [ubuntu-latest, macos-latest]
       # As soon as one job fails in the matrix, all the other
       # in-progress jobs are canceled.
       fail-fast: true
@@ -72,3 +72,12 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           just test
+      - name: Test bazel build
+        shell: bash
+        run: |
+          export GOOS=$(go env GOHOSTOS)
+          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.2.1/bazelisk-${GOOS}-amd64"
+          mkdir -p "${GITHUB_WORKSPACE}/bin/"
+          mv "bazelisk-${GOOS}-amd64" "${GITHUB_WORKSPACE}/bin/bazel"
+          chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
+          "${GITHUB_WORKSPACE}/bin/bazel" build //...

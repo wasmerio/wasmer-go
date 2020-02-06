@@ -113,6 +113,10 @@ type cWasmerValueT C.wasmer_value_t
 type cWasmerValueTag C.wasmer_value_tag
 type cWasmerWasiMapDirEntryT C.wasmer_wasi_map_dir_entry_t
 
+const cVersionLatest = C.Latest
+const cVersionSnapshot0 = C.Snapshot0
+const cVersionSnapshot1 = C.Snapshot1
+const cVersionUnknown = C.Unknown
 const cWasmF32 = C.WASM_F32
 const cWasmF64 = C.WASM_F64
 const cWasmFunction = C.WASM_FUNCTION
@@ -177,10 +181,6 @@ func cGetReturnsForImportFunc(function *cWasmerImportFuncT) []cWasmerValueTag {
 	return returns
 }
 
-func cNewWasmerDefaultWasiImportObject() *cWasmerImportObjectT {
-	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_default_import_object())
-}
-
 func cNewWasmerImportT(
 	moduleName string,
 	importName string,
@@ -199,13 +199,13 @@ func cNewWasmerImportT(
 
 func cNewWasmerWasiImportObject(
 	arguments *cWasmerByteArray,
-	argumentsLength int,
+	argumentsLength uint,
 	environmentVariables *cWasmerByteArray,
-	environmentVariablesLength int,
+	environmentVariablesLength uint,
 	preopenedFiles *cWasmerByteArray,
-	preopenFilesLength int,
+	preopenFilesLength uint,
 	mappedDirs *cWasmerWasiMapDirEntryT,
-	mappedDirsLength int,
+	mappedDirsLength uint,
 ) *cWasmerImportObjectT {
 	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_import_object(
 		(*C.wasmer_byte_array)(arguments),
@@ -216,6 +216,36 @@ func cNewWasmerWasiImportObject(
 		(C.uint)(preopenFilesLength),
 		(*C.wasmer_wasi_map_dir_entry_t)(mappedDirs),
 		(C.uint)(mappedDirsLength),
+	))
+}
+
+func cNewWasmerWasiImportObjectForVersion(
+	version uint,
+	arguments *cWasmerByteArray,
+	argumentsLength uint,
+	environmentVariables *cWasmerByteArray,
+	environmentVariablesLength uint,
+	preopenedFiles *cWasmerByteArray,
+	preopenFilesLength uint,
+	mappedDirs *cWasmerWasiMapDirEntryT,
+	mappedDirsLength uint,
+) *cWasmerImportObjectT {
+	return (*cWasmerImportObjectT)(C.wasmer_wasi_generate_import_object_for_version(
+		(C.uchar)(version),
+		(*C.wasmer_byte_array)(arguments),
+		(C.uint)(argumentsLength),
+		(*C.wasmer_byte_array)(environmentVariables),
+		(C.uint)(environmentVariablesLength),
+		(*C.wasmer_byte_array)(preopenedFiles),
+		(C.uint)(preopenFilesLength),
+		(*C.wasmer_wasi_map_dir_entry_t)(mappedDirs),
+		(C.uint)(mappedDirsLength),
+	))
+}
+
+func cWasmerWasiGetVersion(module *cWasmerModuleT) uint {
+	return (uint)(C.wasmer_wasi_get_version(
+		(*C.wasmer_module_t)(module),
 	))
 }
 
@@ -467,7 +497,7 @@ func cWasmerInstanceCall(
 
 func cWasmerInstanceContextDataGet(instanceContext *cWasmerInstanceContextT) unsafe.Pointer {
 	return unsafe.Pointer(C.wasmer_instance_context_data_get(
-		(*C.wasmer_instance_t)(instanceContext),
+		(*C.wasmer_instance_context_t)(instanceContext),
 	))
 }
 

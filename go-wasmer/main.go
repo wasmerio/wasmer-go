@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"log"
 	"os"
@@ -15,7 +15,7 @@ func main() {
 	app.Usage = "Run WebAssembly binaries."
 	app.Version = "0.2.0"
 
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:    "call",
 			Aliases: []string{},
@@ -26,9 +26,9 @@ func main() {
 				}
 
 				arguments := c.Args()
-				wasmFile := arguments[0]
-				functionName := arguments[1]
-				functionArguments := arguments[2:]
+				wasmFile := arguments.Get(0)
+				functionName := arguments.Get(1)
+				functionArguments := arguments.Slice()[2:]
 
 				bytes, err := wasm.ReadBytes(wasmFile)
 

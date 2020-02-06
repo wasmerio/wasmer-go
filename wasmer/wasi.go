@@ -4,6 +4,23 @@ import (
 	"unsafe"
 )
 
+// WasiVersion represents the WASI version.
+type WasiVersion uint
+
+const (
+	// Unknown represents an unknown WASI version.
+	Unknown = WasiVersion(cVersionUnknown)
+
+	// Latest represents the latest WASI version.
+	Latest = WasiVersion(cVersionSnapshot0)
+
+	// Snapshot0 represents the `wasi_unstable` WASI version.
+	Snapshot0 = WasiVersion(cVersionSnapshot0)
+
+	// Snapshot1 represents the `wasi_snapshot1_preview` WASI version.
+	Snapshot1 = WasiVersion(cVersionSnapshot1)
+)
+
 // MapDirEntry is an entry that can be passed to `NewWasiImportObject`.
 // Preopens a file for the WASI module but renames it to the given name
 type MapDirEntry struct {
@@ -17,7 +34,13 @@ type MapDirEntry struct {
 // To specify WASI program arguments, environment variables,
 // preopened directories, and more, see `NewWasiImportObject`
 func NewDefaultWasiImportObject() *ImportObject {
-	var inner = cNewWasmerDefaultWasiImportObject()
+	return NewDefaultWasiImportObjectForVersion(Latest)
+}
+
+// NewDefaultWasiImportObjectForVersion is similar to
+// `NewDefaultWasiImportObject` but it specifies the WASI version.
+func NewDefaultWasiImportObjectForVersion(version WasiVersion) *ImportObject {
+	var inner = cNewWasmerWasiImportObjectForVersion((uint)(version), nil, 0, nil, 0, nil, 0, nil, 0)
 
 	return &ImportObject{inner}
 }
@@ -28,6 +51,24 @@ func NewDefaultWasiImportObject() *ImportObject {
 // (host file paths), and mapped directories (host file paths with an
 // alias, see `MapDirEntry`)
 func NewWasiImportObject(
+	arguments []string,
+	environmentVariables []string,
+	preopenedDirs []string,
+	mappedDirs []MapDirEntry,
+) *ImportObject {
+	return NewWasiImportObjectForVersion(
+		Latest,
+		arguments,
+		environmentVariables,
+		preopenedDirs,
+		mappedDirs,
+	)
+}
+
+// NewWasiImportObjectForVersion is similar to `NewWasiImportObject`
+// but it specifies the WASI version.
+func NewWasiImportObjectForVersion(
+	version WasiVersion,
 	arguments []string,
 	environmentVariables []string,
 	preopenedDirs []string,
@@ -58,11 +99,23 @@ func NewWasiImportObject(
 	}
 
 	var inner = cNewWasmerWasiImportObject(
-		(*cWasmerByteArray)(unsafe.Pointer(&argumentsBytes)), len(argumentsBytes),
-		(*cWasmerByteArray)(unsafe.Pointer(&environmentVariablesBytes)), len(environmentVariablesBytes),
-		(*cWasmerByteArray)(unsafe.Pointer(&preopenedDirsBytes)), len(preopenedDirsBytes),
-		(*cWasmerWasiMapDirEntryT)(unsafe.Pointer(&mappedDirsBytes)), len(mappedDirsBytes),
+		(*cWasmerByteArray)(unsafe.Pointer(&argumentsBytes)),
+		(uint)(len(argumentsBytes)),
+		(*cWasmerByteArray)(unsafe.Pointer(&environmentVariablesBytes)),
+		(uint)(len(environmentVariablesBytes)),
+		(*cWasmerByteArray)(unsafe.Pointer(&preopenedDirsBytes)),
+		(uint)(len(preopenedDirsBytes)),
+		(*cWasmerWasiMapDirEntryT)(unsafe.Pointer(&mappedDirsBytes)),
+		(uint)(len(mappedDirsBytes)),
 	)
 
 	return &ImportObject{inner}
+}
+
+// WasiGetVersion returns the WASI version of a module if any, other
+// `Unknown` is returned.
+func WasiGetVersion(module Module) WasiVersion {
+	return (WasiVersion)(cWasmerWasiGetVersion(
+		module.module,
+	))
 }
