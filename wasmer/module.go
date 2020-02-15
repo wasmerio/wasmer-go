@@ -3,6 +3,7 @@ package wasmer
 import (
 	"fmt"
 	"io/ioutil"
+	"runtime"
 	"unsafe"
 )
 
@@ -167,6 +168,8 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
 			var instance *cWasmerInstanceT
 
+			runtime.LockOSThread()
+			defer runtime.UnlockOSThread()
 			var instantiateResult = cWasmerModuleInstantiate(
 				module.module,
 				&instance,
@@ -175,7 +178,7 @@ func (module *Module) InstantiateWithImports(imports *Imports) (Instance, error)
 			)
 
 			if instantiateResult != cWasmerOk {
-				var lastError, err = GetLastError()
+				var lastError, err = getLastError()
 				var errorMessage = "Failed to instantiate the module:\n    %s"
 
 				if err != nil {
@@ -198,10 +201,12 @@ func (module *Module) InstantiateWithImportObject(importObject *ImportObject) (I
 	var instance *cWasmerInstanceT
 	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: nil}
 
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 	var instantiateResult = cWasmerModuleImportInstantiate(&instance, module.module, importObject.inner)
 
 	if instantiateResult != cWasmerOk {
-		var lastError, err = GetLastError()
+		var lastError, err = getLastError()
 		var errorMessage = "Failed to instantiate the module:\n    %s"
 
 		if err != nil {

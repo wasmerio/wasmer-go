@@ -29,22 +29,27 @@ func (error *InstanceError) Error() string {
 // WebAssembly exported function. It is returned by `Instance`
 // functions only.
 type ExportedFunctionError struct {
-	functionName string
+	FunctionName string
 	message      string
+	Err          string
 }
 
 // NewExportedFunctionError constructs a new `ExportedFunctionError`,
 // where `functionName` is the name of the exported function, and
 // `message` is the error message. If the error message contains `%s`,
 // then this parameter will be replaced by `functionName`.
-func NewExportedFunctionError(functionName string, message string) *ExportedFunctionError {
-	return &ExportedFunctionError{functionName, message}
+func NewExportedFunctionError(functionName, message string) *ExportedFunctionError {
+	return &ExportedFunctionError{functionName, message, ""}
 }
 
 // ExportedFunctionError is an actual error. The `Error` function
 // returns the error message.
 func (error *ExportedFunctionError) Error() string {
-	return fmt.Sprintf(error.message, error.functionName)
+	s := fmt.Sprintf(error.message, error.FunctionName)
+	if error.Err != "" {
+		s += ": " + error.Err
+	}
+	return s
 }
 
 // Instance represents a WebAssembly instance.
@@ -89,6 +94,8 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 		func(wasmImportsCPointer *cWasmerImportT, numberOfImports int) (*cWasmerInstanceT, error) {
 			var instance *cWasmerInstanceT
 
+			runtime.LockOSThread()
+			defer runtime.UnlockOSThread()
 			var compileResult = cWasmerInstantiate(
 				&instance,
 				(*cUchar)(unsafe.Pointer(&bytes[0])),
@@ -98,7 +105,7 @@ func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 			)
 
 			if compileResult != cWasmerOk {
-				var lastError, err = GetLastError()
+				var lastError, err = getLastError()
 				var errorMessage = "Failed to instantiate the module:\n    %s"
 
 				if err != nil {
@@ -354,17 +361,30 @@ func getExportsFromInstance(
 					wasmOutputsCPointer = (*cWasmerValueT)(unsafe.Pointer(&wasmOutputs))
 				}
 
-				var callResult = cWasmerInstanceCall(
-					instance,
-					wasmFunctionName,
-					wasmInputsCPointer,
-					wasmFunctionInputsArity,
-					wasmOutputsCPointer,
-					wasmFunctionOutputsArity,
-				)
+				var callResult cWasmerResultT
+				if err := func() error {
+					runtime.LockOSThread()
+					defer runtime.UnlockOSThread()
+					callResult = cWasmerInstanceCall(
+						instance,
+						wasmFunctionName,
+						wasmInputsCPointer,
+						wasmFunctionInputsArity,
+						wasmOutputsCPointer,
+						wasmFunctionOutputsArity,
+					)
 
-				if callResult != cWasmerOk {
-					return I32(0), NewExportedFunctionError(exportedFunctionName, "Failed to call the `%s` exported function.")
+					if callResult != cWasmerOk {
+						err := NewExportedFunctionError(exportedFunctionName, "Failed to call the `%s` exported function.")
+						errStr, errStrErr := getLastError()
+						if errStrErr == nil {
+							err.Err = errStr
+						}
+						return err
+					}
+					return nil
+				}(); err != nil {
+					return I32(0), err
 				}
 
 				if wasmFunctionOutputsArity > 0 {

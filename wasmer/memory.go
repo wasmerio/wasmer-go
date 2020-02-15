@@ -3,6 +3,7 @@ package wasmer
 import (
 	"fmt"
 	"reflect"
+	"runtime"
 	"unsafe"
 )
 
@@ -69,10 +70,12 @@ func (memory *Memory) Grow(numberOfPages uint32) error {
 		return nil
 	}
 
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
 	var growResult = cWasmerMemoryGrow(memory.memory, cUint32T(numberOfPages))
 
 	if growResult != cWasmerOk {
-		var lastError, err = GetLastError()
+		var lastError, err = getLastError()
 		var errorMessage = "Failed to grow the memory:\n    %s"
 
 		if err != nil {

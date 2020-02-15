@@ -5,8 +5,8 @@ import (
 	"unsafe"
 )
 
-// GetLastError returns the last error message if any, otherwise returns an error.
-func GetLastError() (string, error) {
+// getLastError returns the last error message if any, otherwise returns an error.
+func getLastError() (string, error) {
 	var errorLength = cWasmerLastErrorLength()
 
 	if errorLength == 0 {
