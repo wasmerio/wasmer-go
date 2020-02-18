@@ -30,6 +30,28 @@ type Memory struct {
 	memory *cWasmerMemoryT
 }
 
+// NewMemory instantiates a new WebAssembly imported memory.
+func NewMemory(min, max uint32) (*Memory, error) {
+	var memory Memory
+
+	newResult := cWasmerMemoryNew(&memory.memory, cUint32T(min), cUint32T(max))
+
+	if newResult != cWasmerOk {
+		var lastError, err = GetLastError()
+		var errorMessage = "Failed to allocate the memory:\n    %s"
+
+		if err != nil {
+			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+		} else {
+			errorMessage = fmt.Sprintf(errorMessage, lastError)
+		}
+
+		return nil, NewMemoryError(errorMessage)
+	}
+
+	return &memory, nil
+}
+
 // Instantiates a new WebAssembly exported memory.
 func newMemory(memory *cWasmerMemoryT) Memory {
 	return Memory{memory}
@@ -85,4 +107,9 @@ func (memory *Memory) Grow(numberOfPages uint32) error {
 	}
 
 	return nil
+}
+
+// Close closes/frees memory allocated at the NewMemory at time.
+func (memory *Memory) Close() {
+	cWasmerMemoryDestroy(memory.memory)
 }

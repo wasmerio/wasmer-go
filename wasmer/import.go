@@ -35,11 +35,6 @@ func NewImportObject() *ImportObject {
 // Imports returns `*Imports` for a given `ImportObject`
 func (importObject *ImportObject) Imports() (*Imports, error) {
 	imports := cWasmerImportObjectGetFunctions(importObject.inner)
-
-	if imports == nil {
-		return nil, NewImportObjectError("Could not get functions from the given import object")
-	}
-
 	output := NewImports()
 
 	for _, impoort := range imports {
@@ -72,14 +67,14 @@ func (importObject *ImportObject) Extend(imports Imports) error {
 	}
 
 	var cImports = make([]cWasmerImportT, numberOfImports)
-	var importFunctionNth = 0
+	var importNth = 0
 
-	for importName, importFunction := range imports.imports {
-		cImports[importFunctionNth] = *getCWasmerImport(importName, importFunction)
-		importFunctionNth++
+	for importName, importImport := range imports.imports {
+		cImports[importNth] = *getCWasmerImport(importName, importImport)
+		importNth++
 	}
 
-	if importFunctionNth == 0 {
+	if importNth == 0 {
 		return nil
 	}
 
@@ -126,8 +121,11 @@ func (error *ImportedFunctionError) Error() string {
 	return fmt.Sprintf(error.message, error.functionName)
 }
 
-// Import represents an WebAssembly instance imported function.
-type Import struct {
+// Import represents an WebAssembly instance imported function or memory.
+type Import interface{}
+
+// ImportFunction represents an WebAssembly instance imported function.
+type ImportFunction struct {
 	// An implementation must be of type:
 	// `func(context unsafe.Pointer, arguments ...interface{}) interface{}`.
 	// It represents the real function implementation written in Go.
@@ -146,6 +144,14 @@ type Import struct {
 	// The function implementation signature as a WebAssembly signature.
 	wasmOutputs []cWasmerValueTag
 
+	// The namespace of the imported function.
+	namespace string
+}
+
+// ImportMemory represents an WebAssembly instance imported memory.
+type ImportMemory struct {
+	// Memory to import.
+	memory *Memory
 	// The namespace of the imported function.
 	namespace string
 }
@@ -174,7 +180,7 @@ func (imports *Imports) Namespace(namespace string) *Imports {
 	return imports
 }
 
-// Append adds a new imported function to the current set.
+// Append adds a new imported function to the current set. Deprecated, please use AppendFunction instead.
 func (imports *Imports) Append(importName string, implementation interface{}, cgoPointer unsafe.Pointer) (*Imports, error) {
 	var importType = reflect.TypeOf(implementation)
 
@@ -234,12 +240,29 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	var importedFunctionPointer *cWasmerImportFuncT
 	var namespace = imports.currentNamespace
 
-	imports.imports[importName] = Import{
+	imports.imports[importName] = ImportFunction{
 		implementation,
 		cgoPointer,
 		importedFunctionPointer,
 		wasmInputs,
 		wasmOutputs,
+		namespace,
+	}
+
+	return imports, nil
+}
+
+// AppendFunction adds a new imported function to the current set.
+func (imports *Imports) AppendFunction(importName string, implementation interface{}, cgoPointer unsafe.Pointer) (*Imports, error) {
+	return imports.Append(importName, implementation, cgoPointer)
+}
+
+// AppendMemory adds a new imported memory to the current set.
+func (imports *Imports) AppendMemory(importName string, memory *Memory) (*Imports, error) {
+	var namespace = imports.currentNamespace
+
+	imports.imports[importName] = ImportMemory{
+		memory,
 		namespace,
 	}
 
@@ -264,7 +287,7 @@ func (imports *Imports) appendRaw(
 		return imports, NewImportedFunctionError(importName, fmt.Sprintf("Could not get the outputs for `%%s` in namespace `%s`", namespace))
 	}
 
-	imports.imports[importName] = Import{
+	imports.imports[importName] = ImportFunction{
 		nil,
 		unsafe.Pointer(wasmerImportFunc),
 		wasmerImportFunc,
@@ -278,15 +301,29 @@ func (imports *Imports) appendRaw(
 
 // Close closes/frees all imported functions that have been registered by Wasmer.
 func (imports *Imports) Close() {
-	for _, importFunction := range imports.imports {
-		if nil != importFunction.importedFunctionPointer {
-			cWasmerImportFuncDestroy(importFunction.importedFunctionPointer)
+	for _, importImport := range imports.imports {
+		if importFunction, ok := importImport.(ImportFunction); ok {
+			if nil != importFunction.importedFunctionPointer {
+				cWasmerImportFuncDestroy(importFunction.importedFunctionPointer)
+			}
 		}
 	}
 }
 
 // Helper function: Get a C import for a given import
-func getCWasmerImport(importName string, importFunction Import) *cWasmerImportT {
+func getCWasmerImport(importName string, importImport Import) *cWasmerImportT {
+	if importMemory, ok := importImport.(ImportMemory); ok {
+		var newImport = cNewWasmerImportTMemory(
+			importMemory.namespace,
+			importName,
+			importMemory.memory.memory,
+		)
+
+		return &newImport
+	}
+
+	importFunction := importImport.(ImportFunction)
+
 	var wasmInputsArity = len(importFunction.wasmInputs)
 	var wasmOutputsArity = len(importFunction.wasmOutputs)
 
@@ -308,7 +345,7 @@ func getCWasmerImport(importName string, importFunction Import) *cWasmerImportT 
 		importFunctionOutputsCPointer,
 		cUint(wasmOutputsArity),
 	)
-	var newImport = cNewWasmerImportT(
+	var newImport = cNewWasmerImportTFunction(
 		importFunction.namespace,
 		importName,
 		importFunction.importedFunctionPointer,
