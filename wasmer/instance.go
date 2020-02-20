@@ -210,6 +210,21 @@ func getExportsFromInstance(
 
 			var numberOfExpectedArguments = int(wasmFunctionInputsArity)
 
+			var wasmInputs = make([]cWasmerValueT, wasmFunctionInputsArity)
+			var wasmOutputs = make([]cWasmerValueT, wasmFunctionOutputsArity)
+
+			type wasmFunctionNameHolder struct {
+				CPointer *cChar
+			}
+
+			wasmFunctionName := &wasmFunctionNameHolder{
+				CPointer: cCString(exportedFunctionName),
+			}
+
+			runtime.SetFinalizer(wasmFunctionName, func(h *wasmFunctionNameHolder) {
+				cFree(unsafe.Pointer(h.CPointer))
+			})
+
 			exports[exportedFunctionName] = func(arguments ...interface{}) (Value, error) {
 				var numberOfGivenArguments = len(arguments)
 				var diff = numberOfExpectedArguments - numberOfGivenArguments
@@ -219,8 +234,6 @@ func getExportsFromInstance(
 				} else if diff < 0 {
 					return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, numberOfExpectedArguments, numberOfGivenArguments))
 				}
-
-				var wasmInputs = make([]cWasmerValueT, wasmFunctionInputsArity)
 
 				for nth, value := range arguments {
 					var wasmInputType = wasmFunctionInputSignatures[nth]
@@ -333,11 +346,6 @@ func getExportsFromInstance(
 					}
 				}
 
-				var wasmOutputs = make([]cWasmerValueT, wasmFunctionOutputsArity)
-
-				var wasmFunctionName = cCString(exportedFunctionName)
-				defer cFree(unsafe.Pointer(wasmFunctionName))
-
 				var wasmInputsCPointer *cWasmerValueT
 
 				if wasmFunctionInputsArity > 0 {
@@ -356,7 +364,7 @@ func getExportsFromInstance(
 
 				var callResult = cWasmerInstanceCall(
 					instance,
-					wasmFunctionName,
+					wasmFunctionName.CPointer,
 					wasmInputsCPointer,
 					wasmFunctionInputsArity,
 					wasmOutputsCPointer,
