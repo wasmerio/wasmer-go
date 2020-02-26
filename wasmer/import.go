@@ -121,10 +121,11 @@ func (error *ImportedFunctionError) Error() string {
 	return fmt.Sprintf(error.message, error.functionName)
 }
 
-// Import represents an WebAssembly instance imported function or memory.
+// Import represents a WebAssembly instance imported function or
+// memory. Imagine it is an union of `ImportFunction` and `ImportMemory`.
 type Import interface{}
 
-// ImportFunction represents an WebAssembly instance imported function.
+// ImportFunction represents a WebAssembly instance imported function.
 type ImportFunction struct {
 	// An implementation must be of type:
 	// `func(context unsafe.Pointer, arguments ...interface{}) interface{}`.
@@ -148,10 +149,11 @@ type ImportFunction struct {
 	namespace string
 }
 
-// ImportMemory represents an WebAssembly instance imported memory.
+// ImportMemory represents a WebAssembly instance imported memory.
 type ImportMemory struct {
 	// Memory to import.
 	memory *Memory
+
 	// The namespace of the imported function.
 	namespace string
 }
@@ -299,7 +301,9 @@ func (imports *Imports) appendRaw(
 	return imports, nil
 }
 
-// Close closes/frees all imported functions that have been registered by Wasmer.
+// Close closes/frees all imports. For the moment, only imported
+// functions must be freed. Imported memory must be freed manually by the
+// owner.
 func (imports *Imports) Close() {
 	for _, importImport := range imports.imports {
 		if importFunction, ok := importImport.(ImportFunction); ok {
