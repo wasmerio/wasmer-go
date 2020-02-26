@@ -316,6 +316,39 @@ func (imports *Imports) Close() {
 
 // Helper function: Get a C import for a given import
 func getCWasmerImport(importName string, importImport Import) *cWasmerImportT {
+	// Imported function.
+	if importFunction, ok := importImport.(ImportFunction); ok {
+		var wasmInputsArity = len(importFunction.wasmInputs)
+		var wasmOutputsArity = len(importFunction.wasmOutputs)
+
+		var importFunctionInputsCPointer *cWasmerValueTag
+		var importFunctionOutputsCPointer *cWasmerValueTag
+
+		if wasmInputsArity > 0 {
+			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
+		}
+
+		if wasmOutputsArity > 0 {
+			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
+		}
+
+		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
+			importFunction.cgoPointer,
+			importFunctionInputsCPointer,
+			cUint(wasmInputsArity),
+			importFunctionOutputsCPointer,
+			cUint(wasmOutputsArity),
+		)
+		var newImport = cNewWasmerImportTFunction(
+			importFunction.namespace,
+			importName,
+			importFunction.importedFunctionPointer,
+		)
+
+		return &newImport
+	}
+
+	// Imported memory.
 	if importMemory, ok := importImport.(ImportMemory); ok {
 		var newImport = cNewWasmerImportTMemory(
 			importMemory.namespace,
@@ -326,36 +359,7 @@ func getCWasmerImport(importName string, importImport Import) *cWasmerImportT {
 		return &newImport
 	}
 
-	importFunction := importImport.(ImportFunction)
-
-	var wasmInputsArity = len(importFunction.wasmInputs)
-	var wasmOutputsArity = len(importFunction.wasmOutputs)
-
-	var importFunctionInputsCPointer *cWasmerValueTag
-	var importFunctionOutputsCPointer *cWasmerValueTag
-
-	if wasmInputsArity > 0 {
-		importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
-	}
-
-	if wasmOutputsArity > 0 {
-		importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
-	}
-
-	importFunction.importedFunctionPointer = cWasmerImportFuncNew(
-		importFunction.cgoPointer,
-		importFunctionInputsCPointer,
-		cUint(wasmInputsArity),
-		importFunctionOutputsCPointer,
-		cUint(wasmOutputsArity),
-	)
-	var newImport = cNewWasmerImportTFunction(
-		importFunction.namespace,
-		importName,
-		importFunction.importedFunctionPointer,
-	)
-
-	return &newImport
+	return nil
 }
 
 // InstanceContext represents a way to access instance API from within
