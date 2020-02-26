@@ -16,8 +16,7 @@ import "unsafe"
 // compile-time. [Wasmer releases][wasmer-releases] come with
 // pre-compiled `.dylib` and `.so` shared libraries. It is also possible
 // to re-compile specific shared libraries with this project. In this
-// package, they are located in the root as
-// `libwasmer_runtime_c_api\..*`.
+// package, they are located in the root as `libwasmer\..*`.
 //
 // Go provides [cgo] that enables the creation of Go packages that
 // call C code. This package uses cgo to communicate with Wasmer through
