@@ -20,6 +20,13 @@ func TestMemoryIsAbsent(t *testing.T) {
 	assert.Equal(t, false, instance.HasMemory())
 }
 
+func TestExportedMemoryIsBorrowed(t *testing.T) {
+	instance, _ := wasm.NewInstance(GetBytes())
+	defer instance.Close()
+
+	assert.Equal(t, false, instance.Memory.IsOwned())
+}
+
 func TestMemoryLength(t *testing.T) {
 	instance, _ := wasm.NewInstance(GetBytes())
 	defer instance.Close()

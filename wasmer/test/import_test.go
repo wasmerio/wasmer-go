@@ -64,3 +64,7 @@ func TestWasiImportObject(t *testing.T) {
 func TestImportMemory(t *testing.T) {
 	testImportMemory(t)
 }
+
+func TestImportMemoryIsOwned(t *testing.T) {
+	testImportMemoryIsOwned(t)
+}
