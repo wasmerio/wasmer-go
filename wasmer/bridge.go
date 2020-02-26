@@ -599,11 +599,16 @@ func cWasmerMemoryGrow(memory *cWasmerMemoryT, numberOfPages cUint32T) cWasmerRe
 func cWasmerMemoryNew(memory **cWasmerMemoryT, min, max cUint32T) cWasmerResultT {
 	limits := C.wasmer_limits_t{
 		min: C.uint32_t(min),
-		max: C.wasmer_limit_option_t{has_some: false},
+		max: C.wasmer_limit_option_t{
+			has_some: false,
+		},
 	}
 
 	if max > 0 {
-		limits.max = C.wasmer_limit_option_t{has_some: true, some: C.uint32_t(max)}
+		limits.max = C.wasmer_limit_option_t{
+			has_some: true,
+			some:     C.uint32_t(max),
+		}
 	}
 
 	return (cWasmerResultT)(C.wasmer_memory_new(
