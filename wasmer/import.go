@@ -373,7 +373,7 @@ type InstanceContext struct {
 // argument of an imported function into an `InstanceContext`.
 func IntoInstanceContext(instanceContext unsafe.Pointer) InstanceContext {
 	context := (*cWasmerInstanceContextT)(instanceContext)
-	memory := newMemory(cWasmerInstanceContextMemory(context))
+	memory := newBorrowedMemory(cWasmerInstanceContextMemory(context))
 
 	return InstanceContext{context, memory}
 }

@@ -179,7 +179,7 @@ func getExportsFromInstance(
 				return nil, nil, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			var memory = newMemory(wasmMemory)
+			var memory = newBorrowedMemory(wasmMemory)
 			memoryPointer = &memory
 
 		case cWasmFunction:
