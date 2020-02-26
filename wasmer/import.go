@@ -184,6 +184,11 @@ func (imports *Imports) Namespace(namespace string) *Imports {
 
 // Append adds a new imported function to the current set. Deprecated, please use AppendFunction instead.
 func (imports *Imports) Append(importName string, implementation interface{}, cgoPointer unsafe.Pointer) (*Imports, error) {
+	return imports.AppendFunction(importName, implementation, cgoPointer)
+}
+
+// AppendFunction adds a new imported function to the current set.
+func (imports *Imports) AppendFunction(importName string, implementation interface{}, cgoPointer unsafe.Pointer) (*Imports, error) {
 	var importType = reflect.TypeOf(implementation)
 
 	if importType.Kind() != reflect.Func {
@@ -252,11 +257,6 @@ func (imports *Imports) Append(importName string, implementation interface{}, cg
 	}
 
 	return imports, nil
-}
-
-// AppendFunction adds a new imported function to the current set.
-func (imports *Imports) AppendFunction(importName string, implementation interface{}, cgoPointer unsafe.Pointer) (*Imports, error) {
-	return imports.Append(importName, implementation, cgoPointer)
 }
 
 // AppendMemory adds a new imported memory to the current set.
