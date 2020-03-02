@@ -52,8 +52,8 @@ type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *cWasmerInstanceT
 
-	// The imported functions. Use the `NewInstanceWithImports`
-	// constructor to set it.
+	// The imported functions and memories. Use the
+	// `NewInstanceWithImports` constructor to set it.
 	imports *Imports
 
 	// All functions exported by the WebAssembly instance, indexed
@@ -77,12 +77,12 @@ type Instance struct {
 	contextDataIndex *int
 }
 
-// NewInstance constructs a new `Instance` with no imported functions.
+// NewInstance constructs a new `Instance` with no imports.
 func NewInstance(bytes []byte) (Instance, error) {
 	return NewInstanceWithImports(bytes, NewImports())
 }
 
-// NewInstanceWithImports constructs a new `Instance` with imported functions.
+// NewInstanceWithImports constructs a new `Instance` with imports.
 func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	return newInstanceWithImports(
 		imports,
@@ -121,11 +121,11 @@ func newInstanceWithImports(
 ) (Instance, error) {
 	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
-	var importFunctionNth = 0
+	var importNth = 0
 
-	for importName, importFunction := range imports.imports {
-		wasmImports[importFunctionNth] = *getCWasmerImport(importName, importFunction)
-		importFunctionNth++
+	for importName, importImport := range imports.imports {
+		wasmImports[importNth] = *getCWasmerImport(importName, importImport)
+		importNth++
 	}
 
 	var wasmImportsCPointer *cWasmerImportT
@@ -179,7 +179,7 @@ func getExportsFromInstance(
 				return nil, nil, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			var memory = newMemory(wasmMemory)
+			var memory = newBorrowedMemory(wasmMemory)
 			memoryPointer = &memory
 
 		case cWasmFunction:

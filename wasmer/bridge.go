@@ -180,7 +180,7 @@ func cGetReturnsForImportFunc(function *cWasmerImportFuncT) []cWasmerValueTag {
 	return returns
 }
 
-func cNewWasmerImportT(
+func cNewWasmerImportTFunction(
 	moduleName string,
 	importName string,
 	function *cWasmerImportFuncT,
@@ -194,6 +194,22 @@ func cNewWasmerImportT(
 	*pointer = (*C.wasmer_import_func_t)(function)
 
 	return (cWasmerImportT)(importedFunction)
+}
+
+func cNewWasmerImportTMemory(
+	moduleName string,
+	importName string,
+	memory *cWasmerMemoryT,
+) cWasmerImportT {
+	var importedMemory C.wasmer_import_t
+	importedMemory.module_name = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(moduleName))
+	importedMemory.import_name = (C.wasmer_byte_array)(cGoStringToWasmerByteArray(importName))
+	importedMemory.tag = cWasmMemory
+
+	var pointer = (**C.wasmer_memory_t)(unsafe.Pointer(&importedMemory.value))
+	*pointer = (*C.wasmer_memory_t)(memory)
+
+	return (cWasmerImportT)(importedMemory)
 }
 
 func cNewWasmerWasiImportObject(
@@ -566,10 +582,37 @@ func cWasmerMemoryDataLength(memory *cWasmerMemoryT) cUint32T {
 	))
 }
 
+func cWasmerMemoryDestroy(memory *cWasmerMemoryT) {
+	C.wasmer_memory_destroy(
+		(*C.wasmer_memory_t)(memory),
+	)
+}
+
 func cWasmerMemoryGrow(memory *cWasmerMemoryT, numberOfPages cUint32T) cWasmerResultT {
 	return (cWasmerResultT)(C.wasmer_memory_grow(
 		(*C.wasmer_memory_t)(memory),
 		(C.uint32_t)(numberOfPages),
+	))
+}
+
+func cWasmerMemoryNew(memory **cWasmerMemoryT, min, max cUint32T) cWasmerResultT {
+	limits := C.wasmer_limits_t{
+		min: C.uint32_t(min),
+		max: C.wasmer_limit_option_t{
+			has_some: false,
+		},
+	}
+
+	if max > 0 {
+		limits.max = C.wasmer_limit_option_t{
+			has_some: true,
+			some:     C.uint32_t(max),
+		}
+	}
+
+	return (cWasmerResultT)(C.wasmer_memory_new(
+		(**C.wasmer_memory_t)(unsafe.Pointer(memory)),
+		limits,
 	))
 }
 

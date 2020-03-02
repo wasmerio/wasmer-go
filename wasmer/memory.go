@@ -24,15 +24,49 @@ func (error *MemoryError) Error() string {
 	return error.message
 }
 
-// Memory represents an exported memory of a WebAssembly instance. To read
-// and write data, please see the `Data` function.
+// Memory represents a WebAssembly memory. To read and write data,
+// please see the `Data` function. The memory can be owned or
+// borrowed. It is only possible to create an owned memory from the
+// user-land.
 type Memory struct {
 	memory *cWasmerMemoryT
+
+	// If set to true, the memory can be freed.
+	owned bool
 }
 
-// Instantiates a new WebAssembly exported memory.
-func newMemory(memory *cWasmerMemoryT) Memory {
-	return Memory{memory}
+// NewMemory instantiates a new owned WebAssembly memory, bound for
+// imported memory.
+func NewMemory(min, max uint32) (*Memory, error) {
+	var memory Memory
+
+	memory.owned = true
+	newResult := cWasmerMemoryNew(&memory.memory, cUint32T(min), cUint32T(max))
+
+	if newResult != cWasmerOk {
+		var lastError, err = GetLastError()
+		var errorMessage = "Failed to allocate the memory:\n    %s"
+
+		if err != nil {
+			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
+		} else {
+			errorMessage = fmt.Sprintf(errorMessage, lastError)
+		}
+
+		return nil, NewMemoryError(errorMessage)
+	}
+
+	return &memory, nil
+}
+
+// Creates a new WebAssembly borrowed memory.
+func newBorrowedMemory(memory *cWasmerMemoryT) Memory {
+	return Memory{memory, false}
+}
+
+// IsOwned checks whether the memory is owned, or borrowed.
+func (memory *Memory) IsOwned() bool {
+	return memory.owned
 }
 
 // Length calculates the memory length (in bytes).
@@ -85,4 +119,11 @@ func (memory *Memory) Grow(numberOfPages uint32) error {
 	}
 
 	return nil
+}
+
+// Close closes/frees memory allocated at the NewMemory at time.
+func (memory *Memory) Close() {
+	if memory.IsOwned() {
+		cWasmerMemoryDestroy(memory.memory)
+	}
 }

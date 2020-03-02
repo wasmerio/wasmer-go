@@ -14,6 +14,7 @@ package wasmertest
 // extern void logMessageWithContextData(void *context, int pointer, int length);
 import "C"
 import (
+	"encoding/binary"
 	"github.com/stretchr/testify/assert"
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
@@ -291,4 +292,44 @@ func testWasiImportObject(t *testing.T) {
 	_, err = start()
 	assert.NoError(t, err)
 
+}
+
+func testImportMemory(t *testing.T) {
+	module, err := wasm.Compile(getImportedFunctionBytes("import_memory.wasm"))
+	assert.NoError(t, err)
+
+	imports := wasm.NewImports().Namespace("env")
+	memory, err := wasm.NewMemory(1, 1)
+	assert.NoError(t, err)
+
+	defer memory.Close()
+
+	imports, err = imports.AppendMemory("memory", memory)
+	assert.NoError(t, err)
+
+	importObject := wasm.NewImportObject()
+	err = importObject.Extend(*imports)
+	assert.NoError(t, err)
+
+	instance, err := module.InstantiateWithImportObject(importObject)
+	assert.NoError(t, err)
+
+	defer instance.Close()
+
+	readMemory, exists := instance.Exports["read_memory"]
+	assert.Equal(t, true, exists)
+
+	binary.LittleEndian.PutUint32(memory.Data()[0:4], 0x12345678)
+	result, err := readMemory()
+	assert.NoError(t, err)
+	assert.Equal(t, wasm.TypeI32, result.GetType())
+	assert.Equal(t, int32(0x12345678), result.ToI32())
+
+}
+
+func testImportMemoryIsOwned(t *testing.T) {
+	memory, err := wasm.NewMemory(1, 1)
+
+	assert.NoError(t, err)
+	assert.Equal(t, true, memory.IsOwned())
 }
