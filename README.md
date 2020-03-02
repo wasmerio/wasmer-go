@@ -165,7 +165,7 @@ code:
 * `C.sum` is the cgo function pointer.
 
 ```go
-imports, _ := wasm.NewImports().Append("sum", sum, C.sum)
+imports, _ := wasm.NewImports().AppendFunction("sum", sum, C.sum)
 ```
 
 Finally, we use `NewInstanceWithImports` to inject the imports:
