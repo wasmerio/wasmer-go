@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 ## Table of Contents
 
 * [Unreleased](#unreleased)
+* [0.3.1](#031---2020-02-03)
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
 
 ## [Unreleased]
+
+## [0.3.1] - 2020-02-03
+
+### Changed
+
+* Replace godoc.org by pkg.go.dev
+  ([#122](https://github.com/wasmerio/go-ext-wasm/pull/122) by
+  [@Hywan])
+* Do everything to publish the package on pkg.go.dev.
 
 ## [0.3.0] - 2020-02-02
 
@@ -308,7 +318,8 @@ All notable changes to this project will be documented in this file.
 First release.
 
 
-[Unreleased]: https://github.com/wasmerio/go-ext-wasm/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/wasmerio/go-ext-wasm/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/wasmerio/go-ext-wasm/compare/0.3.0...v0.3.1
 [0.3.0]: https://github.com/wasmerio/go-ext-wasm/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/wasmerio/go-ext-wasm/compare/0.1.0...0.2.0
 [@Hywan]: https://github.com/Hywan
