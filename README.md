@@ -51,7 +51,7 @@ git_repository(
 
 # Documentation
 
-[The documentation can be read online on godoc.org][documentation]. It
+[The documentation can be read online on pkg.go.dev][documentation]. It
 contains function descriptions, short examples, long examples
 etc. Everything one need to start using Wasmer with Go!
 
@@ -59,7 +59,7 @@ Also, there is this article written for the announcement that
 introduces the project: [Announcing the fastest WebAssembly runtime
 for Go: wasmer][medium].
 
-[documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
+[documentation]: https://pkg.go.dev/github.com/wasmerio/go-ext-wasm/wasmer?tab=doc
 [medium]: https://medium.com/wasmer/announcing-the-fastest-webassembly-runtime-for-go-wasmer-19832d77c050
 
 # Examples
