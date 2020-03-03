@@ -7,8 +7,8 @@
 <p align="center">
   <a href="https://spectrum.chat/wasmer">
     <img src="https://withspectrum.github.io/badge/badge.svg" alt="Join the Wasmer Community" valign="middle"></a>
-  <a href="https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer">
-    <img src="https://godoc.org/github.com/wasmerio/go-ext-wasm?status.svg" alt="Read our API documentation" valign="middle"></a>
+  <a href="https://pkg.go.dev/github.com/wasmerio/go-ext-wasm/wasmer">
+    <img src="https://img.shields.io/badge/go.dev-package-f06" alt="Read our API documentation" valign="middle"></a>
   <a href="https://goreportcard.com/report/github.com/wasmerio/go-ext-wasm">
     <img src="https://goreportcard.com/badge/github.com/wasmerio/go-ext-wasm" alt="Go Report Card" valign="middle" /></a>
   <a href="https://github.com/wasmerio/wasmer/blob/master/LICENSE">
