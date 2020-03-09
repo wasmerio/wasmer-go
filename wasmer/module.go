@@ -14,6 +14,9 @@ func ReadBytes(filename string) ([]byte, error) {
 // Validate validates a sequence of bytes that is supposed to represent a valid
 // WebAssembly module.
 func Validate(bytes []byte) bool {
+	if bytes == nil || len(bytes) == 0 {
+		return false
+	}
 	return true == cWasmerValidate((*cUchar)(unsafe.Pointer(&bytes[0])), cUint(len(bytes)))
 }
 
