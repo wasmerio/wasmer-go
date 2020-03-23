@@ -25,7 +25,7 @@ func Example_greet() {
 	lengthOfSubject := len(subject)
 
 	// Allocate memory for the subject, and get a pointer to it.
-	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject)
+	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject+1)
 	inputPointer := allocateResult.ToI32()
 
 	// Write the subject into the memory.
@@ -62,8 +62,8 @@ func Example_greet() {
 
 	// Deallocate the subject, and the output.
 	deallocate := instance.Exports["deallocate"]
-	deallocate(inputPointer, lengthOfSubject)
-	deallocate(outputPointer, lengthOfOutput)
+	deallocate(inputPointer, lengthOfSubject+1)
+	deallocate(outputPointer, lengthOfOutput+1)
 
 	// Output:
 	// Hello, Wasmer 🐹!
@@ -85,7 +85,7 @@ func Test_greetLong(t *testing.T) {
 	lengthOfSubject := len(subject)
 
 	// Allocate memory for the subject, and get a pointer to it.
-	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject)
+	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject+1)
 	inputPointer := allocateResult.ToI32()
 
 	// Write the subject into the memory.
@@ -101,7 +101,7 @@ func Test_greetLong(t *testing.T) {
 	// Allocate and copy the input string a second time.
 
 	// Allocate memory for the subject, and get a pointer to it.
-	allocateResult, _ = instance.Exports["allocate"](lengthOfSubject)
+	allocateResult, _ = instance.Exports["allocate"](lengthOfSubject+1)
 	inputPointer2 := allocateResult.ToI32()
 
 	// Write the subject into the memory.
@@ -136,9 +136,9 @@ func Test_greetLong(t *testing.T) {
 
 	// Deallocate the subject, and the output.
 	deallocate := instance.Exports["deallocate"]
-	deallocate(inputPointer, lengthOfSubject)
-	deallocate(inputPointer2, lengthOfSubject)
-	deallocate(outputPointer, lengthOfOutput)
+	deallocate(inputPointer, lengthOfSubject+1)
+	deallocate(inputPointer2, lengthOfSubject+1)
+	deallocate(outputPointer, lengthOfOutput+1)
 
 	expected := "Hello, " + string(subject) + "!"
 	if output.String() != expected {
