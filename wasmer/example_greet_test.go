@@ -24,15 +24,13 @@ func Example_greet() {
 	lengthOfSubject := len(subject)
 
 	// Allocate memory for the subject, and get a pointer to it.
+	// Include a byte for the NULL terminator we add below.
 	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject+1)
 	inputPointer := allocateResult.ToI32()
 
 	// Write the subject into the memory.
 	memory := instance.Memory.Data()[inputPointer:]
-
-	for nth := 0; nth < lengthOfSubject; nth++ {
-		memory[nth] = subject[nth]
-	}
+	copy(memory, subject)
 
 	// C-string terminates by NULL.
 	memory[lengthOfSubject] = 0
