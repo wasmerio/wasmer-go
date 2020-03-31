@@ -1,10 +1,11 @@
 package wasmertest
 
 import (
-	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/assert"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
 func TestInstanceImport(t *testing.T) {
@@ -59,6 +60,7 @@ func TestImportInstanceContextData(t *testing.T) {
 
 func TestWasiImportObject(t *testing.T) {
 	testWasiImportObject(t)
+	testWasiImportObjectWithEnv(t)
 }
 
 func TestImportMemory(t *testing.T) {
