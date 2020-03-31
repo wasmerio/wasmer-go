@@ -15,12 +15,13 @@ package wasmertest
 import "C"
 import (
 	"encoding/binary"
-	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
 	"runtime"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/assert"
+	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 )
 
 func getImportedFunctionBytes(wasmFile ...string) []byte {
@@ -273,6 +274,50 @@ func testWasiImportObject(t *testing.T) {
 	assert.Equal(t, wasiVersion, wasm.Snapshot1)
 
 	importObject := wasm.NewDefaultWasiImportObjectForVersion(wasiVersion)
+
+	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
+	assert.NoError(t, err)
+
+	err = importObject.Extend(*imports)
+	assert.NoError(t, err)
+
+	instance, err := module.InstantiateWithImportObject(importObject)
+	assert.NoError(t, err)
+
+	defer instance.Close()
+
+	start, exists := instance.Exports["_start"]
+
+	assert.Equal(t, true, exists)
+
+	_, err = start()
+	assert.NoError(t, err)
+}
+
+func testWasiImportObjectWithEnv(t *testing.T) {
+	module, err := wasm.Compile(getImportedFunctionBytes("wasi_hello_world.wasm"))
+	assert.NoError(t, err)
+
+	wasiVersion := wasm.WasiGetVersion(module)
+
+	assert.Equal(t, wasiVersion, wasm.Snapshot1)
+
+	var (
+		args    []string
+		envVars []string
+		dirs    []string
+		mDirs   []wasm.MapDirEntry
+	)
+
+	envVars = append(envVars, "foo=bar")
+
+	importObject := wasm.NewWasiImportObjectForVersion(
+		wasiVersion,
+		args,
+		envVars,
+		dirs,
+		mDirs,
+	)
 
 	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
 	assert.NoError(t, err)
