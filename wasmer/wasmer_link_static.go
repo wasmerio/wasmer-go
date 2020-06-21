@@ -2,6 +2,6 @@
 
 package wasmer
 
-// #cgo !darwin LDFLAGS: -L${SRCDIR} -l:libwasmer.a -lm -ldl -lrt
-// #cgo darwin LDFLAGS: -L${SRCDIR} -l:libwasmer.a -lm -ldl
+// #cgo !darwin LDFLAGS: -L${SRCDIR}/static -lwasmer -lm -ldl -lrt
+// #cgo darwin LDFLAGS: -L${SRCDIR}/static -lwasmer -lm -ldl
 import "C"

@@ -30,8 +30,8 @@ build-runtime:
 	# Link `wasmer/*wasmer_runtime_c_api.*`.
 	rm -f wasmer/${shared_library}
 	ln -s "../${shared_library_path}" wasmer/${shared_library}
-	rm -f wasmer/${static_library}
-	ln -s "../${static_library_path}" wasmer/${static_library}
+	rm -f wasmer/static/${static_library}
+	ln -s "../../${static_library_path}" wasmer/static/${static_library}
 
 # Build the `wasmer` library.
 build go-build-args='-v':
