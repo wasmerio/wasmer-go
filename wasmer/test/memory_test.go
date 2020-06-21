@@ -13,9 +13,18 @@ func TestMemoryIsAbsent(t *testing.T) {
 	modulePath := path.Join(path.Dir(filename), "testdata", "no_memory.wasm")
 
 	bytes, _ := wasm.ReadBytes(modulePath)
-	_, err := wasm.NewInstance(bytes)
+	instance, err := wasm.NewInstance(bytes)
 
-	assert.EqualError(t, err, "No memory exported.")
+	assert.NoError(t, err)
+	assert.Nil(t, instance.Memory)
+	assert.Equal(t, false, instance.HasMemory())
+}
+
+func TestExportedMemoryIsBorrowed(t *testing.T) {
+	instance, _ := wasm.NewInstance(GetBytes())
+	defer instance.Close()
+
+	assert.Equal(t, false, instance.Memory.IsOwned())
 }
 
 func TestMemoryLength(t *testing.T) {
@@ -25,6 +34,7 @@ func TestMemoryLength(t *testing.T) {
 	var memoryLength uint32 = instance.Memory.Length()
 
 	assert.Equal(t, uint32(0x110000), memoryLength)
+	assert.Equal(t, true, instance.HasMemory())
 }
 
 func TestMemoryDataIsASlice(t *testing.T) {

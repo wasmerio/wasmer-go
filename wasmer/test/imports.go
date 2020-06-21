@@ -2,18 +2,19 @@ package wasmertest
 
 // #include <stdlib.h>
 //
-// extern int32_t sum(void *context, int32_t x, int32_t y);
-// extern int64_t sum_i64(void *context, int64_t x, int64_t y);
+// extern int sum(void *context, int x, int y);
+// extern long long sum_i64(void *context, long long x, long long y);
 // extern float sum_f32(void *context, float x, float y);
 // extern double sum_f64(void *context, double x, double y);
-// extern int32_t missingContext();
-// extern int32_t badInstanceContext(int32_t x);
-// extern int32_t badInput(void *context, char x);
+// extern int missingContext();
+// extern int badInstanceContext(int x);
+// extern int badInput(void *context, char x);
 // extern char badOutput(void *context);
-// extern void logMessage(void *context, int32_t pointer, int32_t length);
-// extern void logMessageWithContextData(void *context, int32_t pointer, int32_t length);
+// extern void logMessage(void *context, int pointer, int length);
+// extern void logMessageWithContextData(void *context, int pointer, int length);
 import "C"
 import (
+	"encoding/binary"
 	"github.com/stretchr/testify/assert"
 	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
 	"path"
@@ -226,13 +227,17 @@ func testImportInstanceContext(t *testing.T) {
 func logMessageWithContextData(context unsafe.Pointer, pointer int32, length int32) {
 	var instanceContext = wasm.IntoInstanceContext(context)
 	var memory = instanceContext.Memory().Data()
-	var logMessage = (*logMessageContext)(instanceContext.Data())
+	var logMessage = instanceContext.Data().(*logMessageContext)
 
 	logMessage.message = string(memory[pointer : pointer+length])
 }
 
 type logMessageContext struct {
 	message string
+
+	// Ensure that Context Data may include Go pointers & reference types.
+	slice []string
+	ptr   *string
 }
 
 func testImportInstanceContextData(t *testing.T) {
@@ -244,8 +249,11 @@ func testImportInstanceContextData(t *testing.T) {
 
 	defer instance.Close()
 
-	contextData := logMessageContext{message: "first"}
-	instance.SetContextData(unsafe.Pointer(&contextData))
+	str := "test"
+	contextData := logMessageContext{message: "first",
+		slice: []string{str, str},
+		ptr:   &str}
+	instance.SetContextData(&contextData)
 
 	doSomething := instance.Exports["do_something"]
 
@@ -254,4 +262,74 @@ func testImportInstanceContextData(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, wasm.TypeVoid, result.GetType())
 	assert.Equal(t, "hello", contextData.message)
+}
+
+func testWasiImportObject(t *testing.T) {
+	module, err := wasm.Compile(getImportedFunctionBytes("wasi_hello_world.wasm"))
+	assert.NoError(t, err)
+
+	wasiVersion := wasm.WasiGetVersion(module)
+
+	assert.Equal(t, wasiVersion, wasm.Snapshot1)
+
+	importObject := wasm.NewDefaultWasiImportObjectForVersion(wasiVersion)
+
+	imports, err := wasm.NewImports().Namespace("env").Append("sum", sum, C.sum)
+	assert.NoError(t, err)
+
+	err = importObject.Extend(*imports)
+	assert.NoError(t, err)
+
+	instance, err := module.InstantiateWithImportObject(importObject)
+	assert.NoError(t, err)
+
+	defer instance.Close()
+
+	start, exists := instance.Exports["_start"]
+
+	assert.Equal(t, true, exists)
+
+	_, err = start()
+	assert.NoError(t, err)
+
+}
+
+func testImportMemory(t *testing.T) {
+	module, err := wasm.Compile(getImportedFunctionBytes("import_memory.wasm"))
+	assert.NoError(t, err)
+
+	imports := wasm.NewImports().Namespace("env")
+	memory, err := wasm.NewMemory(1, 1)
+	assert.NoError(t, err)
+
+	defer memory.Close()
+
+	imports, err = imports.AppendMemory("memory", memory)
+	assert.NoError(t, err)
+
+	importObject := wasm.NewImportObject()
+	err = importObject.Extend(*imports)
+	assert.NoError(t, err)
+
+	instance, err := module.InstantiateWithImportObject(importObject)
+	assert.NoError(t, err)
+
+	defer instance.Close()
+
+	readMemory, exists := instance.Exports["read_memory"]
+	assert.Equal(t, true, exists)
+
+	binary.LittleEndian.PutUint32(memory.Data()[0:4], 0x12345678)
+	result, err := readMemory()
+	assert.NoError(t, err)
+	assert.Equal(t, wasm.TypeI32, result.GetType())
+	assert.Equal(t, int32(0x12345678), result.ToI32())
+
+}
+
+func testImportMemoryIsOwned(t *testing.T) {
+	memory, err := wasm.NewMemory(1, 1)
+
+	assert.NoError(t, err)
+	assert.Equal(t, true, memory.IsOwned())
 }

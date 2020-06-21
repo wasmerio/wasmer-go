@@ -1,0 +1,67 @@
+name: Build and Test
+
+on: [push]
+
+jobs:
+  # The `test` job.
+  test:
+    name: Test
+
+    strategy:
+      matrix:
+        # The job runs on 2 different OS.
+        os: [ubuntu-latest, macos-latest]
+      # As soon as one job fails in the matrix, all the other
+      # in-progress jobs are canceled.
+      fail-fast: true
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '1.14'
+
+      - name: Set up Rust
+        shell: bash
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+      - name: Set up just
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cargo install just
+
+      - name: Build the runtime
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just build-runtime
+
+      - name: Build the library
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just build
+
+      - name: Run all the tests
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just test
+# Skipped for now because of Github banning the API request from actions.
+# You can find more info in this PR: https://github.com/wasmerio/go-ext-wasm/pull/118#issuecomment-588487544
+#       - name: Test bazel build
+#         shell: bash
+#         run: |
+#           export GOOS=$(go env GOHOSTOS)
+#           curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.2.1/bazelisk-${GOOS}-amd64"
+#           mkdir -p "${GITHUB_WORKSPACE}/bin/"
+#           mv "bazelisk-${GOOS}-amd64" "${GITHUB_WORKSPACE}/bin/bazel"
+#           chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
+#           "${GITHUB_WORKSPACE}/bin/bazel" build //...

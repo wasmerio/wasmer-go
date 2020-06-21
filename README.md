@@ -1,14 +1,14 @@
 <p align="center">
-  <a href="https://wasmer.io" target="_blank" rel="noopener noreferrer">
-    <img width="400" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/logo.png" alt="Wasmer logo">
+  <a href="https://wasmer.io" target="_blank" rel="noopener">
+    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/assets/logo.png" alt="Wasmer logo">
   </a>
 </p>
 
 <p align="center">
   <a href="https://spectrum.chat/wasmer">
     <img src="https://withspectrum.github.io/badge/badge.svg" alt="Join the Wasmer Community" valign="middle"></a>
-  <a href="https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer">
-    <img src="https://godoc.org/github.com/wasmerio/go-ext-wasm?status.svg" alt="Read our API documentation" valign="middle"></a>
+  <a href="https://pkg.go.dev/github.com/wasmerio/go-ext-wasm/wasmer">
+    <img src="https://img.shields.io/badge/go.dev-package-f06" alt="Read our API documentation" valign="middle"></a>
   <a href="https://goreportcard.com/report/github.com/wasmerio/go-ext-wasm">
     <img src="https://goreportcard.com/badge/github.com/wasmerio/go-ext-wasm" alt="Go Report Card" valign="middle" /></a>
   <a href="https://github.com/wasmerio/wasmer/blob/master/LICENSE">
@@ -22,21 +22,36 @@ Wasmer is a Go library for executing WebAssembly binaries.
 To install the library, follow the classical:
 
 ```sh
+# Enable cgo
+$ export CGO_ENABLED=1; export CC=gcc;
+
 $ go get github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
-To install the `go-wasmer` CLI, follow the classical:
+It will work on many macOS and Linux distributions. It will not work
+on Windows yet, we are working on it.
+
+If the pre-compiled shared libraries are not compatible with your system, try installing manually with the following command:
 
 ```sh
-$ go install github.com/wasmerio/go-ext-wasm/go-wasmer
+$ just build-runtime
+$ just build
+$ go install github.com/wasmerio/go-ext-wasm/wasmer
 ```
 
-`go install` will work on many macOS and Linux distributions. It will
-not work on Windows yet, we are working on it.
+If you are a bazel user, add following to your WORKSPACE file 
+
+```
+git_repository(
+    name = "com_github_wasmerio_go_ext_wasm",
+    remote = "https://github.com/wasmerio/go-ext-wasm",
+    commit = "",
+)
+```
 
 # Documentation
 
-[The documentation can be read online on godoc.org][documentation]. It
+[The documentation can be read online on pkg.go.dev][documentation]. It
 contains function descriptions, short examples, long examples
 etc. Everything one need to start using Wasmer with Go!
 
@@ -44,7 +59,7 @@ Also, there is this article written for the announcement that
 introduces the project: [Announcing the fastest WebAssembly runtime
 for Go: wasmer][medium].
 
-[documentation]: https://godoc.org/github.com/wasmerio/go-ext-wasm/wasmer
+[documentation]: https://pkg.go.dev/github.com/wasmerio/go-ext-wasm/wasmer?tab=doc
 [medium]: https://medium.com/wasmer/announcing-the-fastest-webassembly-runtime-for-go-wasmer-19832d77c050
 
 # Examples
@@ -150,7 +165,7 @@ code:
 * `C.sum` is the cgo function pointer.
 
 ```go
-imports, _ := wasm.NewImports().Append("sum", sum, C.sum)
+imports, _ := wasm.NewImports().AppendFunction("sum", sum, C.sum)
 ```
 
 Finally, we use `NewInstanceWithImports` to inject the imports:
@@ -223,11 +238,15 @@ The Go library is written in Go and Rust.
 To build both parts, run the following commands:
 
 ```sh
-$ just rust
-$ just go
+$ just build-runtime
+$ just build
 ```
 
 To build the Go part, run:
+
+```sh
+$ just build
+```
 
 (Yes, you need [`just`]).
 

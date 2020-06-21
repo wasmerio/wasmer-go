@@ -2,6 +2,8 @@ package wasmer
 
 import (
 	"fmt"
+	"runtime"
+	"sync"
 	"unsafe"
 )
 
@@ -50,8 +52,8 @@ type Instance struct {
 	// The underlying WebAssembly instance.
 	instance *cWasmerInstanceT
 
-	// The imported functions. Use the `NewInstanceWithImports`
-	// constructor to set it.
+	// The imported functions and memories. Use the
+	// `NewInstanceWithImports` constructor to set it.
 	imports *Imports
 
 	// All functions exported by the WebAssembly instance, indexed
@@ -70,15 +72,17 @@ type Instance struct {
 	Exports map[string]func(...interface{}) (Value, error)
 
 	// The exported memory of a WebAssembly instance.
-	Memory Memory
+	Memory *Memory
+
+	contextDataIndex *int
 }
 
-// NewInstance constructs a new `Instance` with no imported functions.
+// NewInstance constructs a new `Instance` with no imports.
 func NewInstance(bytes []byte) (Instance, error) {
 	return NewInstanceWithImports(bytes, NewImports())
 }
 
-// NewInstanceWithImports constructs a new `Instance` with imported functions.
+// NewInstanceWithImports constructs a new `Instance` with imports.
 func NewInstanceWithImports(bytes []byte, imports *Imports) (Instance, error) {
 	return newInstanceWithImports(
 		imports,
@@ -117,39 +121,11 @@ func newInstanceWithImports(
 ) (Instance, error) {
 	var numberOfImports = len(imports.imports)
 	var wasmImports = make([]cWasmerImportT, numberOfImports)
-	var importFunctionNth = 0
+	var importNth = 0
 
-	for importName, importFunction := range imports.imports {
-		var wasmInputsArity = len(importFunction.wasmInputs)
-		var wasmOutputsArity = len(importFunction.wasmOutputs)
-
-		var importFunctionInputsCPointer *cWasmerValueTag
-		var importFunctionOutputsCPointer *cWasmerValueTag
-
-		if wasmInputsArity > 0 {
-			importFunctionInputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmInputs[0]))
-		}
-
-		if wasmOutputsArity > 0 {
-			importFunctionOutputsCPointer = (*cWasmerValueTag)(unsafe.Pointer(&importFunction.wasmOutputs[0]))
-		}
-
-		importFunction.importedFunctionPointer = cWasmerImportFuncNew(
-			importFunction.cgoPointer,
-			importFunctionInputsCPointer,
-			cUint(wasmInputsArity),
-			importFunctionOutputsCPointer,
-			cUint(wasmOutputsArity),
-		)
-
-		var importedFunction = cNewWasmerImportT(
-			importFunction.namespace,
-			importName,
-			importFunction.importedFunctionPointer,
-		)
-
-		wasmImports[importFunctionNth] = importedFunction
-		importFunctionNth++
+	for importName, importImport := range imports.imports {
+		wasmImports[importNth] = *getCWasmerImport(importName, importImport)
+		importNth++
 	}
 
 	var wasmImportsCPointer *cWasmerImportT
@@ -160,18 +136,32 @@ func newInstanceWithImports(
 
 	instance, err := instanceBuilder(wasmImportsCPointer, numberOfImports)
 
-	var memory Memory
-	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: memory}
+	var emptyInstance = Instance{instance: nil, imports: nil, Exports: nil, Memory: nil}
 
 	if err != nil {
 		return emptyInstance, err
 	}
 
+	exports, memoryPointer, err := getExportsFromInstance(instance)
+
+	if err != nil {
+		return emptyInstance, err
+	}
+
+	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memoryPointer}, nil
+}
+
+// Returns the exports, whether it has memory or an error
+func getExportsFromInstance(
+	instance *cWasmerInstanceT,
+) (
+	map[string]func(...interface{}) (Value, error),
+	*Memory,
+	error,
+) {
 	var exports = make(map[string]func(...interface{}) (Value, error))
-
 	var wasmExports *cWasmerExportsT
-	var hasMemory = false
-
+	var memoryPointer *Memory
 	cWasmerInstanceExports(instance, &wasmExports)
 	defer cWasmerExportsDestroy(wasmExports)
 
@@ -186,11 +176,11 @@ func newInstanceWithImports(
 			var wasmMemory *cWasmerMemoryT
 
 			if cWasmerExportToMemory(wasmExport, &wasmMemory) != cWasmerOk {
-				return emptyInstance, NewInstanceError("Failed to extract the exported memory.")
+				return nil, nil, NewInstanceError("Failed to extract the exported memory.")
 			}
 
-			memory = newMemory(wasmMemory)
-			hasMemory = true
+			var memory = newBorrowedMemory(wasmMemory)
+			memoryPointer = &memory
 
 		case cWasmFunction:
 			var wasmExportName = cWasmerExportName(wasmExport)
@@ -199,7 +189,7 @@ func newInstanceWithImports(
 			var wasmFunctionInputsArity cUint32T
 
 			if cWasmerExportFuncParamsArity(wasmFunction, &wasmFunctionInputsArity) != cWasmerOk {
-				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
+				return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the input arity of the `%s` exported function.")
 			}
 
 			var wasmFunctionInputSignatures = make([]cWasmerValueTag, int(wasmFunctionInputsArity))
@@ -208,17 +198,32 @@ func newInstanceWithImports(
 				var wasmFunctionInputSignaturesCPointer = (*cWasmerValueTag)(unsafe.Pointer(&wasmFunctionInputSignatures[0]))
 
 				if cWasmerExportFuncParams(wasmFunction, wasmFunctionInputSignaturesCPointer, wasmFunctionInputsArity) != cWasmerOk {
-					return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
+					return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the signature of the `%s` exported function.")
 				}
 			}
 
 			var wasmFunctionOutputsArity cUint32T
 
 			if cWasmerExportFuncResultsArity(wasmFunction, &wasmFunctionOutputsArity) != cWasmerOk {
-				return emptyInstance, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
+				return nil, nil, NewExportedFunctionError(exportedFunctionName, "Failed to read the output arity of the `%s` exported function.")
 			}
 
 			var numberOfExpectedArguments = int(wasmFunctionInputsArity)
+
+			var wasmInputs = make([]cWasmerValueT, wasmFunctionInputsArity)
+			var wasmOutputs = make([]cWasmerValueT, wasmFunctionOutputsArity)
+
+			type wasmFunctionNameHolder struct {
+				CPointer *cChar
+			}
+
+			wasmFunctionName := &wasmFunctionNameHolder{
+				CPointer: cCString(exportedFunctionName),
+			}
+
+			runtime.SetFinalizer(wasmFunctionName, func(h *wasmFunctionNameHolder) {
+				cFree(unsafe.Pointer(h.CPointer))
+			})
 
 			exports[exportedFunctionName] = func(arguments ...interface{}) (Value, error) {
 				var numberOfGivenArguments = len(arguments)
@@ -229,8 +234,6 @@ func newInstanceWithImports(
 				} else if diff < 0 {
 					return I32(0), NewExportedFunctionError(exportedFunctionName, fmt.Sprintf("Given %d extra argument(s) when calling the `%%s` exported function; Expect %d argument(s), given %d.", -diff, numberOfExpectedArguments, numberOfGivenArguments))
 				}
-
-				var wasmInputs = make([]cWasmerValueT, wasmFunctionInputsArity)
 
 				for nth, value := range arguments {
 					var wasmInputType = wasmFunctionInputSignatures[nth]
@@ -343,11 +346,6 @@ func newInstanceWithImports(
 					}
 				}
 
-				var wasmOutputs = make([]cWasmerValueT, wasmFunctionOutputsArity)
-
-				var wasmFunctionName = cCString(exportedFunctionName)
-				defer cFree(unsafe.Pointer(wasmFunctionName))
-
 				var wasmInputsCPointer *cWasmerValueT
 
 				if wasmFunctionInputsArity > 0 {
@@ -366,7 +364,7 @@ func newInstanceWithImports(
 
 				var callResult = cWasmerInstanceCall(
 					instance,
-					wasmFunctionName,
+					wasmFunctionName.CPointer,
 					wasmInputsCPointer,
 					wasmFunctionInputsArity,
 					wasmOutputsCPointer,
@@ -406,22 +404,64 @@ func newInstanceWithImports(
 			}
 		}
 	}
-
-	if hasMemory == false {
-		return emptyInstance, NewInstanceError("No memory exported.")
-	}
-
-	return Instance{instance: instance, imports: imports, Exports: exports, Memory: memory}, nil
+	return exports, memoryPointer, nil
 }
 
-// SetContextData assigns a data that can be used by all imported
-// functions. Indeed, each imported function receives as its first
-// argument an instance context (see `InstanceContext`). An instance
-// context can hold a pointer to any kind of data. It is important to
-// understand that this data is shared by all imported function, it's
-// global to the instance.
-func (instance *Instance) SetContextData(data unsafe.Pointer) {
-	cWasmerInstanceContextDataSet(instance.instance, data)
+// HasMemory checks whether the instance has at least one exported memory.
+func (instance *Instance) HasMemory() bool {
+	return nil != instance.Memory
+}
+
+var (
+
+	// In order to avoid passing illegal Go pointers across the
+	// CGo FFI, store Instance Context Data in instanceContextData
+	// and simply pass the index through the FFI instead.
+	//
+	// See `Instance.SetContextData` and `InstanceContext.Data`.
+	instancesContextData      = make(map[int]interface{})
+	nextContextDataIndex      int
+	instancesContextDataMutex sync.RWMutex
+)
+
+// SetContextData assigns a data that can be used by all imported functions.
+// Each imported function receives as its first argument an instance context
+// (see `InstanceContext`). An instance context can hold any kind of data,
+// including data that contain Go references such as slices, maps, or structs
+// with reference types or pointers. It is important to understand that data is
+// global to the instance, and thus is shared by all imported functions.
+func (instance *Instance) SetContextData(data interface{}) {
+	instancesContextDataMutex.Lock()
+
+	if instance.contextDataIndex == nil {
+		instance.contextDataIndex = new(int)
+		*instance.contextDataIndex = nextContextDataIndex
+		nextContextDataIndex++
+
+		// When instance is garbage-collected, clean up its
+		// `instanceContextData`.  Set the finalizer on the
+		// unexported `instance.contextDataIndex`, instead of
+		// directly on the instance, to allow users of this
+		// package to set their own finalizer on the `Instance`
+		// for other reasons.
+		runtime.SetFinalizer(instance.contextDataIndex, func(index *int) {
+			// Launch a goroutine to avoid blocking other
+			// finalizers while waiting for the mutex lock.
+			go func() {
+				instancesContextDataMutex.Lock()
+				delete(instancesContextData, *index)
+				instancesContextDataMutex.Unlock()
+			}()
+		})
+	}
+
+	instancesContextData[*instance.contextDataIndex] = data
+	instancesContextDataMutex.Unlock()
+
+	cWasmerInstanceContextDataSet(
+		instance.instance,
+		unsafe.Pointer(instance.contextDataIndex),
+	)
 }
 
 // Close closes/frees an `Instance`.

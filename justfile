@@ -1,38 +1,47 @@
-# Build the `wasmer` library.
-build go-build-args='-v':
+# Build the runtime shared library for this specific system.
+build-runtime:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	cd wasmer
+
+	# Build the shared library.
+	cargo build --release
+
+	# Find the shared library extension.
 	case "{{os()}}" in
 		"macos")
-			dylib_extension="dylib"
+			shared_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.dylib | head -n 1 )
+			static_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.a | head -n 1 )
+			shared_library=libwasmer.dylib
+			static_library=libwasmer.a
 			;;
 		"windows")
-			dylib_extension="dll"
+			shared_library_path=$( ls -t target/release/deps/wasmer_runtime_c_api*.dll | head -n 1 )
+			static_library_path=$( ls -t target/release/deps/wasmer_runtime_c_api*.lib | head -n 1 )
+			shared_library=wasmer.dll
+			static_library=wasmer.lib
 			;;
 		*)
-			dylib_extension="so"
-			staticlib_extension="a"
+			shared_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.so | head -n 1 )
+			static_library_path=$( ls -t target/release/deps/libwasmer_runtime_c_api*.a | head -n 1 )
+			shared_library=libwasmer.so
+			static_library=libwasmer.a
 	esac
-	if ! test -f libwasmer_runtime_c_api.${dylib_extension}; then
-		cargo build --release
-		ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${dylib_extension} libwasmer_runtime_c_api.${dylib_extension}
-	fi
-	go build {{go-build-args}} .
 
-	if test ! -z "${staticlib_extension:-}"; then
-		if ! test -f libwasmer_runtime_c_api.${staticlib_extension}; then
-			cargo build --release
-			ln -s ../target/release/deps/libwasmer_runtime_c_api-*.${staticlib_extension} libwasmer_runtime_c_api.${staticlib_extension}
-		fi
-		go build {{go-build-args}} -tags "static_build" .
-	fi
+	# Link `wasmer/*wasmer_runtime_c_api.*`.
+	rm -f wasmer/${shared_library}
+	ln -s "../${shared_library_path}" wasmer/${shared_library}
+	rm -f wasmer/${static_library}
+	ln -s "../${static_library_path}" wasmer/${static_library}
+
+# Build the `wasmer` library.
+build go-build-args='-v':
+	cd wasmer && go build {{go-build-args}} . && go build {{go-build-args}} -tags "static_build" .
 
 # Build the `go-wasmer` bin.
 build-bin go-build-args='-v':
 	cd go-wasmer && go build {{go-build-args}} -o ../target/go/go-wasmer .
 
-# Compile the Rust part for this specific system.
+# Compile the Rust part for your specific system.
 rust:
 	cargo build --release
 
@@ -54,14 +63,12 @@ test:
 	# Run the long examples.
 	go test -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
 
-	if test -f libwasmer_runtime_c_api.a; then
-		# Run the tests.
-		GODEBUG=cgocheck=2 go test -tags "static_build" -test.v $(find test -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) test/imports.go
-		# Run the short examples.
-		go test -tags "static_build" -test.v example_test.go
-		# Run the long examples.
-		go test -tags "static_build" -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
-	fi
+	# Run the tests using static lib.
+	GODEBUG=cgocheck=2 go test -tags "static_build" -test.v $(find test -type f \( -name "*_test.go" \! -name "example_*.go" \! -name "benchmark*.go" \) ) test/imports.go
+	# Run the short examples.
+	go test -tags "static_build" -test.v example_test.go
+	# Run the long examples.
+	go test -tags "static_build" -test.v $(find . -type f \( -name "example_*_test.go" \! -name "_example_import_test.go" \) )
 
 # Run benchmarks. Subjects can be `wasmer`, `wagon` or `life`. Filter is a regex to select the benchmarks.
 bench subject='wasmer' filter='.*':

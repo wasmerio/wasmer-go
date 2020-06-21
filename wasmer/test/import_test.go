@@ -56,3 +56,15 @@ func TestImportInstanceContext(t *testing.T) {
 func TestImportInstanceContextData(t *testing.T) {
 	testImportInstanceContextData(t)
 }
+
+func TestWasiImportObject(t *testing.T) {
+	testWasiImportObject(t)
+}
+
+func TestImportMemory(t *testing.T) {
+	testImportMemory(t)
+}
+
+func TestImportMemoryIsOwned(t *testing.T) {
+	testImportMemoryIsOwned(t)
+}

@@ -24,15 +24,13 @@ func Example_greet() {
 	lengthOfSubject := len(subject)
 
 	// Allocate memory for the subject, and get a pointer to it.
-	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject)
+	// Include a byte for the NULL terminator we add below.
+	allocateResult, _ := instance.Exports["allocate"](lengthOfSubject+1)
 	inputPointer := allocateResult.ToI32()
 
 	// Write the subject into the memory.
 	memory := instance.Memory.Data()[inputPointer:]
-
-	for nth := 0; nth < lengthOfSubject; nth++ {
-		memory[nth] = subject[nth]
-	}
+	copy(memory, subject)
 
 	// C-string terminates by NULL.
 	memory[lengthOfSubject] = 0
@@ -61,8 +59,8 @@ func Example_greet() {
 
 	// Deallocate the subject, and the output.
 	deallocate := instance.Exports["deallocate"]
-	deallocate(inputPointer, lengthOfSubject)
-	deallocate(outputPointer, lengthOfOutput)
+	deallocate(inputPointer, lengthOfSubject+1)
+	deallocate(outputPointer, lengthOfOutput+1)
 
 	// Output:
 	// Hello, Wasmer 🐹!
