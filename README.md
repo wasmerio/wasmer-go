@@ -245,7 +245,7 @@ If you are a bazel user, add following to your WORKSPACE file
 
 ```
 git_repository(
-    name = "com_github_wasmerio_go_ext_wasm",
+    name = "com_github_wasmerio_wasmer_go",
     remote = "https://github.com/wasmerio/wasmer-go",
     commit = "",
 )
