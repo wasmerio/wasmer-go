@@ -30,7 +30,7 @@ go_library(
      ],
     cgo = True,
     clinkopts = ["-Wl,-rpath,wasmer -Lwasmer/wasmer -lwasmer_runtime_c_api"],
-    importpath = "github.com/wasmerio/go-ext-wasm/wasmer",
+    importpath = "github.com/wasmerio/wasmer-go/wasmer",
     visibility = ["//visibility:public"],
     cdeps = [":wasm"],
 )
