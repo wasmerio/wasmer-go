@@ -2,7 +2,7 @@ package wasmer_test
 
 import (
 	"fmt"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
+	wasm "github.com/wasmerio/wasmer-go/wasmer"
 	"path"
 	"runtime"
 	"strings"

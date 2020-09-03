@@ -16,7 +16,7 @@ import "C"
 import (
 	"encoding/binary"
 	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
+	wasm "github.com/wasmerio/wasmer-go/wasmer"
 	"path"
 	"runtime"
 	"testing"

@@ -55,7 +55,7 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           just test
 # Skipped for now because of Github banning the API request from actions.
-# You can find more info in this PR: https://github.com/wasmerio/go-ext-wasm/pull/118#issuecomment-588487544
+# You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
 #         shell: bash
 #         run: |

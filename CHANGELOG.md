@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 * Replace godoc.org by pkg.go.dev
-  ([#122](https://github.com/wasmerio/go-ext-wasm/pull/122) by
+  ([#122](https://github.com/wasmerio/wasmer-go/pull/122) by
   [@Hywan])
 * Do everything to publish the package on pkg.go.dev.
 
@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 
 * Memory can be imported, thus making the distinction between owned
   and borrowed memory
-  ([#119](https://github.com/wasmerio/go-ext-wasm/pull/119) by
+  ([#119](https://github.com/wasmerio/wasmer-go/pull/119) by
   [@koponen-styra]).
 
   The main new methods are `Imports.AppendMemory`, and `NewMemory` to
@@ -55,12 +55,12 @@ All notable changes to this project will be documented in this file.
   ```
   
 * Add Bazel files to build the project with Bazel
-  ([#108](https://github.com/wasmerio/go-ext-wasm/pull/108) by
+  ([#108](https://github.com/wasmerio/wasmer-go/pull/108) by
   [@joesonw])
 * Support multiple WASI version with `WasiGetVersion`,
   `NewDefaultWasiImportObjectForVersion`,
   `NewWasiImportObjectForVersion` and `WasiVersion`
-  ([#92](https://github.com/wasmerio/go-ext-wasm/pull/92) by
+  ([#92](https://github.com/wasmerio/wasmer-go/pull/92) by
   [@Hywan]).
 
   Supported version are:
@@ -90,8 +90,8 @@ All notable changes to this project will be documented in this file.
 
 * `InstanceContext` supports user data with any reference types or
   types that include any reference types or other Go pointers
-  ([#85](https://github.com/wasmerio/go-ext-wasm/pull/85) and
-  [#94](https://github.com/wasmerio/go-ext-wasm/pull/94) by
+  ([#85](https://github.com/wasmerio/wasmer-go/pull/85) and
+  [#94](https://github.com/wasmerio/wasmer-go/pull/94) by
   [@AdamSLevy])
   
   ```go
@@ -112,7 +112,7 @@ All notable changes to this project will be documented in this file.
   ```
 
 * WASI is now supported
-  ([#72](https://github.com/wasmerio/go-ext-wasm/pull/72) by
+  ([#72](https://github.com/wasmerio/wasmer-go/pull/72) by
   [@MarkMcCaskey])
   
   ```go
@@ -138,43 +138,43 @@ All notable changes to this project will be documented in this file.
   
 * `Instance` supports optional memory, i.e. a WebAssembly module that
   does not have an exported memory, and provides a new `HasMemory`
-  method ([#63](https://github.com/wasmerio/go-ext-wasm/pull/63) by
+  method ([#63](https://github.com/wasmerio/wasmer-go/pull/63) by
   [@Hywan])
 
 ### Changed
 
 * Remove unnecessary heap allocations and calls to C
-  ([#118](https://github.com/wasmerio/go-ext-wasm/pull/118) by
+  ([#118](https://github.com/wasmerio/wasmer-go/pull/118) by
   [@koponen-styra])
 * Update the `cli` package version to v2
-  ([#110](https://github.com/wasmerio/go-ext-wasm/pull/110) by
+  ([#110](https://github.com/wasmerio/wasmer-go/pull/110) by
   [@d0iasm])
 * Migrate from CircleCI to Github Actions
-  ([#99](https://github.com/wasmerio/go-ext-wasm/pull/99) and
-  [#103](https://github.com/wasmerio/go-ext-wasm/pull/103) by
+  ([#99](https://github.com/wasmerio/wasmer-go/pull/99) and
+  [#103](https://github.com/wasmerio/wasmer-go/pull/103) by
   [@Hywan])
 * Explain how this package works
-  ([#97](https://github.com/wasmerio/go-ext-wasm/pull/97) by [@Hywan])
+  ([#97](https://github.com/wasmerio/wasmer-go/pull/97) by [@Hywan])
 * Make tests more portable by changing `int64_t` to `long long` in cgo
-  ([#67](https://github.com/wasmerio/go-ext-wasm/pull/67) by
+  ([#67](https://github.com/wasmerio/wasmer-go/pull/67) by
   [@ethanfrey])
 * Update build instructions
-  ([#66](https://github.com/wasmerio/go-ext-wasm/pull/66) by
+  ([#66](https://github.com/wasmerio/wasmer-go/pull/66) by
   [@ethanfrey])
 * Update Wasmer to 0.6.0 to 0.14.0
-  ([#57](https://github.com/wasmerio/go-ext-wasm/pull/57),
-  [#64](https://github.com/wasmerio/go-ext-wasm/pull/64),
-  [#73](https://github.com/wasmerio/go-ext-wasm/pull/73),
-  [#80](https://github.com/wasmerio/go-ext-wasm/pull/80),
-  [#89](https://github.com/wasmerio/go-ext-wasm/pull/89),
-  [#107](https://github.com/wasmerio/go-ext-wasm/pull/107),
-  [#111](https://github.com/wasmerio/go-ext-wasm/pull/111) and
-  [#120](https://github.com/wasmerio/go-ext-wasm/pull/120) by [@Hywan])
+  ([#57](https://github.com/wasmerio/wasmer-go/pull/57),
+  [#64](https://github.com/wasmerio/wasmer-go/pull/64),
+  [#73](https://github.com/wasmerio/wasmer-go/pull/73),
+  [#80](https://github.com/wasmerio/wasmer-go/pull/80),
+  [#89](https://github.com/wasmerio/wasmer-go/pull/89),
+  [#107](https://github.com/wasmerio/wasmer-go/pull/107),
+  [#111](https://github.com/wasmerio/wasmer-go/pull/111) and
+  [#120](https://github.com/wasmerio/wasmer-go/pull/120) by [@Hywan])
   
 ### Fixed
 
 * Fix build for go1.14beta1 on macOS
-  ([#114](https://github.com/wasmerio/go-ext-wasm/pull/114) by
+  ([#114](https://github.com/wasmerio/wasmer-go/pull/114) by
   [@chai2010])
 
 ## [0.2.0] - 2019-07-16
@@ -182,11 +182,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 * Add the `Memory.Grow` method
-  ([#55](https://github.com/wasmerio/go-ext-wasm/pull/55) by [@Hywan])
+  ([#55](https://github.com/wasmerio/wasmer-go/pull/55) by [@Hywan])
 * Improve error messages when instantiating
-  ([#42](https://github.com/wasmerio/go-ext-wasm/pull/42) by [@Hywan])
+  ([#42](https://github.com/wasmerio/wasmer-go/pull/42) by [@Hywan])
 * Support import descriptors
-  ([#38](https://github.com/wasmerio/go-ext-wasm/pull/38) by [@Hywan])
+  ([#38](https://github.com/wasmerio/wasmer-go/pull/38) by [@Hywan])
 
   ```go
   var module, _ = wasm.Compile(bytes)
@@ -196,7 +196,7 @@ All notable changes to this project will be documented in this file.
   ```
 
 * Support export descriptors
-  ([#37](https://github.com/wasmerio/go-ext-wasm/pull/37) by [@Hywan])
+  ([#37](https://github.com/wasmerio/wasmer-go/pull/37) by [@Hywan])
 
   ```go
   var module, _ = wasm.Compile(bytes)
@@ -205,7 +205,7 @@ All notable changes to this project will be documented in this file.
   ```
 
 * Support module serialization and deserialization
-  ([#34](https://github.com/wasmerio/go-ext-wasm/pull/34) by [@Hywan])
+  ([#34](https://github.com/wasmerio/wasmer-go/pull/34) by [@Hywan])
 
   ```go
   // Compiles the bytes into a WebAssembly module.
@@ -243,9 +243,9 @@ All notable changes to this project will be documented in this file.
   ```
 
 * Add `Compile`, `Module.Instantiate*` and `Module.Close`
-  ([#33](https://github.com/wasmerio/go-ext-wasm/pull/33) by [@Hywan])
+  ([#33](https://github.com/wasmerio/wasmer-go/pull/33) by [@Hywan])
 * Support instance context data
-  ([#30](https://github.com/wasmerio/go-ext-wasm/pull/30) by [@Hywan])
+  ([#30](https://github.com/wasmerio/wasmer-go/pull/30) by [@Hywan])
 
   ```go
   //export logMessageWithContextData
@@ -284,7 +284,7 @@ All notable changes to this project will be documented in this file.
   ```
 
 * Add `Imports.Namespace` to set the current import namespace
-  ([#29](https://github.com/wasmerio/go-ext-wasm/pull/29) by [@Hywan])
+  ([#29](https://github.com/wasmerio/wasmer-go/pull/29) by [@Hywan])
 
   ```go
   // By default, the namespace is `"env"`. Change it to `"ns"`.
@@ -292,36 +292,36 @@ All notable changes to this project will be documented in this file.
   ```
 
 * Support instance context API
-  ([#26](https://github.com/wasmerio/go-ext-wasm/pull/26) by [@Hywan])
+  ([#26](https://github.com/wasmerio/wasmer-go/pull/26) by [@Hywan])
 
 ### Changed
 
 * Update Wasmer to 0.5.5
-  ([#56](https://github.com/wasmerio/go-ext-wasm/pull/56) by [@Hywan])
+  ([#56](https://github.com/wasmerio/wasmer-go/pull/56) by [@Hywan])
 * Test that all Wasm types can be used in imported functions
-  ([#51](https://github.com/wasmerio/go-ext-wasm/pull/51) by [@Hywan])
+  ([#51](https://github.com/wasmerio/wasmer-go/pull/51) by [@Hywan])
 * Improve the Benchmarks Section
-  ([#36](https://github.com/wasmerio/go-ext-wasm/pull/36) by [@Hywan])
+  ([#36](https://github.com/wasmerio/wasmer-go/pull/36) by [@Hywan])
 * Move examples in the root directory for godoc.org
-  ([#32](https://github.com/wasmerio/go-ext-wasm/pull/32) by [@Hywan])
+  ([#32](https://github.com/wasmerio/wasmer-go/pull/32) by [@Hywan])
 * Fix example namespaces for godoc.org
-  ([#31](https://github.com/wasmerio/go-ext-wasm/pull/31) by [@Hywan])
+  ([#31](https://github.com/wasmerio/wasmer-go/pull/31) by [@Hywan])
 * Increase the `cgocheck` level
-  ([#30](https://github.com/wasmerio/go-ext-wasm/pull/30) by [@Hywan])
+  ([#30](https://github.com/wasmerio/wasmer-go/pull/30) by [@Hywan])
 * Reorganize `bridge.go`
-  ([#54](https://github.com/wasmerio/go-ext-wasm/pull/54) by [@Hywan])
+  ([#54](https://github.com/wasmerio/wasmer-go/pull/54) by [@Hywan])
 * Build and test on macOS
-  ([#15](https://github.com/wasmerio/go-ext-wasm/pull/15) by [@Hywan])
+  ([#15](https://github.com/wasmerio/wasmer-go/pull/15) by [@Hywan])
 
 ## 0.1.0 - 2019-05-29
 
 First release.
 
 
-[Unreleased]: https://github.com/wasmerio/go-ext-wasm/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/wasmerio/go-ext-wasm/compare/0.3.0...v0.3.1
-[0.3.0]: https://github.com/wasmerio/go-ext-wasm/compare/0.2.0...0.3.0
-[0.2.0]: https://github.com/wasmerio/go-ext-wasm/compare/0.1.0...0.2.0
+[Unreleased]: https://github.com/wasmerio/wasmer-go/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/wasmerio/wasmer-go/compare/0.3.0...v0.3.1
+[0.3.0]: https://github.com/wasmerio/wasmer-go/compare/0.2.0...0.3.0
+[0.2.0]: https://github.com/wasmerio/wasmer-go/compare/0.1.0...0.2.0
 [@Hywan]: https://github.com/Hywan
 [@ethanfrey]: https://github.com/ethanfrey
 [@MarkMcCaskey]: https://github.com/MarkMcCaskey

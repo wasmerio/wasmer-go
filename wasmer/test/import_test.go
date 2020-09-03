@@ -2,7 +2,7 @@ package wasmertest
 
 import (
 	"github.com/stretchr/testify/assert"
-	wasm "github.com/wasmerio/go-ext-wasm/wasmer"
+	wasm "github.com/wasmerio/wasmer-go/wasmer"
 	"testing"
 	"unsafe"
 )

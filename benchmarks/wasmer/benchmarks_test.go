@@ -1,7 +1,7 @@
 package wasmer_test
 
 import (
-	"github.com/wasmerio/go-ext-wasm/wasmer"
+	"github.com/wasmerio/wasmer-go/wasmer"
 	"path"
 	"runtime"
 	"testing"
