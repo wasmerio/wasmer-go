@@ -2,7 +2,7 @@
 publish = false
 name = "wasmer-go"
 version = "0.2.0"
-authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
+authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
 edition = "2018"
 description = "Go library to run WebAssembly binaries"
 readme = "README.md"
@@ -14,4 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime-c-api = "0.14"
+wasmer = { git = "https://github.com/wasmerio/wasmer" }
