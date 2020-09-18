@@ -25,7 +25,6 @@ func NewStore(engine *Engine) *Store {
 		Engine: engine,
 	}
 
-	runtime.KeepAlive(engine)
 	runtime.SetFinalizer(store, func(store *Store) {
 		C.wasm_store_delete(store.inner())
 	})

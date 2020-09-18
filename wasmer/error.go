@@ -29,7 +29,7 @@ func newError() *Error {
 	}
 
 	return &Error{
-		message: C.GoString(errorMessagePointer),
+		message: C.GoStringN(errorMessagePointer, errorLength),
 	}
 }
 
