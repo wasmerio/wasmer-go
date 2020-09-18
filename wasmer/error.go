@@ -8,7 +8,13 @@ type Error struct {
 	message string
 }
 
-func newError() *Error {
+func newErrorWith(message string) *Error {
+	return &Error{
+		message: message,
+	}
+}
+
+func newErrorFromWasmer() *Error {
 	var errorLength = C.wasmer_last_error_length()
 
 	if errorLength == 0 {
@@ -29,7 +35,7 @@ func newError() *Error {
 	}
 
 	return &Error{
-		message: C.GoStringN(errorMessagePointer, errorLength),
+		message: C.GoStringN(errorMessagePointer, errorLength-1),
 	}
 }
 
