@@ -13,6 +13,14 @@ package wasmer
 //
 //     return wasm_module_new(store, &wasm_bytes);
 // }
+//
+// bool to_wasm_module_validate(wasm_store_t *store, uint8_t *bytes, size_t bytes_length) {
+//     wasm_byte_vec_t wasm_bytes;
+//     wasm_bytes.size = bytes_length;
+//     wasm_bytes.data = (wasm_byte_t*) bytes;
+//
+//     return wasm_module_validate(store, &wasm_bytes);
+// }
 import "C"
 import (
 	"runtime"
@@ -38,9 +46,6 @@ type Module struct {
 }
 
 func NewModule(store *Store, bytes []byte) (*Module, error) {
-	// If `bytes` contains a Wasm module with the WAT format,
-	// compile it to Wasm bytes.
-	// If it does not, it will return the same bytes.
 	wasmBytes, err := Wat2Wasm(string(bytes))
 
 	if err != nil {
@@ -69,6 +74,32 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 	})
 
 	return module, nil
+}
+
+func ValidateModule(store *Store, bytes []byte) error {
+	wasmBytes, err := Wat2Wasm(string(bytes))
+
+	if err != nil {
+		return err
+	}
+
+	var wasmBytesPtr *C.uint8_t
+	wasmBytesLength := len(wasmBytes)
+
+	if wasmBytesLength > 0 {
+		wasmBytesPtr = (*C.uint8_t)(unsafe.Pointer(&wasmBytes[0]))
+	}
+
+	isValid := C.to_wasm_module_validate(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength))
+
+	runtime.KeepAlive(bytes)
+	runtime.KeepAlive(wasmBytes)
+
+	if !isValid {
+		return newErrorFromWasmer()
+	}
+
+	return nil
 }
 
 func (module *Module) inner() *C.wasm_module_t {

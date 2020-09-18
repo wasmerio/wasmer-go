@@ -12,3 +12,11 @@ func TestModule(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+func TestValidateModule(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	err := ValidateModule(store, []byte("(module)"))
+
+	assert.NoError(t, err)
+}
