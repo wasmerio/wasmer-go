@@ -142,4 +142,8 @@ int wasmer_last_error_length();
  */
 int wasmer_last_error_message(char* buffer, int length);
 
+// Parses in-memory bytes as either the WAT format, or a binary Wasm
+// module. This is wasmer-specific.
+void wat2wasm(wasm_byte_vec_t* wat, wasm_byte_vec_t* wasm);
+
 #endif /* WASMER_WASM_H */
