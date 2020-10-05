@@ -9,17 +9,17 @@ type Engine struct {
 }
 
 func NewEngine() *Engine {
-	engine := &Engine{
+	self := &Engine{
 		_inner: C.wasm_engine_new(),
 	}
 
-	runtime.SetFinalizer(engine, func(engine *Engine) {
-		C.wasm_engine_delete(engine.inner())
+	runtime.SetFinalizer(self, func(self *Engine) {
+		C.wasm_engine_delete(self.inner())
 	})
 
-	return engine
+	return self
 }
 
-func (engine *Engine) inner() *C.wasm_engine_t {
-	return engine._inner
+func (self *Engine) inner() *C.wasm_engine_t {
+	return self._inner
 }
