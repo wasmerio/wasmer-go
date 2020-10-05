@@ -20,18 +20,18 @@ type Store struct {
 }
 
 func NewStore(engine *Engine) *Store {
-	store := &Store{
+	self := &Store{
 		_inner: C.wasm_store_new(engine.inner()),
 		Engine: engine,
 	}
 
-	runtime.SetFinalizer(store, func(store *Store) {
-		C.wasm_store_delete(store.inner())
+	runtime.SetFinalizer(self, func(self *Store) {
+		C.wasm_store_delete(self.inner())
 	})
 
-	return store
+	return self
 }
 
-func (store *Store) inner() *C.wasm_store_t {
-	return store._inner
+func (self *Store) inner() *C.wasm_store_t {
+	return self._inner
 }
