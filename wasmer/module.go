@@ -59,21 +59,21 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 		wasmBytesPtr = (*C.uint8_t)(unsafe.Pointer(&wasmBytes[0]))
 	}
 
-	module := &Module{
+	self := &Module{
 		_inner: C.to_wasm_module_new(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
 	}
 
-	if module._inner == nil {
+	if self._inner == nil {
 		return nil, newErrorFromWasmer()
 	}
 
 	runtime.KeepAlive(bytes)
 	runtime.KeepAlive(wasmBytes)
-	runtime.SetFinalizer(module, func(module *Module) {
-		C.wasm_module_delete(module.inner())
+	runtime.SetFinalizer(self, func(self *Module) {
+		C.wasm_module_delete(self.inner())
 	})
 
-	return module, nil
+	return self, nil
 }
 
 func ValidateModule(store *Store, bytes []byte) error {
@@ -102,6 +102,6 @@ func ValidateModule(store *Store, bytes []byte) error {
 	return nil
 }
 
-func (module *Module) inner() *C.wasm_module_t {
-	return module._inner
+func (self *Module) inner() *C.wasm_module_t {
+	return self._inner
 }
