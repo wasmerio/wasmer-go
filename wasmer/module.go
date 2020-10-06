@@ -3,6 +3,8 @@ package wasmer
 // #include <wasmer_wasm.h>
 // #include <stdio.h>
 //
+// #define own
+//
 // // We can't create a `wasm_byte_vec_t` directly in Go otherwise cgo
 // // complains with “Go pointer to Go pointer”. The hack consists at
 // // creating the `wasm_byte_vec_t` directly in C.
@@ -104,4 +106,8 @@ func ValidateModule(store *Store, bytes []byte) error {
 
 func (self *Module) inner() *C.wasm_module_t {
 	return self._inner
+}
+
+func (self *Module) Imports() []*ImportType {
+	return newImportTypes(self).importTypes
 }
