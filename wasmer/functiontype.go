@@ -9,15 +9,6 @@ type FunctionType struct {
 	_ownedBy interface{}
 }
 
-func NewFunctionType(params []*ValueType, results []*ValueType) *FunctionType {
-	paramsAsValueTypeVec := toValueTypeVec(params)
-	resultsAsValueTypeVec := toValueTypeVec(results)
-
-	pointer := C.wasm_functype_new(&paramsAsValueTypeVec, &resultsAsValueTypeVec)
-
-	return newFunctionType(pointer, nil)
-}
-
 func newFunctionType(pointer *C.wasm_functype_t, ownedBy interface{}) *FunctionType {
 	functionType := &FunctionType{_inner: pointer, _ownedBy: ownedBy}
 
@@ -28,6 +19,15 @@ func newFunctionType(pointer *C.wasm_functype_t, ownedBy interface{}) *FunctionT
 	}
 
 	return functionType
+}
+
+func NewFunctionType(params []*ValueType, results []*ValueType) *FunctionType {
+	paramsAsValueTypeVec := toValueTypeVec(params)
+	resultsAsValueTypeVec := toValueTypeVec(results)
+
+	pointer := C.wasm_functype_new(&paramsAsValueTypeVec, &resultsAsValueTypeVec)
+
+	return newFunctionType(pointer, nil)
 }
 
 func (self *FunctionType) inner() *C.wasm_functype_t {
