@@ -4,6 +4,29 @@ package wasmer
 import "C"
 import "runtime"
 
+type ExternKind C.wasm_externkind_t
+
+const (
+	FUNCTION = ExternKind(C.WASM_EXTERN_FUNC)
+	GLOBAL   = ExternKind(C.WASM_EXTERN_GLOBAL)
+	TABLE    = ExternKind(C.WASM_EXTERN_TABLE)
+	MEMORY   = ExternKind(C.WASM_EXTERN_MEMORY)
+)
+
+func (self ExternKind) String() string {
+	switch self {
+	case FUNCTION:
+		return "func"
+	case GLOBAL:
+		return "global"
+	case TABLE:
+		return "table"
+	case MEMORY:
+		return "memory"
+	}
+	panic("Unknown extern kind") // unreachable
+}
+
 type ExternType struct {
 	_inner   *C.wasm_externtype_t
 	_ownedBy interface{}
@@ -27,4 +50,30 @@ func newExternType(pointer *C.wasm_externtype_t, ownedBy interface{}) *ExternTyp
 
 func (self *ExternType) inner() *C.wasm_externtype_t {
 	return self._inner
+}
+
+func (self *ExternType) ownedBy() interface{} {
+	if self._ownedBy == nil {
+		return self
+	}
+
+	return self._ownedBy
+}
+
+func (self *ExternType) Kind() ExternKind {
+	kind := ExternKind(C.wasm_externtype_kind(self.inner()))
+
+	runtime.KeepAlive(self)
+
+	return kind
+}
+
+func (self *ExternType) IntoFunctionType() *FunctionType {
+	pointer := C.wasm_externtype_as_functype(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newFunctionType(pointer, self.ownedBy())
 }
