@@ -12,8 +12,22 @@ func TestGlobalMutability(t *testing.T) {
 
 func TestGlobalType(t *testing.T) {
 	valueType := NewValueType(I32)
-	globalType := NewGlobalType(valueType, IMMUTABLE)
+	globalType := NewGlobalType(valueType, MUTABLE)
 
 	assert.Equal(t, globalType.ValueType().Kind(), I32)
-	assert.Equal(t, globalType.Mutability(), IMMUTABLE)
+	assert.Equal(t, globalType.Mutability(), MUTABLE)
+}
+
+func TestGlobalTypeIntoExternTypeAndBack(t *testing.T) {
+	valueType := NewValueType(I32)
+
+	globalType := NewGlobalType(valueType, MUTABLE)
+	externType := globalType.IntoExternType()
+
+	assert.Equal(t, externType.Kind(), GLOBAL)
+
+	globalTypeAgain := externType.IntoGlobalType()
+
+	assert.Equal(t, globalTypeAgain.ValueType().Kind(), I32)
+	assert.Equal(t, globalTypeAgain.Mutability(), MUTABLE)
 }
