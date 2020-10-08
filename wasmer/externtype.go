@@ -69,11 +69,21 @@ func (self *ExternType) Kind() ExternKind {
 }
 
 func (self *ExternType) IntoFunctionType() *FunctionType {
-	pointer := C.wasm_externtype_as_functype(self.inner())
+	pointer := C.wasm_externtype_as_functype_const(self.inner())
 
 	if pointer == nil {
 		return nil
 	}
 
 	return newFunctionType(pointer, self.ownedBy())
+}
+
+func (self *ExternType) IntoGlobalType() *GlobalType {
+	pointer := C.wasm_externtype_as_globaltype_const(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newGlobalType(pointer, self.ownedBy())
 }
