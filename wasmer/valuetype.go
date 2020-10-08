@@ -33,7 +33,7 @@ func (self ValueKind) String() string {
 	case FuncRef:
 		return "funcref"
 	}
-	panic("Unknown value kind")
+	panic("Unknown value kind") // unreachable
 }
 
 func (self ValueKind) IsNumber() bool {
