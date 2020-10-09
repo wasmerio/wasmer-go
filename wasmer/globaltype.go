@@ -59,6 +59,8 @@ func (self *GlobalType) ownedBy() interface{} {
 func (self *GlobalType) ValueType() *ValueType {
 	pointer := C.wasm_globaltype_content(self.inner())
 
+	runtime.KeepAlive(self)
+
 	return newValueType(pointer, self.ownedBy())
 }
 

@@ -40,8 +40,7 @@ func (self *MemoryType) ownedBy() interface{} {
 }
 
 func (self *MemoryType) Limits() *Limits {
-	cLimits := C.wasm_memorytype_limits(self.inner())
-	limits := newLimits(cLimits, self.ownedBy())
+	limits := newLimits(C.wasm_memorytype_limits(self.inner()), self.ownedBy())
 
 	runtime.KeepAlive(self)
 
