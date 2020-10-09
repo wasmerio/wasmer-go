@@ -88,6 +88,16 @@ func (self *ExternType) IntoGlobalType() *GlobalType {
 	return newGlobalType(pointer, self.ownedBy())
 }
 
+func (self *ExternType) IntoTableType() *TableType {
+	pointer := C.wasm_externtype_as_tabletype_const(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newTableType(pointer, self.ownedBy())
+}
+
 func (self *ExternType) IntoMemoryType() *MemoryType {
 	pointer := C.wasm_externtype_as_memorytype_const(self.inner())
 
