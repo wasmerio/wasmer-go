@@ -60,8 +60,28 @@ func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportTyp
 	return exportType
 }
 
+func NewExportType(name string, ty IntoExternType) *ExportType {
+	nameName := newName(name)
+	externType := ty.IntoExternType().inner()
+	externTypeCopy := C.wasm_externtype_copy(externType)
+
+	runtime.KeepAlive(externType)
+
+	exportType := C.wasm_exporttype_new(&nameName, externTypeCopy)
+
+	return newExportType(exportType, nil)
+}
+
 func (self *ExportType) inner() *C.wasm_exporttype_t {
 	return self._inner
+}
+
+func (self *ExportType) ownedBy() interface{} {
+	if self._ownedBy == nil {
+		return self
+	}
+
+	return self._ownedBy
 }
 
 func (self *ExportType) Name() string {
@@ -71,4 +91,12 @@ func (self *ExportType) Name() string {
 	runtime.KeepAlive(self)
 
 	return name
+}
+
+func (self *ExportType) Type() *ExternType {
+	ty := C.wasm_exporttype_type(self.inner())
+
+	runtime.KeepAlive(self)
+
+	return newExternType(ty, self.ownedBy())
 }
