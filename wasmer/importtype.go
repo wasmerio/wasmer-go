@@ -60,8 +60,29 @@ func newImportType(pointer *C.wasm_importtype_t, ownedBy interface{}) *ImportTyp
 	return importType
 }
 
+func NewImportType(module string, name string, ty IntoExternType) *ImportType {
+	moduleName := newName(module)
+	nameName := newName(name)
+	externType := ty.IntoExternType().inner()
+	externTypeCopy := C.wasm_externtype_copy(externType)
+
+	runtime.KeepAlive(externType)
+
+	importType := C.wasm_importtype_new(&moduleName, &nameName, externTypeCopy)
+
+	return newImportType(importType, nil)
+}
+
 func (self *ImportType) inner() *C.wasm_importtype_t {
 	return self._inner
+}
+
+func (self *ImportType) ownedBy() interface{} {
+	if self._ownedBy == nil {
+		return self
+	}
+
+	return self._ownedBy
 }
 
 func (self *ImportType) Module() string {
@@ -80,4 +101,12 @@ func (self *ImportType) Name() string {
 	runtime.KeepAlive(self)
 
 	return name
+}
+
+func (self *ImportType) Type() *ExternType {
+	ty := C.wasm_importtype_type(self.inner())
+
+	runtime.KeepAlive(self)
+
+	return newExternType(ty, self.ownedBy())
 }
