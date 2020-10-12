@@ -43,13 +43,17 @@ func TestModuleImports(t *testing.T) {
 
 	assert.Equal(t, imports[0].Module(), "ns")
 	assert.Equal(t, imports[0].Name(), "function")
+	assert.Equal(t, imports[0].Type().Kind(), FUNCTION)
 
 	assert.Equal(t, imports[1].Module(), "ns")
 	assert.Equal(t, imports[1].Name(), "global")
+	assert.Equal(t, imports[1].Type().Kind(), GLOBAL)
 
 	assert.Equal(t, imports[2].Module(), "ns")
 	assert.Equal(t, imports[2].Name(), "table")
+	assert.Equal(t, imports[2].Type().Kind(), TABLE)
 
 	assert.Equal(t, imports[3].Module(), "ns")
 	assert.Equal(t, imports[3].Name(), "memory")
+	assert.Equal(t, imports[3].Type().Kind(), MEMORY)
 }
