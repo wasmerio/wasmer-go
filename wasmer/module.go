@@ -111,3 +111,7 @@ func (self *Module) inner() *C.wasm_module_t {
 func (self *Module) Imports() []*ImportType {
 	return newImportTypes(self).importTypes
 }
+
+func (self *Module) Exports() []*ExportType {
+	return newExportTypes(self).exportTypes
+}
