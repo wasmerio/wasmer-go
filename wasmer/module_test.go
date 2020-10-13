@@ -166,3 +166,47 @@ func TestModuleExports(t *testing.T) {
 
 	assert.Equal(t, memoryLimits.Minimum(), uint32(1))
 }
+
+func TestModuleSerialize(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	_, err := NewModule(store, []byte("(module)"))
+
+	assert.NoError(t, err)
+}
+
+func TestModuleDeserialize(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (func (export "function") (param i32 i64)))
+		`),
+	)
+
+	assert.NoError(t, err)
+
+	serializedModule, err := module.Serialize()
+
+	assert.NoError(t, err)
+
+	moduleAgain, err := DeserializeModule(store, serializedModule)
+
+	assert.NoError(t, err)
+
+	exports := moduleAgain.Exports()
+
+	assert.Equal(t, len(exports), 1)
+	assert.Equal(t, exports[0].Name(), "function")
+
+	type0 := exports[0].Type()
+
+	assert.Equal(t, type0.Kind(), FUNCTION)
+
+	functionType := type0.IntoFunctionType()
+
+	assert.Equal(t, len(functionType.Params()), 2)
+	assert.Equal(t, len(functionType.Results()), 0)
+}
