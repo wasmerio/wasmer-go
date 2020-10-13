@@ -1,7 +1,6 @@
 package wasmer
 
 // #include <wasmer_wasm.h>
-// #include <stdio.h>
 //
 // #define own
 //
