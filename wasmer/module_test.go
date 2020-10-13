@@ -21,6 +21,30 @@ func TestValidateModule(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestModuleNameSome(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(store, []byte("(module $moduleName)"))
+
+	assert.NoError(t, err)
+
+	name := module.Name()
+
+	assert.Equal(t, name, "moduleName")
+}
+
+func TestModuleNameNone(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(store, []byte("(module)"))
+
+	assert.NoError(t, err)
+
+	name := module.Name()
+
+	assert.Equal(t, name, "")
+}
+
 func TestModuleImports(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
