@@ -8,6 +8,7 @@ package wasmer
 // // We can't create a `wasm_byte_vec_t` directly in Go otherwise cgo
 // // complains with “Go pointer to Go pointer”. The hack consists at
 // // creating the `wasm_byte_vec_t` directly in C.
+//
 // own wasm_module_t* to_wasm_module_new(wasm_store_t *store, uint8_t *bytes, size_t bytes_length) {
 //     wasm_byte_vec_t wasm_bytes;
 //     wasm_bytes.size = bytes_length;
@@ -22,6 +23,14 @@ package wasmer
 //     wasm_bytes.data = (wasm_byte_t*) bytes;
 //
 //     return wasm_module_validate(store, &wasm_bytes);
+// }
+//
+// wasm_module_t* to_wasm_module_deserialize(wasm_store_t *store, uint8_t *bytes, size_t bytes_length) {
+//     wasm_byte_vec_t serialized_bytes;
+//     serialized_bytes.size = bytes_length;
+//     serialized_bytes.data = (wasm_byte_t*) bytes;
+//
+//     return wasm_module_deserialize(store, &serialized_bytes);
 // }
 import "C"
 import (
@@ -114,4 +123,38 @@ func (self *Module) Imports() []*ImportType {
 
 func (self *Module) Exports() []*ExportType {
 	return newExportTypes(self).exportTypes
+}
+
+func (self *Module) Serialize() ([]byte, error) {
+	var bytes C.wasm_byte_vec_t
+
+	C.wasm_module_serialize(self.inner(), &bytes)
+
+	if bytes.data == nil {
+		return nil, newErrorFromWasmer()
+	}
+
+	goBytes := C.GoBytes(unsafe.Pointer(bytes.data), C.int(bytes.size))
+	C.wasm_byte_vec_delete(&bytes)
+
+	return goBytes, nil
+}
+
+func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
+	var bytesPtr *C.uint8_t
+	bytesLength := len(bytes)
+
+	if bytesLength > 0 {
+		bytesPtr = (*C.uint8_t)(unsafe.Pointer(&bytes[0]))
+	}
+
+	self := &Module{
+		_inner: C.to_wasm_module_deserialize(store.inner(), bytesPtr, C.size_t(bytesLength)),
+	}
+
+	if self._inner == nil {
+		return nil, newErrorFromWasmer()
+	}
+
+	return self, nil
 }
