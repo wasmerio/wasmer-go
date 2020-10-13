@@ -117,6 +117,18 @@ func (self *Module) inner() *C.wasm_module_t {
 	return self._inner
 }
 
+func (self *Module) Name() string {
+	var name C.wasm_name_t
+
+	C.wasm_module_name(self.inner(), &name)
+
+	goName := nameToString(&name)
+
+	C.wasm_name_delete(&name)
+
+	return goName
+}
+
 func (self *Module) Imports() []*ImportType {
 	return newImportTypes(self).importTypes
 }
