@@ -53,6 +53,7 @@ import (
 // features.
 type Module struct {
 	_inner *C.wasm_module_t
+	store  *Store
 }
 
 func NewModule(store *Store, bytes []byte) (*Module, error) {
@@ -71,6 +72,7 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 
 	self := &Module{
 		_inner: C.to_wasm_module_new(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
+		store:  store,
 	}
 
 	if self._inner == nil {
