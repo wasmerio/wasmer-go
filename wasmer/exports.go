@@ -64,3 +64,33 @@ func (self *Exports) GetFunction(name string) (*Function, error) {
 
 	return exports.IntoFunction(), nil
 }
+
+func (self *Exports) GetGlobal(name string) (*Global, error) {
+	exports, err := self.Get(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exports.IntoGlobal(), nil
+}
+
+func (self *Exports) GetTable(name string) (*Table, error) {
+	exports, err := self.Get(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exports.IntoTable(), nil
+}
+
+func (self *Exports) GetMemory(name string) (*Memory, error) {
+	exports, err := self.Get(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exports.IntoMemory(), nil
+}

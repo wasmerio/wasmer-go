@@ -62,3 +62,33 @@ func (self *Extern) IntoFunction() *Function {
 
 	return newFunction(pointer, self.ownedBy())
 }
+
+func (self *Extern) IntoGlobal() *Global {
+	pointer := C.wasm_extern_as_global(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newGlobal(pointer, self.ownedBy())
+}
+
+func (self *Extern) IntoTable() *Table {
+	pointer := C.wasm_extern_as_table(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newTable(pointer, self.ownedBy())
+}
+
+func (self *Extern) IntoMemory() *Memory {
+	pointer := C.wasm_extern_as_memory(self.inner())
+
+	if pointer == nil {
+		return nil
+	}
+
+	return newMemory(pointer, self.ownedBy())
+}
