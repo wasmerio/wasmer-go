@@ -41,10 +41,24 @@ func TestInstanceExports(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, extern.Kind(), FUNCTION)
-	assert.Equal(t, extern.Type().Kind(), FUNCTION)
 
 	function, err := instance.Exports.GetFunction("function")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, function)
+
+	global, err := instance.Exports.GetGlobal("global")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, global)
+
+	table, err := instance.Exports.GetTable("table")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, table)
+
+	memory, err := instance.Exports.GetMemory("memory")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, memory)
 }

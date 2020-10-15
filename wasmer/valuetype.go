@@ -44,6 +44,10 @@ func (self ValueKind) IsReference() bool {
 	return bool(C.wasm_valkind_is_ref(C.wasm_valkind_t(self)))
 }
 
+func (self ValueKind) inner() C.wasm_valkind_t {
+	return C.wasm_valkind_t(self)
+}
+
 type ValueType struct {
 	_inner   *C.wasm_valtype_t
 	_ownedBy interface{}

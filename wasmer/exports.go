@@ -55,7 +55,7 @@ func (self *Exports) Get(name string) (*Extern, error) {
 	return export, nil
 }
 
-func (self *Exports) GetFunction(name string) (*Function, error) {
+func (self *Exports) GetRawFunction(name string) (*Function, error) {
 	exports, err := self.Get(name)
 
 	if err != nil {
@@ -63,6 +63,16 @@ func (self *Exports) GetFunction(name string) (*Function, error) {
 	}
 
 	return exports.IntoFunction(), nil
+}
+
+func (self *Exports) GetFunction(name string) (func(...interface{}) (interface{}, error), error) {
+	function, err := self.GetRawFunction(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return function.Native(), nil
 }
 
 func (self *Exports) GetGlobal(name string) (*Global, error) {
