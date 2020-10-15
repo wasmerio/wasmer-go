@@ -2,14 +2,11 @@ package wasmer
 
 // #include <wasmer_wasm.h>
 import "C"
-import (
-	"fmt"
-	"runtime"
-)
+import "runtime"
 
 type Instance struct {
 	_inner  *C.wasm_instance_t
-	exports map[string]*Extern
+	Exports *Exports
 }
 
 func NewInstance(module *Module) (*Instance, error) {
@@ -32,24 +29,12 @@ func NewInstance(module *Module) (*Instance, error) {
 		return nil, newErrorWith("trapped! to do")
 	}
 
-	exports := make(map[string]*Extern)
-
 	return &Instance{
 		_inner:  instance,
-		exports: exports,
+		Exports: newExports(instance, module),
 	}, nil
 }
 
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
-}
-
-func (self *Instance) Exports(name string) (*Extern, error) {
-	export, exists := self.exports[name]
-
-	if exists == false {
-		return nil, newErrorWith(fmt.Sprintf("Export `%s` does not exist", name))
-	}
-
-	return export, nil
 }
