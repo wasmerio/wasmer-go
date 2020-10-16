@@ -29,18 +29,18 @@ func NewInstance(module *Module) (*Instance, error) {
 		return nil, newErrorWith("trapped! to do")
 	}
 
-	return &Instance{
+	output := &Instance{
 		_inner:  instance,
 		Exports: newExports(instance, module),
-	}, nil
+	}
+
+	runtime.SetFinalizer(output, func(self *Instance) {
+		C.wasm_instance_delete(self.inner())
+	})
+
+	return output, nil
 }
 
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
-}
-
-func (self *Instance) Close() {
-	if self._inner != nil {
-		C.wasm_instance_delete(self._inner)
-	}
 }
