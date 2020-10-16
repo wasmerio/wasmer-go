@@ -9,12 +9,13 @@ import (
 )
 
 type Function struct {
-	_inner   *C.wasm_func_t
-	_ownedBy interface{}
+	_inner     *C.wasm_func_t
+	_ownedBy   interface{}
+	lazyNative func(...interface{}) (interface{}, error)
 }
 
 func newFunction(pointer *C.wasm_func_t, ownedBy interface{}) *Function {
-	function := &Function{_inner: pointer, _ownedBy: ownedBy}
+	function := &Function{_inner: pointer, _ownedBy: ownedBy, lazyNative: nil}
 
 	if ownedBy == nil {
 		runtime.SetFinalizer(function, func(function *Function) {
@@ -59,10 +60,17 @@ func (self *Function) ResultArity() uint {
 	return uint(C.wasm_func_result_arity(self.inner()))
 }
 
-func (self *Function) Native() func(...interface{}) (interface{}, error) {
-	ty := self.Type()
+func (self *Function) Call(parameters ...interface{}) (interface{}, error) {
+	return self.Native()(parameters...)
+}
 
-	return func(receivedParameters ...interface{}) (interface{}, error) {
+func (self *Function) Native() func(...interface{}) (interface{}, error) {
+	if self.lazyNative != nil {
+		return self.lazyNative
+	}
+
+	self.lazyNative = func(receivedParameters ...interface{}) (interface{}, error) {
+		ty := self.Type()
 		expectedParameters := ty.Params()
 		numberOfReceivedParameters := len(receivedParameters)
 		numberOfExpectedParameters := len(expectedParameters)
@@ -130,4 +138,6 @@ func (self *Function) Native() func(...interface{}) (interface{}, error) {
 			return allResults, nil
 		}
 	}
+
+	return self.lazyNative
 }
