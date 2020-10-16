@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestInstanceFunctionCall(t *testing.T) {
+func TestRawFunction(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(
@@ -23,12 +23,44 @@ func TestInstanceFunctionCall(t *testing.T) {
 			  (export "sum" (func $sum_f)))
 		`),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
-	defer instance.Close()
+
+	assert.NoError(t, err)
+
+	sum, err := instance.Exports.GetRawFunction("sum")
+
+	assert.NoError(t, err)
+	assert.Equal(t, sum.ParameterArity(), uint(2))
+	assert.Equal(t, sum.ResultArity(), uint(1))
+
+	result, err := sum.Call(1, 2)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(3))
+}
+
+func TestFunctionNative(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (type $sum_t (func (param i32 i32) (result i32)))
+			  (func $sum_f (type $sum_t) (param $x i32) (param $y i32) (result i32)
+			    local.get $x
+			    local.get $y
+			    i32.add)
+			  (export "sum" (func $sum_f)))
+		`),
+	)
+
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module)
 
 	assert.NoError(t, err)
 
@@ -42,7 +74,7 @@ func TestInstanceFunctionCall(t *testing.T) {
 	assert.Equal(t, result, int32(3))
 }
 
-func TestInstanceFunctionCallReturnZeroValue(t *testing.T) {
+func TestFunctionCallReturnZeroValue(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(
@@ -54,12 +86,10 @@ func TestInstanceFunctionCallReturnZeroValue(t *testing.T) {
 			  (export "test" (func $test_f)))
 		`),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
-	defer instance.Close()
 
 	assert.NoError(t, err)
 
@@ -73,7 +103,7 @@ func TestInstanceFunctionCallReturnZeroValue(t *testing.T) {
 	assert.Nil(t, result)
 }
 
-func TestInstanceFunctionCallReturnMultipleValues(t *testing.T) {
+func TestFunctionCallReturnMultipleValues(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(
@@ -87,12 +117,10 @@ func TestInstanceFunctionCallReturnMultipleValues(t *testing.T) {
 			  (export "swap" (func $swap_f)))
 		`),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
-	instance.Close()
 
 	assert.NoError(t, err)
 
@@ -118,12 +146,10 @@ func testFunction(t *testing.T) *Instance {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, getTestBytes())
-	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
-	defer instance.Close()
 
 	assert.NoError(t, err)
 

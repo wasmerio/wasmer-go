@@ -8,8 +8,7 @@ import (
 func TestModule(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
-	module, err := NewModule(store, []byte("(module)"))
-	defer module.Close()
+	_, err := NewModule(store, []byte("(module)"))
 
 	assert.NoError(t, err)
 }
@@ -26,7 +25,6 @@ func TestModuleNameSome(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, []byte("(module $moduleName)"))
-	defer module.Close()
 
 	assert.NoError(t, err)
 
@@ -39,7 +37,6 @@ func TestModuleNameNone(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, []byte("(module)"))
-	defer module.Close()
 
 	assert.NoError(t, err)
 
@@ -61,7 +58,6 @@ func TestModuleImports(t *testing.T) {
                 	  (import "ns" "memory" (memory 3 4)))
                 `),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
@@ -138,7 +134,6 @@ func TestModuleExports(t *testing.T) {
 			  (memory (export "memory") 1))
 		`),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
@@ -199,8 +194,7 @@ func TestModuleExports(t *testing.T) {
 func TestModuleSerialize(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
-	module, err := NewModule(store, []byte("(module)"))
-	defer module.Close()
+	_, err := NewModule(store, []byte("(module)"))
 
 	assert.NoError(t, err)
 }
@@ -215,7 +209,6 @@ func TestModuleDeserialize(t *testing.T) {
 			  (func (export "function") (param i32 i64)))
 		`),
 	)
-	defer module.Close()
 
 	assert.NoError(t, err)
 
@@ -224,7 +217,6 @@ func TestModuleDeserialize(t *testing.T) {
 	assert.NoError(t, err)
 
 	moduleAgain, err := DeserializeModule(store, serializedModule)
-	defer moduleAgain.Close()
 
 	assert.NoError(t, err)
 
