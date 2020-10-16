@@ -2,6 +2,9 @@ package wasmer
 
 import (
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"path"
+	"runtime"
 	"testing"
 )
 
@@ -95,4 +98,154 @@ func TestInstanceFunctionCallReturnMultipleValues(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, results, []interface{}{int64(42), int32(41)})
+}
+
+func getTestBytes() []byte {
+	_, filename, _, _ := runtime.Caller(0)
+	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	bytes, _ := ioutil.ReadFile(modulePath)
+
+	return bytes
+}
+
+func testFunction(t *testing.T) *Instance {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(store, getTestBytes())
+
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module)
+
+	assert.NoError(t, err)
+
+	return instance
+}
+
+func TestFunctionSum(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("sum")
+	result, err := f(1, 2)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(3))
+}
+
+func TestFunctionArity0(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("arity_0")
+	result, err := f()
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(42))
+}
+
+func TestFunctionI32I32(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("i32_i32")
+	result, err := f(7)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(int8(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(uint8(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(int16(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(uint16(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(int32(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(int(7))
+	assert.Equal(t, result, int32(7))
+
+	result, _ = f(uint(7))
+	assert.Equal(t, result, int32(7))
+}
+
+func TestFunctionI64I64(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("i64_i64")
+	result, err := f(7)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(int8(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(uint8(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(int16(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(uint16(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(int32(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(int64(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(int(7))
+	assert.Equal(t, result, int64(7))
+
+	result, _ = f(uint(7))
+	assert.Equal(t, result, int64(7))
+}
+
+func TestFunctionF32F32(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("f32_f32")
+	result, err := f(float32(7.42))
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, float32(7.42))
+}
+
+func TestFunctionF64F64(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("f64_f64")
+	result, err := f(7.42)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, float64(7.42))
+
+	result, _ = f(float64(7.42))
+	assert.Equal(t, result, float64(7.42))
+}
+
+func TestFunctionI32I64F32F64F64(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("i32_i64_f32_f64_f64")
+	result, err := f(1, 2, float32(3.4), 5.6)
+
+	assert.NoError(t, err)
+	assert.Equal(t, float64(int(result.(float64)*10000000))/10000000, 1+2+3.4+5.6)
+}
+
+func TestFunctionBoolCastedtoI32(t *testing.T) {
+	instance := testFunction(t)
+
+	f, _ := instance.Exports.GetFunction("bool_casted_to_i32")
+	result, err := f()
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(1))
 }

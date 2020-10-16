@@ -77,85 +77,10 @@ func (self *Function) Native() func(...interface{}) (interface{}, error) {
 		allArguments := make([]C.wasm_val_t, numberOfReceivedParameters)
 
 		for nth, receivedParameter := range receivedParameters {
-			var argument C.wasm_val_t
+			argument, err := fromGoValue(receivedParameter, expectedParameters[nth].Kind())
 
-			switch expectedParameters[nth].Kind() {
-			case I32:
-				argument.kind = I32.inner()
-
-				var of = (*int32)(unsafe.Pointer(&argument.of))
-
-				switch receivedParameter.(type) {
-				case int8:
-					*of = int32(receivedParameter.(int8))
-				case uint8:
-					*of = int32(receivedParameter.(uint8))
-				case int16:
-					*of = int32(receivedParameter.(int16))
-				case uint16:
-					*of = int32(receivedParameter.(uint16))
-				case int32:
-					*of = receivedParameter.(int32)
-				case int:
-					*of = int32(receivedParameter.(int))
-				case uint:
-					*of = int32(receivedParameter.(uint))
-				default:
-					return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `i32`, cannot cast value to this type.", nth+1))
-				}
-			case I64:
-				argument.kind = I64.inner()
-
-				var of = (*int64)(unsafe.Pointer(&argument.of))
-
-				switch receivedParameter.(type) {
-				case int8:
-					*of = int64(receivedParameter.(int8))
-				case uint8:
-					*of = int64(receivedParameter.(uint8))
-				case int16:
-					*of = int64(receivedParameter.(int16))
-				case uint16:
-					*of = int64(receivedParameter.(uint16))
-				case int32:
-					*of = int64(receivedParameter.(int32))
-				case uint32:
-					*of = int64(receivedParameter.(int64))
-				case int64:
-					*of = receivedParameter.(int64)
-				case int:
-					*of = int64(receivedParameter.(int))
-				case uint:
-					*of = int64(receivedParameter.(uint))
-				default:
-					return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `i64`, cannot cast value to this type.", nth+1))
-				}
-			case F32:
-				argument.kind = F32.inner()
-
-				var of = (*float32)(unsafe.Pointer(&argument.of))
-
-				switch receivedParameter.(type) {
-				case float32:
-					*of = receivedParameter.(float32)
-				default:
-					return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `f32`, cannot cast value to this type.", nth+1))
-				}
-			case F64:
-				argument.kind = F64.inner()
-
-				var of = (*float64)(unsafe.Pointer(&argument.of))
-
-				switch receivedParameter.(type) {
-				case float32:
-					*of = float64(receivedParameter.(float32))
-				case float64:
-					*of = receivedParameter.(float64)
-				default:
-					return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `f64`, cannot cast value to this type.", nth+1))
-				}
-			default:
-				panic("To implement!")
+			if err != nil {
+				return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `%s`, cannot cast value to this type.", nth+1, err))
 			}
 
 			allArguments[nth] = argument
