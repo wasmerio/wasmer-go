@@ -36,3 +36,63 @@ func TestInstanceFunctionCall(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(3))
 }
+
+func TestInstanceFunctionCallReturnZeroValue(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (type $test_t (func (param i32 i32)))
+			  (func $test_f (type $test_t) (param $x i32) (param $y i32))
+			  (export "test" (func $test_f)))
+		`),
+	)
+
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module)
+
+	assert.NoError(t, err)
+
+	test, err := instance.Exports.GetFunction("test")
+
+	assert.NoError(t, err)
+
+	result, err := test(1, 2)
+
+	assert.NoError(t, err)
+	assert.Nil(t, result)
+}
+
+func TestInstanceFunctionCallReturnMultipleValues(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (type $swap_t (func (param i32 i64) (result i64 i32)))
+			  (func $swap_f (type $swap_t) (param $x i32) (param $y i64) (result i64 i32)
+			    local.get $y
+			    local.get $x)
+			  (export "swap" (func $swap_f)))
+		`),
+	)
+
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module)
+
+	assert.NoError(t, err)
+
+	swap, err := instance.Exports.GetFunction("swap")
+
+	assert.NoError(t, err)
+
+	results, err := swap(41, 42)
+
+	assert.NoError(t, err)
+	assert.Equal(t, results, []interface{}{int64(42), int32(41)})
+}
