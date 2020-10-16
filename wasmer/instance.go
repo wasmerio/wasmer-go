@@ -38,3 +38,9 @@ func NewInstance(module *Module) (*Instance, error) {
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
 }
+
+func (self *Instance) Close() {
+	if self._inner != nil {
+		C.wasm_instance_delete(self._inner)
+	}
+}

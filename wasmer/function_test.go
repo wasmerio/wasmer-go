@@ -23,10 +23,12 @@ func TestInstanceFunctionCall(t *testing.T) {
 			  (export "sum" (func $sum_f)))
 		`),
 	)
+	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
+	defer instance.Close()
 
 	assert.NoError(t, err)
 
@@ -52,10 +54,12 @@ func TestInstanceFunctionCallReturnZeroValue(t *testing.T) {
 			  (export "test" (func $test_f)))
 		`),
 	)
+	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
+	defer instance.Close()
 
 	assert.NoError(t, err)
 
@@ -83,10 +87,12 @@ func TestInstanceFunctionCallReturnMultipleValues(t *testing.T) {
 			  (export "swap" (func $swap_f)))
 		`),
 	)
+	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
+	instance.Close()
 
 	assert.NoError(t, err)
 
@@ -112,10 +118,12 @@ func testFunction(t *testing.T) *Instance {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, getTestBytes())
+	defer module.Close()
 
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module)
+	defer instance.Close()
 
 	assert.NoError(t, err)
 

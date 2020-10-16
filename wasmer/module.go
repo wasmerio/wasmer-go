@@ -171,3 +171,9 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 
 	return self, nil
 }
+
+func (self *Module) Close() {
+	if self._inner != nil {
+		C.wasm_module_delete(self._inner)
+	}
+}
