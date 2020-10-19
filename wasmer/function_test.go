@@ -26,7 +26,7 @@ func TestRawFunction(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 
@@ -60,7 +60,7 @@ func TestFunctionNative(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 
@@ -89,7 +89,7 @@ func TestFunctionCallReturnZeroValue(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 
@@ -120,7 +120,7 @@ func TestFunctionCallReturnMultipleValues(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 
@@ -149,7 +149,7 @@ func testFunction(t *testing.T) *Instance {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 

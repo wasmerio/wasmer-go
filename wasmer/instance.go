@@ -9,13 +9,15 @@ type Instance struct {
 	Exports *Exports
 }
 
-func NewInstance(module *Module) (*Instance, error) {
-	var imports C.wasm_extern_vec_t
-	C.wasm_extern_vec_new_empty(&imports)
-
+func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	var traps *C.wasm_trap_t
 
-	instance := C.wasm_instance_new(module.store.inner(), module.inner(), &imports, &traps)
+	instance := C.wasm_instance_new(
+		module.store.inner(),
+		module.inner(),
+		imports.intoInner(),
+		&traps,
+	)
 
 	runtime.KeepAlive(module)
 	runtime.KeepAlive(module.store)

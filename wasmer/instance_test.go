@@ -12,7 +12,7 @@ func TestInstance(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	_, err = NewInstance(module)
+	_, err = NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 }
@@ -33,7 +33,7 @@ func TestInstanceExports(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
+	instance, err := NewInstance(module, NewImportObject())
 
 	assert.NoError(t, err)
 
