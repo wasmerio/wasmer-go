@@ -83,6 +83,16 @@ func (self *ValueType) Kind() ValueKind {
 	return kind
 }
 
+func NewValueTypes(kinds ...ValueKind) []*ValueType {
+	valueTypes := make([]*ValueType, len(kinds))
+
+	for nth, kind := range kinds {
+		valueTypes[nth] = NewValueType(kind)
+	}
+
+	return valueTypes
+}
+
 func toValueTypeVec(valueTypes []*ValueType) C.wasm_valtype_vec_t {
 	vec := C.wasm_valtype_vec_t{}
 	C.wasm_valtype_vec_new_uninitialized(&vec, C.size_t(len(valueTypes)))
