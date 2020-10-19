@@ -18,7 +18,92 @@ package wasmer
 //     return value->of.f64;
 // }
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
+
+type Value struct {
+	_inner *C.wasm_val_t
+}
+
+func newValue(pointer *C.wasm_val_t) Value {
+	return Value{_inner: pointer}
+}
+
+func NewValue(value interface{}, kind ValueKind) Value {
+	output, err := fromGoValue(value, kind)
+
+	if err != nil {
+		panic(fmt.Sprintf("Cannot create a Wasm `%s` value from `%T`", err, value))
+	}
+
+	return newValue(&output)
+}
+
+func NewI32(value interface{}) Value {
+	return NewValue(value, I32)
+}
+
+func NewI64(value interface{}) Value {
+	return NewValue(value, I64)
+}
+
+func NewF32(value interface{}) Value {
+	return NewValue(value, F32)
+}
+
+func NewF64(value interface{}) Value {
+	return NewValue(value, F64)
+}
+
+func (self *Value) inner() *C.wasm_val_t {
+	return self._inner
+}
+
+func (self *Value) Unwrap() interface{} {
+	return toGoValue(self.inner())
+}
+
+func (self *Value) I32() int32 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != I32 {
+		panic("Cannot convert value to `int32`")
+	}
+
+	return int32(C.to_int32(pointer))
+}
+
+func (self *Value) I64() int64 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != I64 {
+		panic("Cannot convert value to `int64`")
+	}
+
+	return int64(C.to_int64(pointer))
+}
+
+func (self *Value) F32() float32 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != F32 {
+		panic("Cannot convert value to `float32`")
+	}
+
+	return float32(C.to_float32(pointer))
+}
+
+func (self *Value) F64() float64 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != F64 {
+		panic("Cannot convert value to `float64`")
+	}
+
+	return float64(C.to_float64(pointer))
+}
 
 func toGoValue(pointer *C.wasm_val_t) interface{} {
 	switch ValueKind(pointer.kind) {
