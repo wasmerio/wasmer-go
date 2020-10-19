@@ -61,6 +61,10 @@ func (self *Value) inner() *C.wasm_val_t {
 	return self._inner
 }
 
+func (self *Value) Kind() ValueKind {
+	return ValueKind(self.inner().kind)
+}
+
 func (self *Value) Unwrap() interface{} {
 	return toGoValue(self.inner())
 }
@@ -203,4 +207,40 @@ func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
 	}
 
 	return output, nil
+}
+
+func toValueVec(list []Value, vec *C.wasm_val_vec_t) {
+	numberOfValues := len(list)
+	values := make([]C.wasm_val_t, numberOfValues)
+
+	for nth, item := range list {
+		value, err := fromGoValue(item.I32(), item.Kind())
+
+		if err != nil {
+			panic(err)
+		}
+
+		values[nth] = value
+	}
+
+	if numberOfValues > 0 {
+		C.wasm_val_vec_new(vec, C.size_t(numberOfValues), (*C.wasm_val_t)(unsafe.Pointer(&values[0])))
+	}
+}
+
+func toValueList(values *C.wasm_val_vec_t) []Value {
+	numberOfValues := int(values.size)
+	list := make([]Value, numberOfValues)
+	firstValue := unsafe.Pointer(values.data)
+	sizeOfValuePointer := unsafe.Sizeof(C.wasm_val_t{})
+
+	var currentValuePointer *C.wasm_val_t
+
+	for nth := 0; nth < numberOfValues; nth++ {
+		currentValuePointer = (*C.wasm_val_t)(unsafe.Pointer(uintptr(firstValue) + uintptr(nth)*sizeOfValuePointer))
+		value := newValue(currentValuePointer)
+		list[nth] = value
+	}
+
+	return list
 }
