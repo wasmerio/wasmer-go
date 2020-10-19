@@ -6,8 +6,8 @@ import (
 )
 
 func TestFunctionType(t *testing.T) {
-	params := []*ValueType{NewValueType(I32), NewValueType(I64)}
-	results := []*ValueType{NewValueType(F32)}
+	params := NewValueTypes(I32, I64)
+	results := NewValueTypes(F32)
 
 	functionType := NewFunctionType(params, results)
 
@@ -16,8 +16,8 @@ func TestFunctionType(t *testing.T) {
 }
 
 func TestFunctionTypeIntoExternTypeAndBack(t *testing.T) {
-	params := []*ValueType{NewValueType(I32), NewValueType(I64)}
-	results := []*ValueType{NewValueType(F32)}
+	params := NewValueTypes(I32, I64)
+	results := NewValueTypes(F32)
 
 	functionType := NewFunctionType(params, results)
 	externType := functionType.IntoExternType()

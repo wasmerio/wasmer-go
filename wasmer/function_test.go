@@ -283,3 +283,53 @@ func TestFunctionBoolCastedtoI32(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(1))
 }
+
+func TestHostFunction(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (import "math" "sum" (func $sum (param i32 i32) (result i32)))
+			  (func (export "add_one") (param $x i32) (result i32)
+			    local.get $x
+			    i32.const 1
+			    call $sum))
+		`),
+	)
+
+	assert.NoError(t, err)
+
+	function := NewFunction(
+		store,
+		NewFunctionType(NewValueTypes(I32, I32), NewValueTypes(I32)),
+		func(args []Value) ([]Value, error) {
+			x := args[0].I32()
+			y := args[1].I32()
+
+			return []Value{NewI32(x + y)}, nil
+		},
+	)
+
+	importObject := NewImportObject()
+	importObject.register(
+		"math",
+		map[string]IntoExtern{
+			"sum": function,
+		},
+	)
+
+	instance, err := NewInstance(module, importObject)
+
+	assert.NoError(t, err)
+
+	addOne, err := instance.Exports.GetFunction("add_one")
+
+	assert.NoError(t, err)
+
+	result, err := addOne(41)
+
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(42))
+}

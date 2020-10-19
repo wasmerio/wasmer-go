@@ -54,3 +54,13 @@ func TestValueTypeToVecToList(t *testing.T) {
 
 	//C.wasm_valtype_delete(&valueTypeVec)
 }
+
+func TestNewValueTypes(t *testing.T) {
+	valueTypes := NewValueTypes(I32, I64, F32, F64)
+
+	assert.Equal(t, len(valueTypes), 4)
+	assert.Equal(t, valueTypes[0].Kind(), I32)
+	assert.Equal(t, valueTypes[1].Kind(), I64)
+	assert.Equal(t, valueTypes[2].Kind(), F32)
+	assert.Equal(t, valueTypes[3].Kind(), F64)
+}
