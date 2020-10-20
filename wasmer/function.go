@@ -19,34 +19,6 @@ import (
 	"unsafe"
 )
 
-type hostFunctions struct {
-	sync.RWMutex
-	functions map[uint]func([]Value) ([]Value, error)
-}
-
-func (self *hostFunctions) load(index uint) (func([]Value) ([]Value, error), error) {
-	function, exists := self.functions[index]
-
-	if exists {
-		return function, nil
-	}
-
-	return nil, newErrorWith(fmt.Sprintf("Host function `%d` does not exist.", index))
-}
-
-func (self *hostFunctions) store(function func([]Value) ([]Value, error)) uint {
-	self.Lock()
-	index := uint(len(self.functions))
-	self.functions[index] = function
-	self.Unlock()
-
-	return index
-}
-
-var globalHostFunctions = hostFunctions{
-	functions: make(map[uint]func([]Value) ([]Value, error)),
-}
-
 type Function struct {
 	_inner     *C.wasm_func_t
 	_ownedBy   interface{}
@@ -66,9 +38,8 @@ func newFunction(pointer *C.wasm_func_t, ownedBy interface{}) *Function {
 }
 
 func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value, error)) *Function {
-	hostFunctionIndex := globalHostFunctions.store(function)
 	environment := &FunctionEnvironment{
-		globalHostFunctionIndex: hostFunctionIndex,
+		hostFunctionStoreIndex: hostFunctionStore.store(function),
 	}
 	pointer := C.wasm_func_new_with_env(
 		store.inner(),
@@ -86,7 +57,7 @@ func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value
 //export function_trampoline
 func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm_val_vec_t) *C.wasm_trap_t {
 	environment := (*FunctionEnvironment)(env)
-	hostFunction, err := globalHostFunctions.load(environment.globalHostFunctionIndex)
+	hostFunction, err := hostFunctionStore.load(environment.hostFunctionStoreIndex)
 
 	if err != nil {
 		panic(err)
@@ -219,8 +190,36 @@ func (self *Function) Native() func(...interface{}) (interface{}, error) {
 }
 
 type FunctionEnvironment struct {
-	globalHostFunctionIndex uint
+	hostFunctionStoreIndex uint
 }
 
 //export function_environment_finalizer
 func function_environment_finalizer() {}
+
+type hostFunctions struct {
+	sync.RWMutex
+	functions map[uint]func([]Value) ([]Value, error)
+}
+
+func (self *hostFunctions) load(index uint) (func([]Value) ([]Value, error), error) {
+	function, exists := self.functions[index]
+
+	if exists {
+		return function, nil
+	}
+
+	return nil, newErrorWith(fmt.Sprintf("Host function `%d` does not exist.", index))
+}
+
+func (self *hostFunctions) store(function func([]Value) ([]Value, error)) uint {
+	self.Lock()
+	index := uint(len(self.functions))
+	self.functions[index] = function
+	self.Unlock()
+
+	return index
+}
+
+var hostFunctionStore = hostFunctions{
+	functions: make(map[uint]func([]Value) ([]Value, error)),
+}
