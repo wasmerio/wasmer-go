@@ -306,3 +306,39 @@ func TestHostFunctionStore(t *testing.T) {
 	indexD := store.store(f)
 	assert.Equal(t, indexD, indexB)
 }
+
+func TestFunctionTrap(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (func (export "trap") (result i32) (unreachable) (i32.const 1)))
+		`),
+	)
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module, NewImportObject())
+
+	assert.NoError(t, err)
+
+	trap, err := instance.Exports.GetFunction("trap")
+
+	assert.NoError(t, err)
+
+	_, err = trap()
+
+	assert.Error(t, err)
+	assert.IsType(t, &TrapError{}, err)
+	assert.NotNil(t, err.(*TrapError).Origin())
+	assert.Equal(t, uint32(0), err.(*TrapError).Origin().FuncIndex())
+	assert.Equal(t, uint(1), err.(*TrapError).Origin().FuncOffset())
+	assert.Equal(t, uint(34), err.(*TrapError).Origin().ModuleOffset())
+
+	assert.NotNil(t, err.(*TrapError).Trace())
+	assert.Len(t, err.(*TrapError).Trace(), 1)
+	assert.Equal(t, err.(*TrapError).Origin().FuncIndex(), err.(*TrapError).Trace()[0].FuncIndex())
+	assert.Equal(t, err.(*TrapError).Origin().FuncOffset(), err.(*TrapError).Trace()[0].FuncOffset())
+	assert.Equal(t, err.(*TrapError).Origin().ModuleOffset(), err.(*TrapError).Trace()[0].ModuleOffset())
+}

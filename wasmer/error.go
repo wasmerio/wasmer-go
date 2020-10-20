@@ -42,3 +42,31 @@ func newErrorFromWasmer() *Error {
 func (error *Error) Error() string {
 	return error.message
 }
+
+type TrapError struct {
+	message string
+	origin  *Frame
+	trace   []*Frame
+}
+
+func newErrorFromTrap(pointer *C.wasm_trap_t) *TrapError {
+	trap := newTrap(pointer, nil)
+
+	return &TrapError{
+		message: trap.Message(),
+		origin: trap.Origin(),
+		trace: trap.Trace().frames,
+	}
+}
+
+func (self *TrapError) Error() string {
+	return self.message
+}
+
+func (self *TrapError) Origin() *Frame {
+	return self.origin
+}
+
+func (self *TrapError) Trace() []*Frame {
+	return self.trace
+}

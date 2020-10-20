@@ -171,7 +171,7 @@ func (self *Function) Native() func(...interface{}) (interface{}, error) {
 		runtime.KeepAlive(results)
 
 		if trap != nil {
-			panic("trapped!")
+			return nil, newErrorFromTrap(trap)
 		}
 
 		switch results.size {
