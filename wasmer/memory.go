@@ -2,7 +2,11 @@ package wasmer
 
 // #include <wasmer_wasm.h>
 import "C"
-import "runtime"
+import (
+	"reflect"
+	"runtime"
+	"unsafe"
+)
 
 type Memory struct {
 	_inner   *C.wasm_memory_t
@@ -51,6 +55,26 @@ func (self *Memory) Type() *MemoryType {
 
 func (self *Memory) Size() Pages {
 	return Pages(C.wasm_memory_size(self.inner()))
+}
+
+func (self *Memory) DataSize() uint {
+	return uint(C.wasm_memory_data_size(self.inner()))
+}
+
+func (self *Memory) Data() []byte {
+	length := int(self.DataSize())
+	data := (*C.byte_t)(C.wasm_memory_data(self.inner()))
+
+	runtime.KeepAlive(self)
+
+	var header reflect.SliceHeader
+	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
+
+	header.Data = uintptr(unsafe.Pointer(data))
+	header.Len = length
+	header.Cap = length
+
+	return *(*[]byte)(unsafe.Pointer(&header))
 }
 
 func (self *Memory) IntoExtern() *Extern {
