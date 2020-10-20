@@ -12,35 +12,27 @@ var TestBytes = []byte(`
 	  (global $z (export "z") i32 (i32.const 42))
 
 	  (func (export "get_x") (result i32)
-		(global.get $x))
+	    (global.get $x))
 
 	  (func (export "increment_x")
-		(global.set $x
-		  (i32.add (global.get $x) (i32.const 1)))))
+	    (global.set $x
+	      (i32.add (global.get $x) (i32.const 1)))))
 `)
 
-func instance(t *testing.T) *Instance {
+func testGetGlobalInstance(t *testing.T) *Instance {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, TestBytes)
-
 	assert.NoError(t, err)
 
-	instance, err := NewInstance(module)
-
+	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
 	return instance
 }
 
-func TestExport(t *testing.T) {
-	x, err := instance(t).Exports.GetGlobal("x")
-	assert.NoError(t, err)
-	assert.IsType(t, &Global{}, x)
-}
-
-func TestType(t *testing.T) {
-	x, err := instance(t).Exports.GetGlobal("x")
+func TestGlobalGetType(t *testing.T) {
+	x, err := testGetGlobalInstance(t).Exports.GetGlobal("x")
 	assert.NoError(t, err)
 
 	ty := x.Type()
@@ -49,7 +41,7 @@ func TestType(t *testing.T) {
 }
 
 func TestGlobalMutable(t *testing.T) {
-	exports := instance(t).Exports
+	exports := testGetGlobalInstance(t).Exports
 
 	x, err := exports.GetGlobal("x")
 	assert.NoError(t, err)
@@ -65,7 +57,7 @@ func TestGlobalMutable(t *testing.T) {
 }
 
 func TestGlobalReadWrite(t *testing.T) {
-	y, err := instance(t).Exports.GetGlobal("y")
+	y, err := testGetGlobalInstance(t).Exports.GetGlobal("y")
 	assert.NoError(t, err)
 
 	inititalValue, err := y.Get()
@@ -81,7 +73,7 @@ func TestGlobalReadWrite(t *testing.T) {
 }
 
 func TestGlobalReadWriteAndExportedFunctions(t *testing.T) {
-	instance := instance(t)
+	instance := testGetGlobalInstance(t)
 	x, err := instance.Exports.GetGlobal("x")
 	assert.NoError(t, err)
 
@@ -111,7 +103,7 @@ func TestGlobalReadWriteAndExportedFunctions(t *testing.T) {
 }
 
 func TestGlobalReadWriteConstant(t *testing.T) {
-	z, err := instance(t).Exports.GetGlobal("z")
+	z, err := testGetGlobalInstance(t).Exports.GetGlobal("z")
 	assert.NoError(t, err)
 
 	value, err := z.Get()
