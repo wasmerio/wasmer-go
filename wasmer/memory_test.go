@@ -34,7 +34,7 @@ func TestMemory(t *testing.T) {
 func TestMemorySize(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
-	limits, err := NewLimits(1, 7)
+	limits, err := NewLimits(1, 3)
 
 	assert.NoError(t, err)
 
@@ -42,6 +42,18 @@ func TestMemorySize(t *testing.T) {
 	size := memory.Size()
 
 	assert.Equal(t, size, Pages(1))
+
+	success := memory.Grow(Pages(2))
+
+	assert.True(t, success)
+
+	size = memory.Size()
+
+	assert.Equal(t, size, Pages(3))
+
+	success = memory.Grow(Pages(1))
+
+	assert.False(t, success)
 }
 
 func TestMemoryDataSize(t *testing.T) {
