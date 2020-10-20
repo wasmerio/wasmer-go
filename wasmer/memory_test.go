@@ -15,7 +15,7 @@ func TestMemory(t *testing.T) {
 	_ = NewMemory(store, NewMemoryType(limits))
 }
 
-/*func TestMemoryGetType(t *testing.T) {
+func TestMemoryGetType(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	limits, err := NewLimits(1, 7)
@@ -26,10 +26,9 @@ func TestMemory(t *testing.T) {
 
 	limitsAgain := memory.Type().Limits()
 
-	assert.Equal(t, limitsAgain.Minimum(), 1)
-	assert.Equal(t, limitsAgain.Maximum(), 7)
+	assert.Equal(t, limitsAgain.Minimum(), uint32(1))
+	assert.Equal(t, limitsAgain.Maximum(), uint32(7))
 }
-*/
 
 func TestMemorySize(t *testing.T) {
 	engine := NewEngine()
