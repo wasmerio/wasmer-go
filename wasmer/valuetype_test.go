@@ -48,7 +48,6 @@ func TestValueTypeToVecToList(t *testing.T) {
 		NewValueType(F32),
 	}
 	valueTypeVec := toValueTypeVec(valueTypeList)
-
 	assert.Equal(t, int(valueTypeVec.size), 3)
 	assert.Equal(t, toValueTypeList(&valueTypeVec, nil), valueTypeList)
 
@@ -57,7 +56,6 @@ func TestValueTypeToVecToList(t *testing.T) {
 
 func TestNewValueTypes(t *testing.T) {
 	valueTypes := NewValueTypes(I32, I64, F32, F64)
-
 	assert.Equal(t, len(valueTypes), 4)
 	assert.Equal(t, valueTypes[0].Kind(), I32)
 	assert.Equal(t, valueTypes[1].Kind(), I64)

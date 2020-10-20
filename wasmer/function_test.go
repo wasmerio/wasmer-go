@@ -20,21 +20,17 @@ func TestRawFunction(t *testing.T) {
 			  (export "sum" (func $sum_f)))
 		`),
 	)
-
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	sum, err := instance.Exports.GetRawFunction("sum")
-
 	assert.NoError(t, err)
 	assert.Equal(t, sum.ParameterArity(), uint(2))
 	assert.Equal(t, sum.ResultArity(), uint(1))
 
 	result, err := sum.Call(1, 2)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(3))
 }
@@ -54,19 +50,15 @@ func TestFunctionNative(t *testing.T) {
 			  (export "sum" (func $sum_f)))
 		`),
 	)
-
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	sum, err := instance.Exports.GetFunction("sum")
-
 	assert.NoError(t, err)
 
 	result, err := sum(1, 2)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(3))
 }
@@ -83,19 +75,15 @@ func TestFunctionCallReturnZeroValue(t *testing.T) {
 			  (export "test" (func $test_f)))
 		`),
 	)
-
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	test, err := instance.Exports.GetFunction("test")
-
 	assert.NoError(t, err)
 
 	result, err := test(1, 2)
-
 	assert.NoError(t, err)
 	assert.Nil(t, result)
 }
@@ -114,19 +102,15 @@ func TestFunctionCallReturnMultipleValues(t *testing.T) {
 			  (export "swap" (func $swap_f)))
 		`),
 	)
-
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	swap, err := instance.Exports.GetFunction("swap")
-
 	assert.NoError(t, err)
 
 	results, err := swap(41, 42)
-
 	assert.NoError(t, err)
 	assert.Equal(t, results, []interface{}{int64(42), int32(41)})
 }
@@ -136,7 +120,6 @@ func TestFunctionSum(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("sum")
 	result, err := f(1, 2)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(3))
 }
@@ -146,7 +129,6 @@ func TestFunctionArity0(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("arity_0")
 	result, err := f()
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(42))
 }
@@ -156,7 +138,6 @@ func TestFunctionI32I32(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("i32_i32")
 	result, err := f(7)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(7))
 
@@ -187,7 +168,6 @@ func TestFunctionI64I64(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("i64_i64")
 	result, err := f(7)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int64(7))
 
@@ -221,7 +201,6 @@ func TestFunctionF32F32(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("f32_f32")
 	result, err := f(float32(7.42))
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, float32(7.42))
 }
@@ -231,7 +210,6 @@ func TestFunctionF64F64(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("f64_f64")
 	result, err := f(7.42)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, float64(7.42))
 
@@ -244,7 +222,6 @@ func TestFunctionI32I64F32F64F64(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("i32_i64_f32_f64_f64")
 	result, err := f(1, 2, float32(3.4), 5.6)
-
 	assert.NoError(t, err)
 	assert.Equal(t, float64(int(result.(float64)*10000000))/10000000, 1+2+3.4+5.6)
 }
@@ -254,7 +231,6 @@ func TestFunctionBoolCastedtoI32(t *testing.T) {
 
 	f, _ := instance.Exports.GetFunction("bool_casted_to_i32")
 	result, err := f()
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(1))
 }
@@ -273,7 +249,6 @@ func TestHostFunction(t *testing.T) {
 			    call $sum))
 		`),
 	)
-
 	assert.NoError(t, err)
 
 	function := NewFunction(
@@ -296,15 +271,12 @@ func TestHostFunction(t *testing.T) {
 	)
 
 	instance, err := NewInstance(module, importObject)
-
 	assert.NoError(t, err)
 
 	addOne, err := instance.Exports.GetFunction("add_one")
-
 	assert.NoError(t, err)
 
 	result, err := addOne(41)
-
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(42))
 }
@@ -318,23 +290,19 @@ func TestHostFunctionStore(t *testing.T) {
 		functions: make(map[uint]func([]Value) ([]Value, error)),
 	}
 	_, err := store.load(0)
-
 	assert.Error(t, err, "Host function `0` does not exist")
 
 	indexA := store.store(f)
 	indexB := store.store(f)
 	indexC := store.store(f)
-
 	assert.Equal(t, indexA, uint(0))
 	assert.Equal(t, indexB, uint(1))
 	assert.Equal(t, indexC, uint(2))
 
 	store.remove(indexB)
 	_, err = store.load(indexB)
-
 	assert.Error(t, err, "Host function `1` does not exist")
 
 	indexD := store.store(f)
-
 	assert.Equal(t, indexD, indexB)
 }

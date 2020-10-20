@@ -14,7 +14,6 @@ func TestLimits(t *testing.T) {
 	var maximum uint32 = 7
 
 	limits, err := NewLimits(minimum, maximum)
-
 	assert.NoError(t, err)
 	assert.Equal(t, limits.Minimum(), minimum)
 	assert.Equal(t, limits.Maximum(), maximum)

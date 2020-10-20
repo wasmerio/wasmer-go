@@ -20,11 +20,9 @@ func testGetInstance(t *testing.T) *Instance {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, testGetBytes())
-
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	return instance
