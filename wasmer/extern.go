@@ -60,7 +60,7 @@ func (self *Extern) IntoFunction() *Function {
 		return nil
 	}
 
-	return newFunction(pointer, self.ownedBy())
+	return newFunction(pointer, nil, self.ownedBy())
 }
 
 func (self *Extern) IntoGlobal() *Global {

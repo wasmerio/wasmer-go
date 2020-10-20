@@ -20,16 +20,26 @@ import (
 )
 
 type Function struct {
-	_inner     *C.wasm_func_t
-	_ownedBy   interface{}
-	lazyNative func(...interface{}) (interface{}, error)
+	_inner      *C.wasm_func_t
+	_ownedBy    interface{}
+	environment *FunctionEnvironment
+	lazyNative  func(...interface{}) (interface{}, error)
 }
 
-func newFunction(pointer *C.wasm_func_t, ownedBy interface{}) *Function {
-	function := &Function{_inner: pointer, _ownedBy: ownedBy, lazyNative: nil}
+func newFunction(pointer *C.wasm_func_t, environment *FunctionEnvironment, ownedBy interface{}) *Function {
+	function := &Function{
+		_inner:      pointer,
+		_ownedBy:    ownedBy,
+		environment: environment,
+		lazyNative:  nil,
+	}
 
 	if ownedBy == nil {
 		runtime.SetFinalizer(function, func(function *Function) {
+			if function.environment != nil {
+				hostFunctionStore.remove(function.environment.hostFunctionStoreIndex)
+			}
+
 			C.wasm_func_delete(function.inner())
 		})
 	}
@@ -50,8 +60,9 @@ func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value
 	)
 
 	runtime.KeepAlive(store)
+	runtime.KeepAlive(environment)
 
-	return newFunction(pointer, nil)
+	return newFunction(pointer, environment, nil)
 }
 
 //export function_trampoline
@@ -204,20 +215,37 @@ type hostFunctions struct {
 func (self *hostFunctions) load(index uint) (func([]Value) ([]Value, error), error) {
 	function, exists := self.functions[index]
 
-	if exists {
+	if exists && function != nil {
 		return function, nil
 	}
 
-	return nil, newErrorWith(fmt.Sprintf("Host function `%d` does not exist.", index))
+	return nil, newErrorWith(fmt.Sprintf("Host function `%d` does not exist", index))
 }
 
 func (self *hostFunctions) store(function func([]Value) ([]Value, error)) uint {
 	self.Lock()
+	// By default, the index is the size of the store.
 	index := uint(len(self.functions))
+
+	for nth, function := range self.functions {
+		// Find the first empty slot in the sotore.
+		if function == nil {
+			// Use that empty slot for the index.
+			index = nth
+			break
+		}
+	}
+
 	self.functions[index] = function
 	self.Unlock()
 
 	return index
+}
+
+func (self *hostFunctions) remove(index uint) {
+	self.Lock()
+	self.functions[index] = nil
+	self.Unlock()
 }
 
 var hostFunctionStore = hostFunctions{
