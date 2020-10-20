@@ -77,6 +77,10 @@ func (self *Memory) Data() []byte {
 	return *(*[]byte)(unsafe.Pointer(&header))
 }
 
+func (self *Memory) Grow(delta Pages) bool {
+	return bool(C.wasm_memory_grow(self.inner(), C.wasm_memory_pages_t(delta)))
+}
+
 func (self *Memory) IntoExtern() *Extern {
 	pointer := C.wasm_memory_as_extern(self.inner())
 
