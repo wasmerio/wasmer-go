@@ -228,7 +228,7 @@ func (self *hostFunctions) store(function func([]Value) ([]Value, error)) uint {
 	index := uint(len(self.functions))
 
 	for nth, function := range self.functions {
-		// Find the first empty slot in the sotore.
+		// Find the first empty slot in the store.
 		if function == nil {
 			// Use that empty slot for the index.
 			index = nth

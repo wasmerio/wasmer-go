@@ -333,3 +333,33 @@ func TestHostFunction(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(42))
 }
+
+func TestHostFunctionStore(t *testing.T) {
+	f := func(args []Value) ([]Value, error) {
+		return []Value{}, nil
+	}
+
+	store := hostFunctions{
+		functions: make(map[uint]func([]Value) ([]Value, error)),
+	}
+	_, err := store.load(0)
+
+	assert.Error(t, err, "Host function `0` does not exist")
+
+	indexA := store.store(f)
+	indexB := store.store(f)
+	indexC := store.store(f)
+
+	assert.Equal(t, indexA, uint(0))
+	assert.Equal(t, indexB, uint(1))
+	assert.Equal(t, indexC, uint(2))
+
+	store.remove(indexB)
+	_, err = store.load(indexB)
+
+	assert.Error(t, err, "Host function `1` does not exist")
+
+	indexD := store.store(f)
+
+	assert.Equal(t, indexD, indexB)
+}
