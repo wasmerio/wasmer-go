@@ -282,12 +282,15 @@ func TestHostFunction(t *testing.T) {
 }
 
 func TestHostFunctionStore(t *testing.T) {
-	f := func(args []Value) ([]Value, error) {
-		return []Value{}, nil
+	f := &hostFunction{
+		store: NewStore(NewEngine()),
+		function: func(args []Value) ([]Value, error) {
+			return []Value{}, nil
+		},
 	}
 
 	store := hostFunctions{
-		functions: make(map[uint]func([]Value) ([]Value, error)),
+		functions: make(map[uint]*hostFunction),
 	}
 	_, err := store.load(0)
 	assert.Error(t, err, "Host function `0` does not exist")
@@ -343,4 +346,55 @@ func TestFunctionTrap(t *testing.T) {
 	assert.Equal(t, trapOrigin.FunctionIndex(), trapTrace[0].FunctionIndex())
 	assert.Equal(t, trapOrigin.FunctionOffset(), trapTrace[0].FunctionOffset())
 	assert.Equal(t, trapOrigin.ModuleOffset(), trapTrace[0].ModuleOffset())
+}
+
+type myError struct {
+	message string
+}
+
+func (self *myError) Error() string {
+	return self.message
+}
+
+func TestHostFunctionTrap(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (import "math" "sum" (func $sum (param i32 i32) (result i32)))
+			  (func (export "add_one") (param $x i32) (result i32)
+			    local.get $x
+			    i32.const 1
+			    call $sum))
+		`),
+	)
+	assert.NoError(t, err)
+
+	function := NewFunction(
+		store,
+		NewFunctionType(NewValueTypes(I32, I32), NewValueTypes(I32)),
+		func(args []Value) ([]Value, error) {
+			// Go Trap, go!
+			return nil, &myError{message: "oops"}
+		},
+	)
+
+	importObject := NewImportObject()
+	importObject.register(
+		"math",
+		map[string]IntoExtern{
+			"sum": function,
+		},
+	)
+
+	instance, err := NewInstance(module, importObject)
+	assert.NoError(t, err)
+
+	addOne, err := instance.Exports.GetFunction("add_one")
+	assert.NoError(t, err)
+
+	_, err = addOne(41)
+	assert.Error(t, err, "oops")
 }
