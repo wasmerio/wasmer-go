@@ -320,25 +320,27 @@ func TestFunctionTrap(t *testing.T) {
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
-
 	assert.NoError(t, err)
 
 	trap, err := instance.Exports.GetFunction("trap")
-
 	assert.NoError(t, err)
 
 	_, err = trap()
 
 	assert.Error(t, err)
 	assert.IsType(t, &TrapError{}, err)
-	assert.NotNil(t, err.(*TrapError).Origin())
-	assert.Equal(t, uint32(0), err.(*TrapError).Origin().FuncIndex())
-	assert.Equal(t, uint(1), err.(*TrapError).Origin().FuncOffset())
-	assert.Equal(t, uint(34), err.(*TrapError).Origin().ModuleOffset())
 
-	assert.NotNil(t, err.(*TrapError).Trace())
-	assert.Len(t, err.(*TrapError).Trace(), 1)
-	assert.Equal(t, err.(*TrapError).Origin().FuncIndex(), err.(*TrapError).Trace()[0].FuncIndex())
-	assert.Equal(t, err.(*TrapError).Origin().FuncOffset(), err.(*TrapError).Trace()[0].FuncOffset())
-	assert.Equal(t, err.(*TrapError).Origin().ModuleOffset(), err.(*TrapError).Trace()[0].ModuleOffset())
+	trapError := err.(*TrapError)
+	trapOrigin := trapError.Origin()
+	assert.NotNil(t, trapOrigin)
+	assert.Equal(t, uint32(0), trapOrigin.FunctionIndex())
+	assert.Equal(t, uint(1), trapOrigin.FunctionOffset())
+	assert.Equal(t, uint(34), trapOrigin.ModuleOffset())
+
+	trapTrace := trapError.Trace()
+	assert.NotNil(t, trapTrace)
+	assert.Len(t, trapTrace, 1)
+	assert.Equal(t, trapOrigin.FunctionIndex(), trapTrace[0].FunctionIndex())
+	assert.Equal(t, trapOrigin.FunctionOffset(), trapTrace[0].FunctionOffset())
+	assert.Equal(t, trapOrigin.ModuleOffset(), trapTrace[0].ModuleOffset())
 }

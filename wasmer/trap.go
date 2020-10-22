@@ -4,12 +4,13 @@ package wasmer
 //
 // #define own
 //
-// own wasm_trap_t* to_wasm_trap_new(wasm_store_t *store, uint8_t *bytes, size_t bytes_length) {
-//     wasm_byte_vec_t wasm_bytes;
-//     wasm_bytes.size = bytes_length;
-//     wasm_bytes.data = (wasm_byte_t*) bytes;
+// own wasm_trap_t* to_wasm_trap_new(wasm_store_t *store, uint8_t *message_bytes, size_t message_length) {
+//     // `wasm_message_t` is an alias to `wasm_byte_vec_t`.
+//     wasm_message_t message;
+//     message.size = message_length;
+//     message.data = (wasm_byte_t*) message_bytes;
 //
-//     return wasm_trap_new(store, &wasm_bytes);
+//     return wasm_trap_new(store, &message);
 // }
 import "C"
 import (
@@ -39,16 +40,17 @@ func newTrap(pointer *C.wasm_trap_t, ownedBy interface{}) *Trap {
 
 func NewTrap(store *Store, message string) *Trap {
 	messageBytes := []byte(message)
-	var bytesPtr *C.uint8_t
+	var bytesPointer *C.uint8_t
 	bytesLength := len(messageBytes)
 
 	if bytesLength > 0 {
-		bytesPtr = (*C.uint8_t)(unsafe.Pointer(&messageBytes[0]))
+		bytesPointer = (*C.uint8_t)(unsafe.Pointer(&messageBytes[0]))
 	}
 
-	trap := C.to_wasm_trap_new(store.inner(), bytesPtr, C.size_t(bytesLength))
+	trap := C.to_wasm_trap_new(store.inner(), bytesPointer, C.size_t(bytesLength))
 
 	runtime.KeepAlive(store)
+	runtime.KeepAlive(message)
 
 	return newTrap(trap, nil)
 }
@@ -100,7 +102,7 @@ type Frame struct {
 
 func newFrame(pointer *C.wasm_frame_t, ownedBy interface{}) *Frame {
 	frame := &Frame{
-		_inner: pointer,
+		_inner:   pointer,
 		_ownedBy: ownedBy,
 	}
 
@@ -125,7 +127,7 @@ func (self *Frame) ownedBy() interface{} {
 	return self._ownedBy
 }
 
-func (self *Frame) FuncIndex() uint32 {
+func (self *Frame) FunctionIndex() uint32 {
 	index := C.wasm_frame_func_index(self.inner())
 
 	runtime.KeepAlive(self)
@@ -133,7 +135,7 @@ func (self *Frame) FuncIndex() uint32 {
 	return uint32(index)
 }
 
-func (self *Frame) FuncOffset() uint {
+func (self *Frame) FunctionOffset() uint {
 	index := C.wasm_frame_func_offset(self.inner())
 
 	runtime.KeepAlive(self)
