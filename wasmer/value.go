@@ -17,6 +17,10 @@ package wasmer
 // float64_t to_float64(wasm_val_t *value) {
 //     return value->of.f64;
 // }
+//
+// wasm_ref_t *to_ref(wasm_val_t *value) {
+//     return value->of.ref;
+// }
 import "C"
 import (
 	"fmt"
