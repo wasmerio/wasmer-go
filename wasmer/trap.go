@@ -31,7 +31,11 @@ func newTrap(pointer *C.wasm_trap_t, ownedBy interface{}) *Trap {
 
 	if ownedBy == nil {
 		runtime.SetFinalizer(trap, func(trap *Trap) {
-			C.wasm_trap_delete(trap.inner())
+			inner := trap.inner()
+
+			if inner != nil {
+				C.wasm_trap_delete(inner)
+			}
 		})
 	}
 
