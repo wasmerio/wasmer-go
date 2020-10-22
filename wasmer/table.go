@@ -4,6 +4,12 @@ package wasmer
 import "C"
 import "runtime"
 
+type TableSize C.wasm_table_size_t
+
+func (self *TableSize) ToUint32() uint32 {
+	return uint32(C.wasm_table_size_t(*self))
+}
+
 type Table struct {
 	_inner   *C.wasm_table_t
 	_ownedBy interface{}
@@ -31,6 +37,10 @@ func (self *Table) ownedBy() interface{} {
 	}
 
 	return self._ownedBy
+}
+
+func (self *Table) Size() TableSize {
+	return TableSize(C.wasm_table_size(self.inner()))
 }
 
 func (self *Table) IntoExtern() *Extern {
