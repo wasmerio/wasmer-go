@@ -18,9 +18,7 @@ func newErrorFromWasmer() *Error {
 	var errorLength = C.wasmer_last_error_length()
 
 	if errorLength == 0 {
-		return &Error{
-			message: "(no error from Wasmer)",
-		}
+		return newErrorWith("(no error from Wasmer)")
 	}
 
 	var errorMessage = make([]C.char, errorLength)
@@ -29,14 +27,10 @@ func newErrorFromWasmer() *Error {
 	var errorResult = C.wasmer_last_error_message(errorMessagePointer, errorLength)
 
 	if errorResult == -1 {
-		return &Error{
-			message: "(failed to read last error from Wasmer)",
-		}
+		return newErrorWith("(failed to read last error from Wasmer)")
 	}
 
-	return &Error{
-		message: C.GoStringN(errorMessagePointer, errorLength-1),
-	}
+	return newErrorWith(C.GoStringN(errorMessagePointer, errorLength-1))
 }
 
 func (error *Error) Error() string {
@@ -54,8 +48,8 @@ func newErrorFromTrap(pointer *C.wasm_trap_t) *TrapError {
 
 	return &TrapError{
 		message: trap.Message(),
-		origin: trap.Origin(),
-		trace: trap.Trace().frames,
+		origin:  trap.Origin(),
+		trace:   trap.Trace().frames,
 	}
 }
 
