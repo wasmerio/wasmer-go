@@ -396,5 +396,6 @@ func TestHostFunctionTrap(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = addOne(41)
+	assert.IsType(t, err, &TrapError{})
 	assert.Error(t, err, "oops")
 }
