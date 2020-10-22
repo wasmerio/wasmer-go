@@ -48,8 +48,12 @@ func newFunction(pointer *C.wasm_func_t, environment *FunctionEnvironment, owned
 }
 
 func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value, error)) *Function {
+	hostFunction := &hostFunction{
+		store:    store,
+		function: function,
+	}
 	environment := &FunctionEnvironment{
-		hostFunctionStoreIndex: hostFunctionStore.store(function),
+		hostFunctionStoreIndex: hostFunctionStore.store(hostFunction),
 	}
 	pointer := C.wasm_func_new_with_env(
 		store.inner(),
@@ -59,7 +63,6 @@ func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value
 		(C.wasm_func_callback_env_finalizer_t)(C.function_environment_finalizer),
 	)
 
-	runtime.KeepAlive(store)
 	runtime.KeepAlive(environment)
 
 	return newFunction(pointer, environment, nil)
@@ -75,10 +78,14 @@ func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm
 	}
 
 	arguments := toValueList(args)
-	results, err := hostFunction(arguments)
+	results, err := (hostFunction.function)(arguments)
 
 	if err != nil {
-		panic("trapped inside host function")
+		trap := NewTrap(hostFunction.store, err.Error())
+
+		runtime.KeepAlive(trap)
+
+		return trap.inner()
 	}
 
 	toValueVec(results, res)
@@ -201,42 +208,48 @@ func (self *Function) Native() func(...interface{}) (interface{}, error) {
 }
 
 type FunctionEnvironment struct {
+	store                  *Store
 	hostFunctionStoreIndex uint
 }
 
 //export function_environment_finalizer
 func function_environment_finalizer() {}
 
-type hostFunctions struct {
-	sync.RWMutex
-	functions map[uint]func([]Value) ([]Value, error)
+type hostFunction struct {
+	function func([]Value) ([]Value, error)
+	store    *Store
 }
 
-func (self *hostFunctions) load(index uint) (func([]Value) ([]Value, error), error) {
-	function, exists := self.functions[index]
+type hostFunctions struct {
+	sync.RWMutex
+	functions map[uint]*hostFunction
+}
 
-	if exists && function != nil {
-		return function, nil
+func (self *hostFunctions) load(index uint) (*hostFunction, error) {
+	hostFunction, exists := self.functions[index]
+
+	if exists && hostFunction != nil {
+		return hostFunction, nil
 	}
 
 	return nil, newErrorWith(fmt.Sprintf("Host function `%d` does not exist", index))
 }
 
-func (self *hostFunctions) store(function func([]Value) ([]Value, error)) uint {
+func (self *hostFunctions) store(hostFunction *hostFunction) uint {
 	self.Lock()
 	// By default, the index is the size of the store.
 	index := uint(len(self.functions))
 
-	for nth, function := range self.functions {
+	for nth, hostFunc := range self.functions {
 		// Find the first empty slot in the store.
-		if function == nil {
+		if hostFunc == nil {
 			// Use that empty slot for the index.
 			index = nth
 			break
 		}
 	}
 
-	self.functions[index] = function
+	self.functions[index] = hostFunction
 	self.Unlock()
 
 	return index
@@ -249,5 +262,5 @@ func (self *hostFunctions) remove(index uint) {
 }
 
 var hostFunctionStore = hostFunctions{
-	functions: make(map[uint]func([]Value) ([]Value, error)),
+	functions: make(map[uint]*hostFunction),
 }
