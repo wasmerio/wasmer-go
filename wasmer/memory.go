@@ -29,6 +29,7 @@ func NewMemory(store *Store, ty *MemoryType) *Memory {
 	pointer := C.wasm_memory_new(store.inner(), ty.inner())
 
 	runtime.KeepAlive(store)
+	runtime.KeepAlive(ty)
 
 	return newMemory(pointer, nil)
 }
