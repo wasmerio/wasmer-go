@@ -263,7 +263,7 @@ func TestHostFunction(t *testing.T) {
 	)
 
 	importObject := NewImportObject()
-	importObject.register(
+	importObject.Register(
 		"math",
 		map[string]IntoExtern{
 			"sum": function,
@@ -382,7 +382,7 @@ func TestHostFunctionTrap(t *testing.T) {
 	)
 
 	importObject := NewImportObject()
-	importObject.register(
+	importObject.Register(
 		"math",
 		map[string]IntoExtern{
 			"sum": function,

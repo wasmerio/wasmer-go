@@ -18,7 +18,7 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 	cExterns := &C.wasm_extern_vec_t{}
 
 	/*
-		// TODO(ivan: review this
+		// TODO(ivan): review this
 			runtime.SetFinalizer(cExterns, func(cExterns *C.wasm_extern_vec_t) {
 				C.wasm_extern_vec_delete(cExterns)
 			})
@@ -41,13 +41,13 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 	return cExterns
 }
 
-func (self *ImportObject) containsNamespace(name string) bool {
+func (self *ImportObject) ContainsNamespace(name string) bool {
 	_, exists := self.externs[name]
 
 	return exists
 }
 
-func (self *ImportObject) register(namespaceName string, namespace map[string]IntoExtern) {
+func (self *ImportObject) Register(namespaceName string, namespace map[string]IntoExtern) {
 	_, exists := self.externs[namespaceName]
 
 	if exists == false {
