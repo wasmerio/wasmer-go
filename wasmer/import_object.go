@@ -5,12 +5,14 @@ import "C"
 import "unsafe"
 
 type ImportObject struct {
-	externs map[string]map[string]IntoExtern
+	externs       map[string]map[string]IntoExtern
+	opaqueExterns []IntoExtern
 }
 
 func NewImportObject() *ImportObject {
 	return &ImportObject{
-		externs: make(map[string]map[string]IntoExtern),
+		externs:       make(map[string]map[string]IntoExtern),
+		opaqueExterns: nil,
 	}
 }
 
@@ -32,6 +34,11 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 			externs = append(externs, extern.IntoExtern().inner())
 			numberOfExterns++
 		}
+	}
+
+	for extern := range self.opaqueExterns {
+		externs = append(externs, extern.IntoExtern().inner())
+		numberOfExterns++
 	}
 
 	if numberOfExterns > 0 {
@@ -57,4 +64,8 @@ func (self *ImportObject) Register(namespaceName string, namespace map[string]In
 			self.externs[namespaceName][key] = value
 		}
 	}
+}
+
+func (self *ImportObject) addOpaqueExtern(extern *Extern) {
+	self.opaqueExterns = append(self.opaqueExterns, extern)
 }

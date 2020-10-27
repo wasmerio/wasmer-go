@@ -37,6 +37,10 @@ func (self *Extern) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+func (self *Extern) IntoExtern() *Extern {
+	return self
+}
+
 func (self *Extern) Kind() ExternKind {
 	kind := ExternKind(C.wasm_extern_kind(self.inner()))
 
