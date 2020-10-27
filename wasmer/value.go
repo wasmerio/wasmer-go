@@ -1,131 +1,250 @@
 package wasmer
 
+// #include <wasmer_wasm.h>
+//
+// int32_t to_int32(wasm_val_t *value) {
+//     return value->of.i32;
+// }
+//
+// int64_t to_int64(wasm_val_t *value) {
+//     return value->of.i64;
+// }
+//
+// float32_t to_float32(wasm_val_t *value) {
+//     return value->of.f32;
+// }
+//
+// float64_t to_float64(wasm_val_t *value) {
+//     return value->of.f64;
+// }
+//
+// wasm_ref_t *to_ref(wasm_val_t *value) {
+//     return value->of.ref;
+// }
+import "C"
 import (
 	"fmt"
-	"math"
+	"unsafe"
 )
 
-// ValueType represents the `Value` type.
-type ValueType int
-
-const (
-	// TypeI32 represents the WebAssembly `i32` type.
-	TypeI32 ValueType = iota
-
-	// TypeI64 represents the WebAssembly `i64` type.
-	TypeI64
-
-	// TypeF32 represents the WebAssembly `f32` type.
-	TypeF32
-
-	// TypeF64 represents the WebAssembly `f64` type.
-	TypeF64
-
-	// TypeVoid represents nothing.
-	// WebAssembly doesn't have “void” type, but it is introduced
-	// here to represent the returned value of a WebAssembly exported
-	// function that returns nothing.
-	TypeVoid
-)
-
-// Value represents a WebAssembly value of a particular type.
 type Value struct {
-	// The WebAssembly value (as bits).
-	value uint64
-
-	// The WebAssembly value type.
-	ty ValueType
+	_inner *C.wasm_val_t
 }
 
-// I32 constructs a WebAssembly value of type `i32`.
-func I32(value int32) Value {
-	return Value{
-		value: uint64(value),
-		ty:    TypeI32,
+func newValue(pointer *C.wasm_val_t) Value {
+	return Value{_inner: pointer}
+}
+
+func NewValue(value interface{}, kind ValueKind) Value {
+	output, err := fromGoValue(value, kind)
+
+	if err != nil {
+		panic(fmt.Sprintf("Cannot create a Wasm `%s` value from `%T`", err, value))
 	}
+
+	return newValue(&output)
 }
 
-// I64 constructs a WebAssembly value of type `i64`.
-func I64(value int64) Value {
-	return Value{
-		value: uint64(value),
-		ty:    TypeI64,
+func NewI32(value interface{}) Value {
+	return NewValue(value, I32)
+}
+
+func NewI64(value interface{}) Value {
+	return NewValue(value, I64)
+}
+
+func NewF32(value interface{}) Value {
+	return NewValue(value, F32)
+}
+
+func NewF64(value interface{}) Value {
+	return NewValue(value, F64)
+}
+
+func (self *Value) inner() *C.wasm_val_t {
+	return self._inner
+}
+
+func (self *Value) Kind() ValueKind {
+	return ValueKind(self.inner().kind)
+}
+
+func (self *Value) Unwrap() interface{} {
+	return toGoValue(self.inner())
+}
+
+func (self *Value) I32() int32 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != I32 {
+		panic("Cannot convert value to `int32`")
 	}
+
+	return int32(C.to_int32(pointer))
 }
 
-// F32 constructs a WebAssembly value of type `f32`.
-func F32(value float32) Value {
-	return Value{
-		value: uint64(math.Float32bits(value)),
-		ty:    TypeF32,
+func (self *Value) I64() int64 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != I64 {
+		panic("Cannot convert value to `int64`")
 	}
+
+	return int64(C.to_int64(pointer))
 }
 
-// F64 constructs a WebAssembly value of type `f64`.
-func F64(value float64) Value {
-	return Value{
-		value: math.Float64bits(value),
-		ty:    TypeF64,
+func (self *Value) F32() float32 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != F32 {
+		panic("Cannot convert value to `float32`")
 	}
+
+	return float32(C.to_float32(pointer))
 }
 
-// void constructs an empty WebAssembly value.
-func void() Value {
-	return Value{
-		value: 0,
-		ty:    TypeVoid,
+func (self *Value) F64() float64 {
+	pointer := self.inner()
+
+	if ValueKind(pointer.kind) != F64 {
+		panic("Cannot convert value to `float64`")
 	}
+
+	return float64(C.to_float64(pointer))
 }
 
-// GetType gets the type of the WebAssembly value.
-func (value Value) GetType() ValueType {
-	return value.ty
-}
-
-// ToI32 reads the WebAssembly value bits as an `int32`. The WebAssembly
-// value type is ignored.
-func (value Value) ToI32() int32 {
-	return int32(value.value)
-}
-
-// ToI64 reads the WebAssembly value bits as an `int64`. The WebAssembly
-// value type is ignored.
-func (value Value) ToI64() int64 {
-	return int64(value.value)
-}
-
-// ToF32 reads the WebAssembly value bits as a `float32`. The WebAssembly
-// value type is ignored.
-func (value Value) ToF32() float32 {
-	return math.Float32frombits(uint32(value.value))
-}
-
-// ToF64 reads the WebAssembly value bits as a `float64`. The WebAssembly
-// value type is ignored.
-func (value Value) ToF64() float64 {
-	return math.Float64frombits(value.value)
-}
-
-// ToVoid reads the WebAssembly value bits as a `nil`. The WebAssembly
-// value type is ignored.
-func (value Value) ToVoid() interface{} {
-	return nil
-}
-
-// String formats the WebAssembly value as a Go string.
-func (value Value) String() string {
-	switch value.ty {
-	case TypeI32:
-		return fmt.Sprintf("%d", value.ToI32())
-	case TypeI64:
-		return fmt.Sprintf("%d", value.ToI64())
-	case TypeF32:
-		return fmt.Sprintf("%f", value.ToF32())
-	case TypeF64:
-		return fmt.Sprintf("%f", value.ToF64())
-	case TypeVoid:
-		return "void"
+func toGoValue(pointer *C.wasm_val_t) interface{} {
+	switch ValueKind(pointer.kind) {
+	case I32:
+		return int32(C.to_int32(pointer))
+	case I64:
+		return int64(C.to_int64(pointer))
+	case F32:
+		return float32(C.to_float32(pointer))
+	case F64:
+		return float64(C.to_float64(pointer))
 	default:
-		return ""
+		panic("to do `newValue`")
 	}
+}
+
+func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
+	output := C.wasm_val_t{}
+
+	switch kind {
+	case I32:
+		output.kind = kind.inner()
+
+		var of = (*int32)(unsafe.Pointer(&output.of))
+
+		switch value.(type) {
+		case int8:
+			*of = int32(value.(int8))
+		case uint8:
+			*of = int32(value.(uint8))
+		case int16:
+			*of = int32(value.(int16))
+		case uint16:
+			*of = int32(value.(uint16))
+		case int32:
+			*of = value.(int32)
+		case int:
+			*of = int32(value.(int))
+		case uint:
+			*of = int32(value.(uint))
+		default:
+			return output, newErrorWith("i32")
+		}
+	case I64:
+		output.kind = kind.inner()
+
+		var of = (*int64)(unsafe.Pointer(&output.of))
+
+		switch value.(type) {
+		case int8:
+			*of = int64(value.(int8))
+		case uint8:
+			*of = int64(value.(uint8))
+		case int16:
+			*of = int64(value.(int16))
+		case uint16:
+			*of = int64(value.(uint16))
+		case int32:
+			*of = int64(value.(int32))
+		case uint32:
+			*of = int64(value.(int64))
+		case int64:
+			*of = value.(int64)
+		case int:
+			*of = int64(value.(int))
+		case uint:
+			*of = int64(value.(uint))
+		default:
+			return output, newErrorWith("i64")
+		}
+	case F32:
+		output.kind = kind.inner()
+
+		var of = (*float32)(unsafe.Pointer(&output.of))
+
+		switch value.(type) {
+		case float32:
+			*of = value.(float32)
+		default:
+			return output, newErrorWith("f32")
+		}
+	case F64:
+		output.kind = kind.inner()
+
+		var of = (*float64)(unsafe.Pointer(&output.of))
+
+		switch value.(type) {
+		case float32:
+			*of = float64(value.(float32))
+		case float64:
+			*of = value.(float64)
+		default:
+			return output, newErrorWith("f64")
+		}
+	default:
+		panic("To do, `fromGoValue`!")
+	}
+
+	return output, nil
+}
+
+func toValueVec(list []Value, vec *C.wasm_val_vec_t) {
+	numberOfValues := len(list)
+	values := make([]C.wasm_val_t, numberOfValues)
+
+	for nth, item := range list {
+		value, err := fromGoValue(item.I32(), item.Kind())
+
+		if err != nil {
+			panic(err)
+		}
+
+		values[nth] = value
+	}
+
+	if numberOfValues > 0 {
+		C.wasm_val_vec_new(vec, C.size_t(numberOfValues), (*C.wasm_val_t)(unsafe.Pointer(&values[0])))
+	}
+}
+
+func toValueList(values *C.wasm_val_vec_t) []Value {
+	numberOfValues := int(values.size)
+	list := make([]Value, numberOfValues)
+	firstValue := unsafe.Pointer(values.data)
+	sizeOfValuePointer := unsafe.Sizeof(C.wasm_val_t{})
+
+	var currentValuePointer *C.wasm_val_t
+
+	for nth := 0; nth < numberOfValues; nth++ {
+		currentValuePointer = (*C.wasm_val_t)(unsafe.Pointer(uintptr(firstValue) + uintptr(nth)*sizeOfValuePointer))
+		value := newValue(currentValuePointer)
+		list[nth] = value
+	}
+
+	return list
 }

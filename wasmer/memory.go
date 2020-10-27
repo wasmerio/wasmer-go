@@ -1,129 +1,89 @@
 package wasmer
 
+// #include <wasmer_wasm.h>
+import "C"
 import (
-	"fmt"
 	"reflect"
+	"runtime"
 	"unsafe"
 )
 
-// MemoryError represents any kind of errors related to a WebAssembly memory. It
-// is returned by `Memory` functions only.
-type MemoryError struct {
-	// Error message.
-	message string
-}
-
-// NewMemoryError constructs a new `MemoryError`.
-func NewMemoryError(message string) *MemoryError {
-	return &MemoryError{message}
-}
-
-// `MemoryError` is an actual error. The `Error` function returns
-// the error message.
-func (error *MemoryError) Error() string {
-	return error.message
-}
-
-// Memory represents a WebAssembly memory. To read and write data,
-// please see the `Data` function. The memory can be owned or
-// borrowed. It is only possible to create an owned memory from the
-// user-land.
 type Memory struct {
-	memory *cWasmerMemoryT
-
-	// If set to true, the memory can be freed.
-	owned bool
+	_inner   *C.wasm_memory_t
+	_ownedBy interface{}
 }
 
-// NewMemory instantiates a new owned WebAssembly memory, bound for
-// imported memory.
-func NewMemory(min, max uint32) (*Memory, error) {
-	var memory Memory
+func newMemory(pointer *C.wasm_memory_t, ownedBy interface{}) *Memory {
+	memory := &Memory{_inner: pointer, _ownedBy: ownedBy}
 
-	memory.owned = true
-	newResult := cWasmerMemoryNew(&memory.memory, cUint32T(min), cUint32T(max))
-
-	if newResult != cWasmerOk {
-		var lastError, err = GetLastError()
-		var errorMessage = "Failed to allocate the memory:\n    %s"
-
-		if err != nil {
-			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
-		} else {
-			errorMessage = fmt.Sprintf(errorMessage, lastError)
-		}
-
-		return nil, NewMemoryError(errorMessage)
+	if ownedBy == nil {
+		runtime.SetFinalizer(memory, func(memory *Memory) {
+			C.wasm_memory_delete(memory.inner())
+		})
 	}
 
-	return &memory, nil
+	return memory
 }
 
-// Creates a new WebAssembly borrowed memory.
-func newBorrowedMemory(memory *cWasmerMemoryT) Memory {
-	return Memory{memory, false}
+func NewMemory(store *Store, ty *MemoryType) *Memory {
+	pointer := C.wasm_memory_new(store.inner(), ty.inner())
+
+	runtime.KeepAlive(store)
+	runtime.KeepAlive(ty)
+
+	return newMemory(pointer, nil)
 }
 
-// IsOwned checks whether the memory is owned, or borrowed.
-func (memory *Memory) IsOwned() bool {
-	return memory.owned
+func (self *Memory) inner() *C.wasm_memory_t {
+	return self._inner
 }
 
-// Length calculates the memory length (in bytes).
-func (memory *Memory) Length() uint32 {
-	if nil == memory.memory {
-		return 0
+func (self *Memory) ownedBy() interface{} {
+	if self._ownedBy == nil {
+		return self
 	}
 
-	return uint32(cWasmerMemoryDataLength(memory.memory))
+	return self._ownedBy
 }
 
-// Data returns a slice of bytes over the WebAssembly memory.
-func (memory *Memory) Data() []byte {
-	if nil == memory.memory {
-		return make([]byte, 0)
-	}
+func (self *Memory) Type() *MemoryType {
+	ty := C.wasm_memory_type(self.inner())
 
-	var length = memory.Length()
-	var data = (*uint8)(cWasmerMemoryData(memory.memory))
+	runtime.KeepAlive(self)
+
+	return newMemoryType(ty, self.ownedBy())
+}
+
+func (self *Memory) Size() Pages {
+	return Pages(C.wasm_memory_size(self.inner()))
+}
+
+func (self *Memory) DataSize() uint {
+	return uint(C.wasm_memory_data_size(self.inner()))
+}
+
+func (self *Memory) Data() []byte {
+	length := int(self.DataSize())
+	data := (*C.byte_t)(C.wasm_memory_data(self.inner()))
+
+	runtime.KeepAlive(self)
 
 	var header reflect.SliceHeader
 	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
 
 	header.Data = uintptr(unsafe.Pointer(data))
-	header.Len = int(length)
-	header.Cap = int(length)
+	header.Len = length
+	header.Cap = length
 
 	return *(*[]byte)(unsafe.Pointer(&header))
 }
 
-// Grow the memory by a number of pages (65kb each).
-func (memory *Memory) Grow(numberOfPages uint32) error {
-	if nil == memory.memory {
-		return nil
-	}
-
-	var growResult = cWasmerMemoryGrow(memory.memory, cUint32T(numberOfPages))
-
-	if growResult != cWasmerOk {
-		var lastError, err = GetLastError()
-		var errorMessage = "Failed to grow the memory:\n    %s"
-
-		if err != nil {
-			errorMessage = fmt.Sprintf(errorMessage, "(unknown details)")
-		} else {
-			errorMessage = fmt.Sprintf(errorMessage, lastError)
-		}
-
-		return NewMemoryError(errorMessage)
-	}
-
-	return nil
+func (self *Memory) Grow(delta Pages) bool {
+	return bool(C.wasm_memory_grow(self.inner(), C.wasm_memory_pages_t(delta)))
 }
 
-// Close closes/frees memory allocated at the NewMemory at time.
-func (memory *Memory) Close() {
-	if memory.IsOwned() {
-		cWasmerMemoryDestroy(memory.memory)
-	}
+func (self *Memory) IntoExtern() *Extern {
+	pointer := C.wasm_memory_as_extern(self.inner())
+
+	return newExtern(pointer, self.ownedBy())
 }
