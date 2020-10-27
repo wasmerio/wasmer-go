@@ -37,18 +37,6 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           cargo install just
 
-      - name: Build the runtime
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          just build-runtime
-
-      - name: Build the library
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          just build
-
       - name: Run all the tests
         shell: bash
         run: |
