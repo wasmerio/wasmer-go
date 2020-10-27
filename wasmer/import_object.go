@@ -36,7 +36,7 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 		}
 	}
 
-	for extern := range self.opaqueExterns {
+	for _, extern := range self.opaqueExterns {
 		externs = append(externs, extern.IntoExtern().inner())
 		numberOfExterns++
 	}

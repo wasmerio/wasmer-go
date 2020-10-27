@@ -54,9 +54,12 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 
 func (self *WasiEnvironment) generateImportObject() *ImportObject {
 	importObject := NewImportObject()
+	_ = importObject
 
 	/*
 		var wasiImports C.wasm_extern_vec_t
 		C.wasm_extern_vec_new_uninitialized(&wasiImports
 	*/
+
+	return nil
 }
