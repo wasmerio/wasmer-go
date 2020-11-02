@@ -8,7 +8,7 @@
 // You can run the example directly by executing in Wasmer root:
 //
 // ```shell
-// go test examples/example_errors_test.go
+// go test examples/example_early_exit_test.go
 // ```
 //
 // Ready?
@@ -20,21 +20,33 @@ import (
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
-func ExampleError() {
+type exitCode struct {
+	code int32
+}
+
+func (self *exitCode) Error() string {
+	return fmt.Sprintf("exit code: %d", self.code)
+}
+
+func earlyExit(args []wasmer.Value) ([]wasmer.Value, error) {
+	return nil, &exitCode{1}
+}
+
+func ExampleFunction_Call() {
 	// Let's declare the Wasm module.
 	//
 	// We are using the text representation of the module here.
 	wasmBytes := []byte(`
 		(module
-		  (type $do_div_by_zero_t (func (result i32)))
-		  (func $do_div_by_zero_f (type $do_div_by_zero_t) (result i32)
-		    i32.const 4
-		    i32.const 0
-		    i32.div_s)
-		  (type $div_by_zero_t (func (result i32)))
-		  (func $div_by_zero_f (type $div_by_zero_t) (result i32)
-		    call $do_div_by_zero_f)
-		  (export "div_by_zero" (func $div_by_zero_f)))
+		  (type $run_t (func (param i32 i32) (result i32)))
+		  (type $early_exit_t (func (param) (result)))
+		  (import "env" "early_exit" (func $early_exit (type $early_exit_t)))
+		  (func $run (type $run_t) (param $x i32) (param $y i32) (result i32)
+		    (call $early_exit)
+		    (i32.add
+		        local.get $x
+		        local.get $y))
+  		(export "run" (func $run)))
 	`)
 
 	// Create an Engine
@@ -50,8 +62,18 @@ func ExampleError() {
 		fmt.Println("Failed to compile module:", err)
 	}
 
-	// Create an empty import object.
+	// Create an import object with the expected function.
 	importObject := wasmer.NewImportObject()
+	importObject.Register(
+		"env",
+		map[string]wasmer.IntoExtern{
+			"early_exit": wasmer.NewFunction(
+				store,
+				wasmer.NewFunctionType(wasmer.NewValueTypes(), wasmer.NewValueTypes()),
+				earlyExit,
+			),
+		},
+	)
 
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
@@ -63,48 +85,25 @@ func ExampleError() {
 
 	// Here we go.
 	//
-	// The Wasm module exports a function called `div_by_zero`. As its name
-	// implies, this function will try to do a division by zero and thus
-	// produce an error.
-	//
-	// Let's get it.
-	divByZero, err := instance.Exports.GetFunction("div_by_zero")
+	// Get the `run` function which we'll use as our entrypoint.
+	fmt.Println("Calling `run` function...")
+	run, err := instance.Exports.GetFunction("run")
 
 	if err != nil {
-		panic(fmt.Sprintln("Failed to get the `div_by_zero` function:", err))
+		panic(fmt.Sprintln("Failed to retrieve the `run` function:", err))
 	}
 
-	fmt.Println("Calling `div_by_zero` function...")
-	_, err = divByZero()
+	_, err = run(1, 7)
 
-	// When we call a function it can either succeed or fail. We expect it to fail.
 	if err == nil {
-		panic(fmt.Sprintln("`div_by_zero` did not error"))
+		panic(fmt.Sprintln("`run` did not error"))
 	}
 
-	fmt.Println("Error caught from `div_by_zero`:", err)
-
-	// We'll try to match the error as a trap
-	trap, ok := err.(*wasmer.TrapError)
-
-	if !ok {
-		panic(fmt.Sprintln("Error was not of the expected type"))
-	}
-
-	frames := trap.Trace()
-	framesLen := len(frames)
-
-	// Errors come with a trace we can inspect to get more
-	// information on the execution flow.
-	for index, frame := range frames {
-		fmt.Printf("  Frame #%d: function index: %d\n", framesLen-index, frame.FunctionIndex())
-	}
+	fmt.Println("Exited early with:", err)
 
 	// Output:
 	// Compiling module...
 	// Instantiating module...
-	// Calling `div_by_zero` function...
-	// Error caught from `div_by_zero`: integer divide by zero
-	//   Frame #2: function index: 0
-	//   Frame #1: function index: 50
+	// Calling `run` function...
+	// Exited early with: exit code: 1
 }
