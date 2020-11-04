@@ -48,6 +48,11 @@ jobs:
         shell: bash
         run: |
           CC=${{ matrix.cc }} just test
+
+      - name: Run all the examples
+        shell: bash
+        run: |
+          CC=${{ matrix.cc }} just examples
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
