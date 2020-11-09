@@ -49,9 +49,12 @@ func TestValueTypeToVecToList(t *testing.T) {
 	}
 	valueTypeVec := toValueTypeVec(valueTypeList)
 	assert.Equal(t, int(valueTypeVec.size), 3)
-	assert.Equal(t, toValueTypeList(&valueTypeVec, nil), valueTypeList)
 
-	//C.wasm_valtype_delete(&valueTypeVec)
+	actualValueTypeList := toValueTypeList(&valueTypeVec, nil)
+	assert.Equal(t, len(valueTypeList), len(actualValueTypeList))
+	for nth, value := range valueTypeList {
+		assert.Equal(t, value.Kind(), actualValueTypeList[nth].Kind())
+	}
 }
 
 func TestNewValueTypes(t *testing.T) {

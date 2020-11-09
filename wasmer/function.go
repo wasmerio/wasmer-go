@@ -213,7 +213,7 @@ type FunctionEnvironment struct {
 }
 
 //export function_environment_finalizer
-func function_environment_finalizer() {}
+func function_environment_finalizer(_ unsafe.Pointer) {}
 
 type hostFunction struct {
 	function func([]Value) ([]Value, error)
