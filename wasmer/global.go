@@ -23,6 +23,16 @@ func newGlobal(pointer *C.wasm_global_t, ownedBy interface{}) *Global {
 	return global
 }
 
+func NewGlobal(store *Store, ty *GlobalType, value Value) *Global {
+	pointer := C.wasm_global_new(
+		store.inner(),
+		ty.inner(),
+		value.inner(),
+	)
+
+	return newGlobal(pointer, nil)
+}
+
 func (self *Global) inner() *C.wasm_global_t {
 	return self._inner
 }
