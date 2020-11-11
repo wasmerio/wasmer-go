@@ -14,4 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer = { git = "https://github.com/wasmerio/wasmer" }
+wasmer = "1.0.0-alpha5"

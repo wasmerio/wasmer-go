@@ -30,5 +30,7 @@ func TestJITEngine(t *testing.T) {
 }
 
 func TestNativeEngine(t *testing.T) {
+	t.Skip("Wasmer C API build does not include the native engine.")
+
 	testEngine(t, NewNativeEngine())
 }
