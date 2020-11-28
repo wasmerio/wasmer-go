@@ -1,8 +1,40 @@
-# <img height="48" src="https://wasmer.io/static/icons/favicon-96x96.png" alt="Wasmer logo" valign="middle"> Wasmer Go [![Packagist version](https://img.shields.io/badge/go.dev-package-f06)](https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer) [![Wasmer Go Documentation](https://img.shields.io/badge/documentation-API-ff0066.svg)](https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer?tab=doc) [![Wasmer Slack Channel](https://img.shields.io/static/v1?label=chat&message=on%20Slack&color=green)](https://slack.wasmer.io)
+<div align="center">
+  <a href="https://wasmer.io" target="_blank" rel="noopener noreferrer">
+    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/assets/logo.png" alt="Wasmer logo">
+  </a>
+  
+  <h1>Wasmer Go</h1>
+  
+  <p>
+    <a href="https://github.com/wasmerio/wasmer-go/actions?query=workflow%3A%22Build+and+Test%22">
+      <img src="https://github.com/wasmerio/wasmer-go/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
+    </a>
+    <a href="https://github.com/wasmerio/wasmer-go/blob/master/LICENSE">
+      <img src="https://img.shields.io/github/license/wasmerio/wasmer-go.svg" alt="License">
+    </a>
+    <a href="https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer">
+      <img src="https://img.shields.io/badge/go.dev-package-f06" alt="Go Package">
+    </a> 
+    <a href="https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer?tab=doc">
+      <img src="https://img.shields.io/badge/documentation-API-f06" alt="API Documentation">
+    </a> 
+  </p>
+
+  <h3>
+    <a href="https://wasmer.io/">Website</a>
+    <span> • </span>
+    <a href="https://docs.wasmer.io">Docs</a>
+    <span> • </span>
+    <a href="https://slack.wasmer.io/">Slack Channel</a>
+  </h3>
+
+</div>
+
+<hr/>
 
 A complete and mature WebAssembly runtime for Go based on [Wasmer].
 
-Features:
+# Features
 
   * **Easy to use**: The `wasmer` API mimics the standard WebAssembly API,
   * **Fast**: `wasmer` executes the WebAssembly modules as fast as
