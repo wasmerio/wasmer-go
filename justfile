@@ -11,7 +11,7 @@ examples:
 	#export DYLD_PRINT_LIBRARIES=y
 	cd examples
 	# Run the examples.
-	GODEBUG=cgocheck=2 go test
+	GODEBUG=cgocheck=2 go test -test.v
 
 # Local Variables:
 # mode: makefile
