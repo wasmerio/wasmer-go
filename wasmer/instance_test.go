@@ -53,3 +53,42 @@ func TestInstanceExports(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, memory)
 }
+
+func TestInstanceMissingImports(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (func (import "missing" "function"))
+			  (func (import "exists" "function")))
+		`),
+	)
+	assert.NoError(t, err)
+
+	function := NewFunction(
+		store,
+		NewFunctionType(NewValueTypes(), NewValueTypes()),
+		func(args []Value) ([]Value, error) {
+			return []Value{}, nil
+		},
+	)
+
+	importObject := NewImportObject()
+	importObject.Register(
+		"exists",
+		map[string]IntoExtern{
+			"function": function,
+		},
+	)
+	importObject.Register(
+		"not_missing",
+		map[string]IntoExtern{
+			"function": function,
+		},
+	)
+
+	_, err = NewInstance(module, NewImportObject())
+	assert.Error(t, err)
+}

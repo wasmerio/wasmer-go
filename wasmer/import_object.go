@@ -2,7 +2,10 @@ package wasmer
 
 // #include <wasmer_wasm.h>
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 type ImportObject struct {
 	externs       map[string]map[string]IntoExtern
@@ -16,7 +19,7 @@ func NewImportObject() *ImportObject {
 	}
 }
 
-func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
+func (self *ImportObject) intoInner(module *Module) (*C.wasm_extern_vec_t, error) {
 	cExterns := &C.wasm_extern_vec_t{}
 
 	/*
@@ -29,11 +32,18 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 	var externs []*C.wasm_extern_t
 	var numberOfExterns uint
 
-	for _, namespace := range self.externs {
-		for _, extern := range namespace {
-			externs = append(externs, extern.IntoExtern().inner())
-			numberOfExterns++
+	for _, importType := range module.Imports() {
+		namespace := importType.Module()
+		name := importType.Name()
+
+		if self.externs[namespace][name] == nil {
+			return nil, &Error{
+				message: fmt.Sprintf("Missing import: `%s`.`%s`", namespace, name),
+			}
 		}
+
+		externs = append(externs, self.externs[namespace][name].IntoExtern().inner())
+		numberOfExterns++
 	}
 
 	for _, extern := range self.opaqueExterns {
@@ -45,7 +55,7 @@ func (self *ImportObject) intoInner() *C.wasm_extern_vec_t {
 		C.wasm_extern_vec_new(cExterns, C.size_t(numberOfExterns), (**C.wasm_extern_t)(unsafe.Pointer(&externs[0])))
 	}
 
-	return cExterns
+	return cExterns, nil
 }
 
 func (self *ImportObject) ContainsNamespace(name string) bool {
