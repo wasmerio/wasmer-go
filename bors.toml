@@ -1,7 +1,6 @@
 status = [
-    "Test (ubuntu-latest)",
-    "Test (macos-latest)",
+    "Build and Test %",
 ]
-required_approvals = 0
-timeout_sec = 900
+required_approvals = 1
+timeout_sec = 7200
 delete_merged_branches = true 

@@ -1,42 +1,47 @@
 name: Build and Test
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+      - staging
+      - trying
 
 jobs:
-  # The `test` job.
   test:
-    name: Test
+    name: Build and Test
 
     strategy:
       matrix:
-        # The job runs on 2 different OS.
-        build: [linux, macos]
-        include:
-          - build: linux
-            os: ubuntu-latest
-            cc: clang-6.0
-          - build: macos
-            os: macos-latest
-            cc: clang
-      # As soon as one job fails in the matrix, all the other
-      # in-progress jobs are canceled.
+        target:
+          - id: 'linux-amd64'
+            os: 'ubuntu-18.04'
+            cc: 'clang-6.0'
+          - id: 'darwin-amd64'
+            os: 'macos-latest'
+            cc: 'clang'
+        go: [1.14]
       fail-fast: true
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.target.os }}
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: '1.14'
-
-      - name: Set up Rust
-        shell: bash
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          go-version: ${{ matrix.go }}
 
       - name: Set up just
         shell: bash
@@ -47,12 +52,16 @@ jobs:
       - name: Run all the tests
         shell: bash
         run: |
-          CC=${{ matrix.cc }} just test
+          just test
+        env:
+          CC: ${{ matrix.target.cc }}
 
       - name: Run all the examples
         shell: bash
         run: |
-          CC=${{ matrix.cc }} just examples
+          just examples
+        env:
+          CC: ${{ matrix.target.cc }}
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
