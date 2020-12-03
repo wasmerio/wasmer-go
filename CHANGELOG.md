@@ -4,13 +4,46 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
-* [Unreleased](#unreleased)
+* [1.0.0-beta1](#100-beta1---2020-12-03)
 * [0.3.1](#031---2020-02-03)
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
 
-## [Unreleased]
+## [1.0.0-beta1] - 2020-12-03
+
+### Changed
+
+* The whole API changed to better match Wasmer and Wasm C API
+
+  ```go
+  // Create an Engine
+  engine := wasmer.NewEngine()
+
+  // Create a Store
+  store := wasmer.NewStore(engine)
+
+  fmt.Println("Compiling module...")
+  module, err := wasmer.NewModule(store, wasmBytes)
+
+  if err != nil {	 
+      fmt.Println("Failed to compile module:", err)
+  }
+
+  // Create an empty import object.
+  importObject := wasmer.NewImportObject()
+
+  fmt.Println("Instantiating module...")
+  // Let's instantiate the Wasm module.
+  instance, err := wasmer.NewInstance(module, importObject)
+
+  if err != nil {	 
+      panic(fmt.Sprintln("Failed to instantiate the module:", err))
+  }
+  ``` 
+  
+  Please refer to the [examples](examples) and 
+  [documentation](https://docs.wasmer.io/integrations/go) to learn more about the changes.
 
 ## [0.3.1] - 2020-02-03
 
@@ -318,7 +351,7 @@ All notable changes to this project will be documented in this file.
 First release.
 
 
-[Unreleased]: https://github.com/wasmerio/wasmer-go/compare/v0.3.1...HEAD
+[1.0.0-beta1]: https://github.com/wasmerio/wasmer-go/compare/v0.3.1...v1.0.0-beta1
 [0.3.1]: https://github.com/wasmerio/wasmer-go/compare/0.3.0...v0.3.1
 [0.3.0]: https://github.com/wasmerio/wasmer-go/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/wasmerio/wasmer-go/compare/0.1.0...0.2.0
