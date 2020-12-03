@@ -55,6 +55,7 @@
 #include <stdlib.h>
 #include "wasm.h"
 
+#if defined(WASMER_COMPILER_ENABLED)
 /**
  * Kind of compilers that can be used by the engines.
  *
@@ -66,6 +67,7 @@ typedef enum {
   LLVM = 1,
   SINGLEPASS = 2,
 } wasmer_compiler_t;
+#endif
 
 /**
  * Kind of engines that can be used by the store.
@@ -143,10 +145,18 @@ intptr_t wasi_env_read_stdout(wasi_env_t *env, char *buffer, uintptr_t buffer_le
 #endif
 
 #if defined(WASMER_WASI_ENABLED)
+/**
+ * This function is deprecated. You may safely remove all calls to it and everything
+ * will continue to work.
+ */
 bool wasi_env_set_instance(wasi_env_t *env, const wasm_instance_t *instance);
 #endif
 
 #if defined(WASMER_WASI_ENABLED)
+/**
+ * This function is deprecated. You may safely remove all calls to it and everything
+ * will continue to work.
+ */
 void wasi_env_set_memory(wasi_env_t *env, const wasm_memory_t *memory);
 #endif
 
@@ -168,10 +178,12 @@ wasm_func_t *wasi_get_start_function(wasm_instance_t *instance);
 wasi_version_t wasi_get_wasi_version(const wasm_module_t *module);
 #endif
 
+#if defined(WASMER_COMPILER_ENABLED)
 /**
  * Configure the compiler to use.
  */
 void wasm_config_set_compiler(wasm_config_t *config, wasmer_compiler_t compiler);
+#endif
 
 /**
  * Configure the engine to use.
@@ -180,7 +192,7 @@ void wasm_config_set_engine(wasm_config_t *config, wasmer_engine_t engine);
 
 void wasm_module_name(const wasm_module_t *module, wasm_name_t *out);
 
-bool wasm_module_set_name(wasm_module_t *module, const wasm_name_t *name);
+bool wasm_module_set_name(wasm_module_t *module, wasm_name_t *name);
 
 /**
  * Gets the length in bytes of the last error if any.
@@ -228,8 +240,8 @@ int wasmer_last_error_message(char *buffer, int length);
  * Parses in-memory bytes as either the WAT format, or a binary Wasm
  * module. This is wasmer-specific.
  *
- * In case of failure, `wat2wasm` returns `NULL`.
+ * In case of failure, `wat2wasm` sets the `out->data = NULL` and `out->size = 0`.
  */
-wasm_byte_vec_t *wat2wasm(const wasm_byte_vec_t *wat);
+void wat2wasm(const wasm_byte_vec_t *wat, wasm_byte_vec_t *out);
 
 #endif /* WASMER_WASM_H */
