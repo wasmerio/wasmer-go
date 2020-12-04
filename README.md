@@ -90,21 +90,27 @@ import (
 )
 
 func main() {
-	// Reads the WebAssembly module as bytes.
-	bytes, _ := wasm.ReadBytes("simple.wasm")
-	
-	// Instantiates the WebAssembly module.
-	instance, _ := wasm.NewInstance(bytes)
-	defer instance.Close()
+    wasmBytes, _ := wasm.ReadBytes("simple.wasm")
 
-	// Gets the `sum` exported function from the WebAssembly instance.
-	sum := instance.Exports["sum"]
+    engine := wasmer.NewEngine()
+    store := wasmer.NewStore(engine)
 
-	// Calls that exported function with Go standard values. The WebAssembly
-	// types are inferred and values are casted automatically.
-	result, _ := sum(5, 37)
+    // Compiles the module
+    module, _ := wasmer.NewModule(store, wasmBytes)
 
-	fmt.Println(result) // 42!
+    // Instantiates the module
+    importObject := wasmer.NewImportObject()
+    instance, _ := wasmer.NewInstance(module, importObject)
+
+    // Gets the `sum` exported function from the WebAssembly instance.
+    sum, _ := instance.Exports.GetFunction("sum")
+
+
+    // Calls that exported function with Go standard values. The WebAssembly
+    // types are inferred and values are casted automatically.
+    result, _ := sum(5, 37)
+
+    fmt.Println(result) // 42!
 }
 ```
 
@@ -150,7 +156,7 @@ Second, we declare the `sum` function implementation in Go. Notice the
 
 ```go
 //export sum
-func sum(context unsafe.Pointer, x int32, y int32) int32 {
+func sum(x int32, y int32) int32 {
 	return x + y
 }
 ```
@@ -163,18 +169,28 @@ code:
 * `C.sum` is the cgo function pointer.
 
 ```go
-imports, _ := wasm.NewImports().AppendFunction("sum", sum, C.sum)
+importObject := wasmer.NewImportObject()
 ```
 
 Finally, we use `NewInstanceWithImports` to inject the imports:
 
 ```go
-bytes, _ := wasm.ReadBytes("imported_function.wasm")
-instance, _ := wasm.NewInstanceWithImports(bytes, imports)
-defer instance.Close()
+wasmBytes, _ := wasm.ReadBytes("imported_function.wasm")
+
+engine := wasmer.NewEngine()
+store := wasmer.NewStore(engine)
+
+// Compiles the module
+module, _ := wasmer.NewModule(store, wasmBytes)
+
+// Instantiates the Module
+instance, _ := wasmer.NewInstance(module, importObject)
+
+// Gets the `sum` exported function from the WebAssembly instance.
+add1, _ := instance.Exports.GetFunction("add1")
 
 // Gets and calls the `add1` exported function from the WebAssembly instance.
-results, _ := instance.Exports["add1"](1, 2)
+results, _ := add1(1, 2)
 
 fmt.Println(result)
 //   add1(1, 2)
@@ -202,19 +218,27 @@ The `return_hello` function returns a pointer to a string. This string
 is stored in the WebAssembly memory. Let's read it.
 
 ```go
-bytes, _ := wasm.ReadBytes("memory.wasm")
-instance, _ := wasm.NewInstance(bytes)
-defer instance.Close()
+wasmBytes, _ := wasm.ReadBytes("simple.wasm")
+
+engine := wasmer.NewEngine()
+store := wasmer.NewStore(engine)
+
+// Compiles the module
+module, _ := wasmer.NewModule(store, wasmBytes)
+
+// Instantiates the module
+importObject := wasmer.NewImportObject()
+instance, _ := wasmer.NewInstance(module, importObject)
 
 // Calls the `return_hello` exported function.
 // This function returns a pointer to a string.
-result, _ := instance.Exports["return_hello"]()
+result, _ := instance.GetFunction("return_hello")
 
 // Gets the pointer value as an integer.
 pointer := result.ToI32()
 
 // Reads the memory.
-memory := instance.Memory.Data()
+memory := instance.exports.GetMemory("memory").Data()
 
 fmt.Println(string(memory[pointer : pointer+13])) // Hello, World!
 ```
