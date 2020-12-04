@@ -24,6 +24,11 @@ func newLimits(pointer *C.wasm_limits_t, ownedBy interface{}) *Limits {
 	return limits
 }
 
+// NewLimits instantiates a new `Limits` which describes the `Memory` used.
+// The minimum and maximum parameters are "number of memory pages", with
+// each page being 64 KiB in size.
+//
+// You cannot `Grow` the `Memory` beyond the maximum defined here.
 func NewLimits(minimum uint32, maximum uint32) (*Limits, error) {
 	if minimum > maximum {
 		return nil, newErrorWith("The minimum limit is greater than the maximum one")
@@ -41,10 +46,16 @@ func (self *Limits) inner() *C.wasm_limits_t {
 	return &self._inner
 }
 
+// Minimum returns the minimum size of the `Memory` allocated in "number of pages".
+// Each page is 64 KiB in size.
 func (self *Limits) Minimum() uint32 {
 	return uint32(self.inner().min)
 }
 
+// Maximum returns the maximum size of the `Memory` allocated in "number of pages".
+// Each page is 64 KiB in size.
+//
+// You cannot `Grow` the `Memory` beyond this defined maximum size.
 func (self *Limits) Maximum() uint32 {
 	return uint32(self.inner().max)
 }
