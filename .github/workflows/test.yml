@@ -16,10 +16,8 @@ jobs:
         target:
           - id: 'linux-amd64'
             os: 'ubuntu-18.04'
-            cc: 'clang-6.0'
           - id: 'darwin-amd64'
             os: 'macos-latest'
-            cc: 'clang'
         go: [1.14]
       fail-fast: true
 
@@ -53,15 +51,11 @@ jobs:
         shell: bash
         run: |
           just test
-        env:
-          CC: ${{ matrix.target.cc }}
 
       - name: Run all the examples
         shell: bash
         run: |
           just examples
-        env:
-          CC: ${{ matrix.target.cc }}
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build

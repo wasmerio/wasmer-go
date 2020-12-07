@@ -1,10 +1,16 @@
 package wasmer
 
 // #include <wasmer_wasm.h>
+//
+// uint32_t limit_max_unbound() {
+//     return wasm_limits_max_default;
+// }
 import "C"
 import "runtime"
 
-const LimitMaxUnbound = uint32(C.wasm_limits_max_default)
+func LimitMaxUnbound() uint32 {
+	return uint32(C.limit_max_unbound())
+}
 
 type Limits struct {
 	_inner C.wasm_limits_t
