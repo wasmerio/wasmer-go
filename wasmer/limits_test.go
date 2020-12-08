@@ -6,7 +6,7 @@ import (
 )
 
 func TestLimitMaxDefault(t *testing.T) {
-	assert.Equal(t, LimitMaxUnbound, uint32(0xffffffff))
+	assert.Equal(t, LimitMaxUnbound(), uint32(0xffffffff))
 }
 
 func TestLimits(t *testing.T) {
