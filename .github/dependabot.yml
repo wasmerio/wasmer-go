@@ -19,4 +19,3 @@ updates:
     schedule:
       interval: "weekly"
       day: "sunday"
-    versioning-strategy: "auto"
