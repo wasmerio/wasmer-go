@@ -47,6 +47,25 @@ func newFunction(pointer *C.wasm_func_t, environment *FunctionEnvironment, owned
 	return function
 }
 
+// NewGlobal instantiates a new Global in the given Store.
+//
+// It takes three arguments, the Store, the FunctionType and the definition for the Function.
+//
+// The function definition must be a native Go function with a Value array as its single argument.
+// The function must return a Value array or an error.
+//
+// ⚠️ Even if the function does not take any argument (or use any argument) it must receive a Value array
+//    as its single argument. At runtime, this array will be empty.
+//    The same applies to the result.
+//
+//   hostFunction := wasmer.NewFunction(
+//		store,
+//		wasmer.NewFunctionType(wasmer.NewValueTypes(), wasmer.NewValueTypes(wasmer.I32)),
+//		func(args []wasmer.Value) ([]wasmer.Value, error) {
+//			return []wasmer.Value{wasmer.NewI32(42)}, nil
+//		},
+//	 )
+//
 func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value, error)) *Function {
 	hostFunction := &hostFunction{
 		store:    store,
@@ -105,12 +124,22 @@ func (self *Function) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// IntoExtern converts the Function into an Extern.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   extern := function.IntoExtern()
+//
 func (self *Function) IntoExtern() *Extern {
 	pointer := C.wasm_func_as_extern(self.inner())
 
 	return newExtern(pointer, self.ownedBy())
 }
 
+// Type returns the Function's FunctionType.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   ty := function.Type()
+//
 func (self *Function) Type() *FunctionType {
 	ty := C.wasm_func_type(self.inner())
 
@@ -119,18 +148,39 @@ func (self *Function) Type() *FunctionType {
 	return newFunctionType(ty, self.ownedBy())
 }
 
+// ParameterArity returns the number of arguments the Function expects as per its definition.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   arity := function.ParameterArity()
+//
 func (self *Function) ParameterArity() uint {
 	return uint(C.wasm_func_param_arity(self.inner()))
 }
 
+// ParameterArity returns the number of results the Function will return.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   arity := function.ResultArity()
+//
 func (self *Function) ResultArity() uint {
 	return uint(C.wasm_func_result_arity(self.inner()))
 }
 
+// Call will call the Function and return its results as native Go values.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   _ = function.Call(1, 2, 3)
+//
 func (self *Function) Call(parameters ...interface{}) (interface{}, error) {
 	return self.Native()(parameters...)
 }
 
+// Native will turn the Function into a native Go function that can be then called.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   nativeFunction = function.Native()
+//   _ = nativeFunction(1, 2, 3)
+//
 func (self *Function) Native() func(...interface{}) (interface{}, error) {
 	if self.lazyNative != nil {
 		return self.lazyNative
