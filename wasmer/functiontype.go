@@ -21,6 +21,12 @@ func newFunctionType(pointer *C.wasm_functype_t, ownedBy interface{}) *FunctionT
 	return functionType
 }
 
+// NewFunctionType instantiates a new FunctionType from two ValueType arrays: the parameters and the results.
+//
+//   params := wasmer.NewValueTypes()
+//   results := wasmer.NewValueTypes(wasmer.I32)
+//   functionType := wasmer.NewFunctionType(params, results)
+//
 func NewFunctionType(params []*ValueType, results []*ValueType) *FunctionType {
 	paramsAsValueTypeVec := toValueTypeVec(params)
 	resultsAsValueTypeVec := toValueTypeVec(results)
@@ -42,14 +48,34 @@ func (self *FunctionType) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// Params returns the parameters definitions from the FunctionType as a ValueType array
+//
+//   params := wasmer.NewValueTypes()
+//   results := wasmer.NewValueTypes(wasmer.I32)
+//   functionType := wasmer.NewFunctionType(params, results)
+//   paramsValueTypes = functionType.Params()
+//
 func (self *FunctionType) Params() []*ValueType {
 	return toValueTypeList(C.wasm_functype_params(self.inner()), self.ownedBy())
 }
 
+// Results returns the results definitions from the FunctionType as a ValueType array
+//
+//   params := wasmer.NewValueTypes()
+//   results := wasmer.NewValueTypes(wasmer.I32)
+//   functionType := wasmer.NewFunctionType(params, results)
+//   resultsValueTypes = functionType.Results()
+//
 func (self *FunctionType) Results() []*ValueType {
 	return toValueTypeList(C.wasm_functype_results(self.inner()), self.ownedBy())
 }
 
+// IntoExternType converts the FunctionType into an ExternType.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   functionType := function.Type()
+//   externType = functionType.IntoExternType()
+//
 func (self *FunctionType) IntoExternType() *ExternType {
 	pointer := C.wasm_functype_as_externtype_const(self.inner())
 
