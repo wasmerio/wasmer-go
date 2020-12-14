@@ -9,6 +9,19 @@ type Instance struct {
 	Exports *Exports
 }
 
+// NewInstance instantiates a new Instance.
+//
+// It takes two arguments, the Module and an ImportObject.
+//
+// ⚠️ Instantiating a module may return TrapError if the module's start function traps.
+//
+//   wasmBytes := []byte(`...`)
+//   engine := wasmer.NewEngine()
+//	 store := wasmer.NewStore(engine)
+//	 module, err := wasmer.NewModule(store, wasmBytes)
+//   importObject := wasmer.NewImportObject()
+//   instance, err := wasmer.NewInstance(module, importObject)
+//
 func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	var traps *C.wasm_trap_t
 	externs, err := imports.intoInner(module)
@@ -33,6 +46,7 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	}
 
 	if traps != nil {
+		// TODO(jubianchi): Implement this properly
 		return nil, newErrorWith("trapped! to do")
 	}
 
