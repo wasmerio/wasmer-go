@@ -13,6 +13,13 @@ const (
 	MEMORY   = ExternKind(C.WASM_EXTERN_MEMORY)
 )
 
+// String returns the ExternKind as a string.
+//
+//   FUNCTION.String() // "func"
+//   GLOBAL.String()   // "global"
+//   TABLE.String()    // "table"
+//   MEMORY.String()   // "memory"
+//
 func (self ExternKind) String() string {
 	switch self {
 	case FUNCTION:
@@ -60,6 +67,12 @@ func (self *ExternType) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// Kind returns the ExternType's ExternKind
+//
+//   global, _ := instance.Exports.GetGlobal("exported_global")
+//   extern = global.IntoExtern()
+//   _ = extern.Kind()
+//
 func (self *ExternType) Kind() ExternKind {
 	kind := ExternKind(C.wasm_externtype_kind(self.inner()))
 
@@ -68,6 +81,14 @@ func (self *ExternType) Kind() ExternKind {
 	return kind
 }
 
+// IntoFunctionType converts the ExternType into a FunctionType.
+//
+// ⚠️ If the ExternType is not a FunctionType, IntoFunctionType will return nil as its result.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   externType = function.IntoExtern().Type()
+//   _ := externType.IntoFunctionType()
+//
 func (self *ExternType) IntoFunctionType() *FunctionType {
 	pointer := C.wasm_externtype_as_functype_const(self.inner())
 
@@ -78,6 +99,14 @@ func (self *ExternType) IntoFunctionType() *FunctionType {
 	return newFunctionType(pointer, self.ownedBy())
 }
 
+// IntoGlobalType converts the ExternType into a GlobalType.
+//
+// ⚠️ If the ExternType is not a GlobalType, IntoGlobalType will return nil as its result.
+//
+//   global, _ := instance.Exports.GetGlobal("exported_global")
+//   externType = global.IntoExtern().Type()
+//   _ := externType.IntoGlobalType()
+//
 func (self *ExternType) IntoGlobalType() *GlobalType {
 	pointer := C.wasm_externtype_as_globaltype_const(self.inner())
 
@@ -88,6 +117,14 @@ func (self *ExternType) IntoGlobalType() *GlobalType {
 	return newGlobalType(pointer, self.ownedBy())
 }
 
+// IntoTableType converts the ExternType into a TableType.
+//
+// ⚠️ If the ExternType is not a TableType, IntoTableType will return nil as its result.
+//
+//   table, _ := instance.Exports.GetTable("exported_table")
+//   externType = table.IntoExtern().Type()
+//   _ := externType.IntoTableType()
+//
 func (self *ExternType) IntoTableType() *TableType {
 	pointer := C.wasm_externtype_as_tabletype_const(self.inner())
 
@@ -98,6 +135,14 @@ func (self *ExternType) IntoTableType() *TableType {
 	return newTableType(pointer, self.ownedBy())
 }
 
+// IntoMemoryType converts the ExternType into a MemoryType.
+//
+// ⚠️ If the ExternType is not a MemoryType, IntoMemoryType will return nil as its result.
+//
+//   memory, _ := instance.Exports.GetMemory("exported_memory")
+//   externType = memory.IntoExtern().Type()
+//   _ := externType.IntoMemoryType()
+//
 func (self *ExternType) IntoMemoryType() *MemoryType {
 	pointer := C.wasm_externtype_as_memorytype_const(self.inner())
 

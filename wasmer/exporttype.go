@@ -62,7 +62,7 @@ func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportTyp
 
 // NewExportType instantiates a new ExportType with a name and an extern type.
 //
-// ℹ️ An extern is anything implementing IntoExtern: FunctionType, GlobalType, MemoryType, TableType.
+// ℹ️ An extern type is anything implementing IntoExternType: FunctionType, GlobalType, MemoryType, TableType.
 //
 //   valueType := NewValueType(I32)
 //   globalType := NewGlobalType(valueType, CONST)
