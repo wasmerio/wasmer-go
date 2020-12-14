@@ -4,6 +4,7 @@ package wasmer
 import "C"
 import "runtime"
 
+
 type Extern struct {
 	_inner   *C.wasm_extern_t
 	_ownedBy interface{}
@@ -41,6 +42,12 @@ func (self *Extern) IntoExtern() *Extern {
 	return self
 }
 
+
+// Kind returns the Extern's ExternKind.
+//
+//   global, _ := instance.Exports.GetGlobal("exported_global")
+//   _ = global.IntoExtern().Kind()
+//
 func (self *Extern) Kind() ExternKind {
 	kind := ExternKind(C.wasm_extern_kind(self.inner()))
 
@@ -49,6 +56,11 @@ func (self *Extern) Kind() ExternKind {
 	return kind
 }
 
+// Type returns the Extern's ExternType.
+//
+//   global, _ := instance.Exports.GetGlobal("exported_global")
+//   _ = global.IntoExtern().Type()
+//
 func (self *Extern) Type() *ExternType {
 	ty := C.wasm_extern_type(self.inner())
 
@@ -57,6 +69,14 @@ func (self *Extern) Type() *ExternType {
 	return newExternType(ty, self.ownedBy())
 }
 
+// IntoFunction converts the Extern into a Function.
+//
+// ⚠️ If the Extern is not a Function, IntoFunction will return nil as its result.
+//
+//   function, _ := instance.Exports.GetFunction("exported_function")
+//   extern = function.IntoExtern()
+//   _ := extern.IntoFunction()
+//
 func (self *Extern) IntoFunction() *Function {
 	pointer := C.wasm_extern_as_func(self.inner())
 
@@ -67,6 +87,14 @@ func (self *Extern) IntoFunction() *Function {
 	return newFunction(pointer, nil, self.ownedBy())
 }
 
+// IntoGlobal converts the Extern into a Global.
+//
+// ⚠️ If the Extern is not a Global, IntoGlobal will return nil as its result.
+//
+//   global, _ := instance.Exports.GetGlobal("exported_global")
+//   extern = global.IntoExtern()
+//   _ := extern.IntoGlobal()
+//
 func (self *Extern) IntoGlobal() *Global {
 	pointer := C.wasm_extern_as_global(self.inner())
 
@@ -77,6 +105,14 @@ func (self *Extern) IntoGlobal() *Global {
 	return newGlobal(pointer, self.ownedBy())
 }
 
+// IntoTable converts the Extern into a Table.
+//
+// ⚠️ If the Extern is not a Table, IntoTable will return nil as its result.
+//
+//   table, _ := instance.Exports.GetTable("exported_table")
+//   extern = table.IntoExtern()
+//   _ := extern.IntoTable()
+//
 func (self *Extern) IntoTable() *Table {
 	pointer := C.wasm_extern_as_table(self.inner())
 
@@ -87,6 +123,14 @@ func (self *Extern) IntoTable() *Table {
 	return newTable(pointer, self.ownedBy())
 }
 
+// IntoMemory converts the Extern into a Memory.
+//
+// ⚠️ If the Extern is not a Memory, IntoMemory will return nil as its result.
+//
+//   memory, _ := instance.Exports.GetMemory("exported_memory")
+//   extern = memory.IntoExtern()
+//   _ := extern.IntoMemory()
+//
 func (self *Extern) IntoMemory() *Memory {
 	pointer := C.wasm_extern_as_memory(self.inner())
 
