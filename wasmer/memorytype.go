@@ -21,6 +21,11 @@ func newMemoryType(pointer *C.wasm_memorytype_t, ownedBy interface{}) *MemoryTyp
 	return memoryType
 }
 
+// NewMemoryType instantiates a new MemoryType given some Limits.
+//
+//   limits := NewLimits(1, 4)
+//   memoryType := NewMemoryType(limits)
+//
 func NewMemoryType(limits *Limits) *MemoryType {
 	pointer := C.wasm_memorytype_new(limits.inner())
 
@@ -39,6 +44,12 @@ func (self *MemoryType) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// Limits returns the MemoryType's Limits.
+//
+//   limits := NewLimits(1, 4)
+//   memoryType := NewMemoryType(limits)
+//   _ = memoryType.Limits()
+//
 func (self *MemoryType) Limits() *Limits {
 	limits := newLimits(C.wasm_memorytype_limits(self.inner()), self.ownedBy())
 
@@ -47,6 +58,12 @@ func (self *MemoryType) Limits() *Limits {
 	return limits
 }
 
+// IntoExternType converts the MemoryType into an ExternType.
+//
+//   limits := NewLimits(1, 4)
+//   memoryType := NewMemoryType(limits)
+//   externType = memoryType.IntoExternType()
+//
 func (self *MemoryType) IntoExternType() *ExternType {
 	pointer := C.wasm_memorytype_as_externtype_const(self.inner())
 
