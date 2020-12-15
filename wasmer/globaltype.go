@@ -26,6 +26,12 @@ func (self GlobalMutability) String() string {
 	panic("Unknown mutability") // unreachable
 }
 
+// GlobalType classifies global variables, which hold a value and can either be mutable or immutable.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#global-types
+//
 type GlobalType struct {
 	_inner   *C.wasm_globaltype_t
 	_ownedBy interface{}

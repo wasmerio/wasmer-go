@@ -6,6 +6,12 @@ import (
 	"runtime"
 )
 
+// Global stores a single value of the given GlobalType.
+//
+// See also
+//
+// https://webassembly.github.io/spec/core/syntax/modules.html#globals
+//
 type Global struct {
 	_inner   *C.wasm_global_t
 	_ownedBy interface{}

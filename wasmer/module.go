@@ -40,6 +40,14 @@ import (
 // Module contains stateless WebAssembly code that has already been
 // compiled and can be instantiated multiple times.
 //
+// WebAssembly programs are organized into modules, which are the unit of deployment, loading, and compilation. A
+// module collects definitions for types, functions, tables, memories, and globals. In addition, it can declare imports
+// and exports and provide initialization logic in the form of data and element segments or a start function.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/modules.html#modules
+//
 type Module struct {
 	_inner *C.wasm_module_t
 	store  *Store

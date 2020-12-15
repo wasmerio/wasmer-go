@@ -4,7 +4,11 @@ package wasmer
 import "C"
 import "runtime"
 
-// Table types classify tables over elements of element types within a size range.
+// TableType classifies tables over elements of element types within a size range.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#table-types
 //
 type TableType struct {
 	_inner   *C.wasm_tabletype_t

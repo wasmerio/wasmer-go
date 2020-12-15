@@ -34,6 +34,12 @@ func (self ExternKind) String() string {
 	panic("Unknown extern kind") // unreachable
 }
 
+// ExternType classifies imports and external values with their respective types.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#external-types
+//
 type ExternType struct {
 	_inner   *C.wasm_externtype_t
 	_ownedBy interface{}

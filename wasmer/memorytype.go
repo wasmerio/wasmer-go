@@ -4,6 +4,12 @@ package wasmer
 import "C"
 import "runtime"
 
+// MemoryType classifies linear memories and their size range.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#memory-types
+//
 type MemoryType struct {
 	_inner   *C.wasm_memorytype_t
 	_ownedBy interface{}

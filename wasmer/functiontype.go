@@ -4,6 +4,13 @@ package wasmer
 import "C"
 import "runtime"
 
+// FunctionType classifies the signature of functions, mapping a vector of parameters to a vector of results. They are
+// also used to classify the inputs and outputs of instructions.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#function-types
+//
 type FunctionType struct {
 	_inner   *C.wasm_functype_t
 	_ownedBy interface{}
