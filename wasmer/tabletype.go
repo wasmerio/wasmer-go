@@ -4,6 +4,8 @@ package wasmer
 import "C"
 import "runtime"
 
+// Table types classify tables over elements of element types within a size range.
+//
 type TableType struct {
 	_inner   *C.wasm_tabletype_t
 	_ownedBy interface{}
@@ -21,6 +23,13 @@ func newTableType(pointer *C.wasm_tabletype_t, ownedBy interface{}) *TableType {
 	return tableType
 }
 
+// NewTableType instantiates a new TableType given a ValueType and some Limits.
+//
+//   valueType := NewValueType(I32)
+//   limits := NewLimits(1, 4)
+//   tableType := NewTableType(valueType, limits)
+//   _ = tableType.IntoExternType()
+//
 func NewTableType(valueType *ValueType, limits *Limits) *TableType {
 	pointer := C.wasm_tabletype_new(valueType.inner(), limits.inner())
 
@@ -39,6 +48,13 @@ func (self *TableType) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// ValueType returns the TableType's ValueType.
+//
+//   valueType := NewValueType(I32)
+//   limits := NewLimits(1, 4)
+//   tableType := NewTableType(valueType, limits)
+//   _ = tableType.ValueType()
+//
 func (self *TableType) ValueType() *ValueType {
 	pointer := C.wasm_tabletype_element(self.inner())
 
@@ -47,6 +63,13 @@ func (self *TableType) ValueType() *ValueType {
 	return newValueType(pointer, self.ownedBy())
 }
 
+// Limits returns the TableType's Limits.
+//
+//   valueType := NewValueType(I32)
+//   limits := NewLimits(1, 4)
+//   tableType := NewTableType(valueType, limits)
+//   _ = tableType.Limits()
+//
 func (self *TableType) Limits() *Limits {
 	limits := newLimits(C.wasm_tabletype_limits(self.inner()), self.ownedBy())
 
@@ -55,6 +78,13 @@ func (self *TableType) Limits() *Limits {
 	return limits
 }
 
+// IntoExternType converts the TableType into an ExternType.
+//
+//   valueType := NewValueType(I32)
+//   limits := NewLimits(1, 4)
+//   tableType := NewTableType(valueType, limits)
+//   _ = tableType.IntoExternType()
+//
 func (self *TableType) IntoExternType() *ExternType {
 	pointer := C.wasm_tabletype_as_externtype_const(self.inner())
 
