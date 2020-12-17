@@ -34,6 +34,11 @@
 
 A complete and mature WebAssembly runtime for Go based on [Wasmer].
 
+**You are seeing the readme for the latest Wasmer Go version, if you are using an older version, please go to:**
+* [0.3](https://github.com/wasmerio/wasmer-go/tree/v0.3.1/README.md)
+* [0.2](https://github.com/wasmerio/wasmer-go/tree/0.2.0/README.md)
+* [0.1](https://github.com/wasmerio/wasmer-go/tree/0.1.0/README.md)
+
 # Features
 
   * **Easy to use**: The `wasmer` API mimics the standard WebAssembly API,
