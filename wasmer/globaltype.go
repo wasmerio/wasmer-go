@@ -11,6 +11,11 @@ const (
 	MUTABLE   = GlobalMutability(C.WASM_VAR)
 )
 
+// String returns the GlobalMutability as a string.
+//
+//   IMMUTABLE.String() // "const"
+//   MUTABLE.String()   // "var"
+//
 func (self GlobalMutability) String() string {
 	switch self {
 	case IMMUTABLE:
@@ -21,6 +26,12 @@ func (self GlobalMutability) String() string {
 	panic("Unknown mutability") // unreachable
 }
 
+// GlobalType classifies global variables, which hold a value and can either be mutable or immutable.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/syntax/types.html#global-types
+//
 type GlobalType struct {
 	_inner   *C.wasm_globaltype_t
 	_ownedBy interface{}
@@ -38,6 +49,11 @@ func newGlobalType(pointer *C.wasm_globaltype_t, ownedBy interface{}) *GlobalTyp
 	return globalType
 }
 
+// NewGlobalType instantiates a new GlobalType from a ValueType and a GlobalMutability
+//
+//   valueType := NewValueType(I32)
+//   globalType := NewGlobalType(valueType, IMMUTABLE)
+//
 func NewGlobalType(valueType *ValueType, mutability GlobalMutability) *GlobalType {
 	pointer := C.wasm_globaltype_new(valueType.inner(), C.wasm_mutability_t(mutability))
 
@@ -56,6 +72,12 @@ func (self *GlobalType) ownedBy() interface{} {
 	return self._ownedBy
 }
 
+// ValueType returns the GlobalType's ValueType
+//
+//   valueType := NewValueType(I32)
+//   globalType := NewGlobalType(valueType, IMMUTABLE)
+//   globalType.ValueType().Kind().String() // "i32"
+//
 func (self *GlobalType) ValueType() *ValueType {
 	pointer := C.wasm_globaltype_content(self.inner())
 
@@ -64,6 +86,12 @@ func (self *GlobalType) ValueType() *ValueType {
 	return newValueType(pointer, self.ownedBy())
 }
 
+// Mutability returns the GlobalType's GlobalMutability
+//
+//   valueType := NewValueType(I32)
+//   globalType := NewGlobalType(valueType, IMMUTABLE)
+//   globalType.Mutability().String() // "const"
+//
 func (self *GlobalType) Mutability() GlobalMutability {
 	mutability := GlobalMutability(C.wasm_globaltype_mutability(self.inner()))
 
@@ -72,6 +100,12 @@ func (self *GlobalType) Mutability() GlobalMutability {
 	return mutability
 }
 
+// IntoExternType converts the GlobalType into an ExternType.
+//
+//   valueType := NewValueType(I32)
+//   globalType := NewGlobalType(valueType, IMMUTABLE)
+//   externType = globalType.IntoExternType()
+//
 func (self *GlobalType) IntoExternType() *ExternType {
 	pointer := C.wasm_globaltype_as_externtype_const(self.inner())
 

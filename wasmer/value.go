@@ -35,6 +35,12 @@ func newValue(pointer *C.wasm_val_t) Value {
 	return Value{_inner: pointer}
 }
 
+// NewValue instantiates a new Value with the given value and ValueKind.
+//
+// ⚠️ If a Wasm value cannot be created from the given value, NewValue will panic.
+//
+//   value := NewValue(42, I32)
+//
 func NewValue(value interface{}, kind ValueKind) Value {
 	output, err := fromGoValue(value, kind)
 
@@ -45,18 +51,42 @@ func NewValue(value interface{}, kind ValueKind) Value {
 	return newValue(&output)
 }
 
+// NewI32 instantiates a new I32 Value with the given value.
+//
+// ⚠️ If a Wasm value cannot be created from the given value, NewI32 will panic.
+//
+//   value := NewI32(42)
+//
 func NewI32(value interface{}) Value {
 	return NewValue(value, I32)
 }
 
+// NewI64 instantiates a new I64 Value with the given value.
+//
+// ⚠️ If a Wasm value cannot be created from the given value, NewI64 will panic.
+//
+//   value := NewI64(42)
+//
 func NewI64(value interface{}) Value {
 	return NewValue(value, I64)
 }
 
+// NewF32 instantiates a new F32 Value with the given value.
+//
+// ⚠️ If a Wasm value cannot be created from the given value, NewF32 will panic.
+//
+//   value := NewF32(4.2)
+//
 func NewF32(value interface{}) Value {
 	return NewValue(value, F32)
 }
 
+// NewF64 instantiates a new F64 Value with the given value.
+//
+// ⚠️ If a Wasm value cannot be created from the given value, NewF64 will panic.
+//
+//   value := NewF64(4.2)
+//
 func NewF64(value interface{}) Value {
 	return NewValue(value, F64)
 }
@@ -65,14 +95,29 @@ func (self *Value) inner() *C.wasm_val_t {
 	return self._inner
 }
 
+// Kind returns the Value's ValueKind.
+//
+//   value := NewF64(4.2)
+//   _ = value.Kind()
+//
 func (self *Value) Kind() ValueKind {
 	return ValueKind(self.inner().kind)
 }
 
+// Unwrap returns the Value's value as a native Go value.
+//
+//   value := NewF64(4.2)
+//   _ = value.Unwrap()
+//
 func (self *Value) Unwrap() interface{} {
 	return toGoValue(self.inner())
 }
 
+// I32 returns the Value's value as a native Go int32.
+//
+//   value := NewI32(42)
+//   _ = value.I32()
+//
 func (self *Value) I32() int32 {
 	pointer := self.inner()
 
@@ -83,6 +128,11 @@ func (self *Value) I32() int32 {
 	return int32(C.to_int32(pointer))
 }
 
+// I64 returns the Value's value as a native Go int64.
+//
+//   value := NewI64(42)
+//   _ = value.I64()
+//
 func (self *Value) I64() int64 {
 	pointer := self.inner()
 
@@ -93,6 +143,11 @@ func (self *Value) I64() int64 {
 	return int64(C.to_int64(pointer))
 }
 
+// F32 returns the Value's value as a native Go float32.
+//
+//   value := NewF32(4.2)
+//   _ = value.F32()
+//
 func (self *Value) F32() float32 {
 	pointer := self.inner()
 
@@ -103,6 +158,11 @@ func (self *Value) F32() float32 {
 	return float32(C.to_float32(pointer))
 }
 
+// F64 returns the Value's value as a native Go float64.
+//
+//   value := NewF64(4.2)
+//   _ = value.F64()
+//
 func (self *Value) F64() float64 {
 	pointer := self.inner()
 

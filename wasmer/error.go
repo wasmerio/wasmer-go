@@ -4,6 +4,8 @@ package wasmer
 import "C"
 import "unsafe"
 
+// Error represents a Wasmer runtime error.
+//
 type Error struct {
 	message string
 }
@@ -33,10 +35,18 @@ func newErrorFromWasmer() *Error {
 	return newErrorWith(C.GoStringN(errorMessagePointer, errorLength-1))
 }
 
+// Error returns the Error's message.
+//
 func (error *Error) Error() string {
 	return error.message
 }
 
+// TrapError represents a trap produced during Wasm execution.
+//
+// See also
+//
+// Specification: https://webassembly.github.io/spec/core/intro/overview.html#trap
+//
 type TrapError struct {
 	message string
 	origin  *Frame
@@ -53,14 +63,20 @@ func newErrorFromTrap(pointer *C.wasm_trap_t) *TrapError {
 	}
 }
 
+// Error returns the TrapError's message.
+//
 func (self *TrapError) Error() string {
 	return self.message
 }
 
+// Origin returns the TrapError's origin as a Frame.
+//
 func (self *TrapError) Origin() *Frame {
 	return self.origin
 }
 
+// Trace returns the TrapError's trace as a Frame array.
+//
 func (self *TrapError) Trace() []*Frame {
 	return self.trace
 }

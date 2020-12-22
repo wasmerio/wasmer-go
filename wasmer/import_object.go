@@ -12,6 +12,10 @@ type ImportObject struct {
 	opaqueExterns []IntoExtern
 }
 
+// NewImportObject instantiates a new empty ImportObject.
+//
+//   imports := NewImportObject()
+//
 func NewImportObject() *ImportObject {
 	return &ImportObject{
 		externs:       make(map[string]map[string]IntoExtern),
@@ -58,12 +62,44 @@ func (self *ImportObject) intoInner(module *Module) (*C.wasm_extern_vec_t, error
 	return cExterns, nil
 }
 
+// ContainsNamespace returns true if the ImportObject contains the given namespace (or module name)
+//
+//   imports := NewImportObject()
+//   _ = imports.ContainsNamespace("env") // false
+//
 func (self *ImportObject) ContainsNamespace(name string) bool {
 	_, exists := self.externs[name]
 
 	return exists
 }
 
+
+// Register registers a namespace (or module name) in the ImportObject.
+//
+// It takes two arguments: the namespace name and a map with imports names as key and externs as values.
+//
+// ℹ️ An extern is anything implementing IntoExtern: Function, Global, Memory, Table.
+//
+//   imports := NewImportObject()
+//   importObject.Register(
+//		"env",
+//		map[string]wasmer.IntoExtern{
+//			"host_function": hostFunction,
+//			"host_global": hostGlobal,
+//		},
+//	)
+//
+// ℹ️ The namespace (or module name) may be empty:
+//
+//   imports := NewImportObject()
+//   importObject.Register(
+//		"",
+//		map[string]wasmer.IntoExtern{
+//			"host_function": hostFunction,
+//			"host_global": hostGlobal,
+//		},
+//	)
+//
 func (self *ImportObject) Register(namespaceName string, namespace map[string]IntoExtern) {
 	_, exists := self.externs[namespaceName]
 

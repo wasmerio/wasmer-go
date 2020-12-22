@@ -6,6 +6,16 @@ import (
 	"unsafe"
 )
 
+// Wat2Wasm parsers a string as either WAT code or a binary Wasm module.
+//
+// ⚠️ This is not part of the standard Wasm C API. It is Wasmer specific.
+//
+//   wat := "(module)"
+//   wasm, _ := Wat2Wasm(wat)
+//   engine := wasmer.NewEngine()
+//	 store := wasmer.NewStore(engine)
+//	 module, _ := wasmer.NewModule(store, wasmBytes)
+//
 func Wat2Wasm(wat string) ([]byte, error) {
 	var watBytes C.wasm_byte_vec_t
 	var watLength = len(wat)

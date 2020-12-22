@@ -20,6 +20,10 @@ func newEngine(engine *C.wasm_engine_t) *Engine {
 	return self
 }
 
+// NewEngine instantiates and returns a new Engine with the default configuration.
+//
+//   engine := NewEngine()
+//
 func NewEngine() *Engine {
 	return newEngine(C.wasm_engine_new())
 }
@@ -31,6 +35,10 @@ func newConfig(engine C.wasmer_engine_t) *C.wasm_config_t {
 	return config
 }
 
+// NewJITEngine instantiates and returns a new JIT engine.
+//
+//   engine := NewJITEngine()
+//
 func NewJITEngine() *Engine {
 	return newEngine(
 		C.wasm_engine_new_with_config(
@@ -39,6 +47,10 @@ func NewJITEngine() *Engine {
 	)
 }
 
+// NewNativeEngine instantiates and returns a new Native engine.
+//
+//   engine := NewNativeEngine()
+//
 func NewNativeEngine() *Engine {
 	return newEngine(
 		C.wasm_engine_new_with_config(
