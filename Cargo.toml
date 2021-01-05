@@ -1,7 +1,7 @@
 [package]
 publish = false
 name = "wasmer-go"
-version = "0.2.0"
+version = "1.0.0-beta2"
 authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
 edition = "2018"
 description = "Go library to run WebAssembly binaries"
@@ -14,4 +14,4 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer = "1.0.0-alpha5"
+wasmer = "1.0"

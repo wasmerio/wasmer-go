@@ -77,7 +77,7 @@ func (self *Trap) Message() string {
 
 	runtime.KeepAlive(self)
 
-	goBytes := C.GoBytes(unsafe.Pointer(bytes.data), C.int(bytes.size))
+	goBytes := C.GoBytes(unsafe.Pointer(bytes.data), C.int(bytes.size) - 1)
 	C.wasm_byte_vec_delete(&bytes)
 
 	return string(goBytes)
@@ -179,11 +179,11 @@ func newTrace(trap *Trap) *trace {
 	firstFrame := unsafe.Pointer(self.inner().data)
 	sizeOfFramePointer := unsafe.Sizeof(firstFrame)
 
-	var currentFramePointer *C.wasm_frame_t
+	var currentFramePointer **C.wasm_frame_t
 
 	for nth := 0; nth < numberOfFrames; nth++ {
-		currentFramePointer = (*C.wasm_frame_t)(unsafe.Pointer(uintptr(firstFrame) + uintptr(nth)*sizeOfFramePointer))
-		frames[nth] = newFrame(currentFramePointer, self)
+		currentFramePointer = (**C.wasm_frame_t)(unsafe.Pointer(uintptr(firstFrame) + uintptr(nth) * sizeOfFramePointer))
+		frames[nth] = newFrame(*currentFramePointer, self)
 	}
 
 	self.frames = frames
