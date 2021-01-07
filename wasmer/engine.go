@@ -28,11 +28,13 @@ func NewEngine() *Engine {
 	return newEngine(C.wasm_engine_new())
 }
 
-func newConfig(engine C.wasmer_engine_t) *C.wasm_config_t {
-	config := C.wasm_config_new()
-	C.wasm_config_set_engine(config, engine)
-
-	return config
+// NewEngineWithConfig instantiates and returns a new Engine with the given configuration.
+//
+//   config := NewConfig()
+//   engine := NewEngineWithConfig(config)
+//
+func NewEngineWithConfig(config *Config) *Engine {
+	return newEngine(C.wasm_engine_new_with_config(config.inner()))
 }
 
 // NewJITEngine instantiates and returns a new JIT engine.
@@ -40,11 +42,10 @@ func newConfig(engine C.wasmer_engine_t) *C.wasm_config_t {
 //   engine := NewJITEngine()
 //
 func NewJITEngine() *Engine {
-	return newEngine(
-		C.wasm_engine_new_with_config(
-			newConfig(C.JIT),
-		),
-	)
+	config := NewConfig()
+	config.UseJITEngine()
+
+	return NewEngineWithConfig(config)
 }
 
 // NewNativeEngine instantiates and returns a new Native engine.
@@ -52,11 +53,10 @@ func NewJITEngine() *Engine {
 //   engine := NewNativeEngine()
 //
 func NewNativeEngine() *Engine {
-	return newEngine(
-		C.wasm_engine_new_with_config(
-			newConfig(C.NATIVE),
-		),
-	)
+	config := NewConfig()
+	config.UseNativeEngine()
+
+	return NewEngineWithConfig(config)
 }
 
 func (self *Engine) inner() *C.wasm_engine_t {
