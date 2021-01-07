@@ -82,13 +82,27 @@ func TestInstanceMissingImports(t *testing.T) {
 			"function": function,
 		},
 	)
-	importObject.Register(
-		"not_missing",
-		map[string]IntoExtern{
-			"function": function,
-		},
+
+	_, err = NewInstance(module, importObject)
+	assert.Error(t, err)
+}
+
+func TestInstanceTraps(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (start $start_f)
+			  (type $start_t (func))
+			  (func $start_f (type $start_t)
+			    unreachable))
+		`),
 	)
+	assert.NoError(t, err)
 
 	_, err = NewInstance(module, NewImportObject())
 	assert.Error(t, err)
+	assert.Equal(t, "unreachable", err.Error())
 }

@@ -41,13 +41,12 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	runtime.KeepAlive(module.store)
 	runtime.KeepAlive(imports)
 
-	if instance == nil {
-		return nil, newErrorFromWasmer()
+	if traps != nil {
+		return nil, newErrorFromTrap(traps)
 	}
 
-	if traps != nil {
-		// TODO(jubianchi): Implement this properly
-		return nil, newErrorWith("trapped! to do")
+	if instance == nil {
+		return nil, newErrorFromWasmer()
 	}
 
 	output := &Instance{
