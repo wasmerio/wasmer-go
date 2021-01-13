@@ -73,7 +73,6 @@ func (self *ImportObject) ContainsNamespace(name string) bool {
 	return exists
 }
 
-
 // Register registers a namespace (or module name) in the ImportObject.
 //
 // It takes two arguments: the namespace name and a map with imports names as key and externs as values.

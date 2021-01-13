@@ -4,7 +4,6 @@ package wasmer
 import "C"
 import "runtime"
 
-
 type Extern struct {
 	_inner   *C.wasm_extern_t
 	_ownedBy interface{}
@@ -41,7 +40,6 @@ func (self *Extern) ownedBy() interface{} {
 func (self *Extern) IntoExtern() *Extern {
 	return self
 }
-
 
 // Kind returns the Extern's ExternKind.
 //
