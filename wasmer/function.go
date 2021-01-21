@@ -276,7 +276,9 @@ type hostFunctions struct {
 }
 
 func (self *hostFunctions) load(index uint) (*hostFunction, error) {
+	self.RLock()
 	hostFunction, exists := self.functions[index]
+	self.RUnlock()
 
 	if exists && hostFunction != nil {
 		return hostFunction, nil
