@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
-func testGetBytes() []byte {
+func testGetBytes(moduleFileName string) []byte {
 	_, filename, _, _ := runtime.Caller(0)
-	modulePath := path.Join(path.Dir(filename), "testdata", "tests.wasm")
+	modulePath := path.Join(path.Dir(filename), "testdata", moduleFileName)
 	bytes, _ := ioutil.ReadFile(modulePath)
 
 	return bytes
@@ -19,7 +19,7 @@ func testGetBytes() []byte {
 func testGetInstance(t *testing.T) *Instance {
 	engine := NewEngine()
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
