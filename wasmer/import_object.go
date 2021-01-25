@@ -8,8 +8,7 @@ import (
 )
 
 type ImportObject struct {
-	externs       map[string]map[string]IntoExtern
-	opaqueExterns []IntoExtern
+	externs map[string]map[string]IntoExtern
 }
 
 // NewImportObject instantiates a new empty ImportObject.
@@ -18,8 +17,7 @@ type ImportObject struct {
 //
 func NewImportObject() *ImportObject {
 	return &ImportObject{
-		externs:       make(map[string]map[string]IntoExtern),
-		opaqueExterns: nil,
+		externs: make(map[string]map[string]IntoExtern),
 	}
 }
 
@@ -47,11 +45,6 @@ func (self *ImportObject) intoInner(module *Module) (*C.wasm_extern_vec_t, error
 		}
 
 		externs = append(externs, self.externs[namespace][name].IntoExtern().inner())
-		numberOfExterns++
-	}
-
-	for _, extern := range self.opaqueExterns {
-		externs = append(externs, extern.IntoExtern().inner())
 		numberOfExterns++
 	}
 
@@ -109,8 +102,4 @@ func (self *ImportObject) Register(namespaceName string, namespace map[string]In
 			self.externs[namespaceName][key] = value
 		}
 	}
-}
-
-func (self *ImportObject) addOpaqueExtern(extern *Extern) {
-	self.opaqueExterns = append(self.opaqueExterns, extern)
 }

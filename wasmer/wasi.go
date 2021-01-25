@@ -2,7 +2,10 @@ package wasmer
 
 // #include <wasmer_wasm.h>
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+	"runtime"
+)
 
 type WasiStateBuilder struct {
 	_inner *C.wasi_config_t
@@ -47,19 +50,53 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 		return nil, newErrorFromWasmer()
 	}
 
+	runtime.SetFinalizer(environment, func(environment *C.wasi_env_t) {
+		C.wasi_env_delete(environment)
+	})
+
 	return &WasiEnvironment{
 		_inner: environment,
 	}, nil
 }
 
-func (self *WasiEnvironment) generateImportObject() *ImportObject {
+func (self *WasiEnvironment) inner() *C.wasi_env_t {
+	return self._inner
+}
+
+func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) (*ImportObject, error) {
+	var wasiNamedExterns C.wasm_named_extern_vec_t
+	C.wasm_named_extern_vec_new_empty(&wasiNamedExterns)
+
+	var success = C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
+
+	if success == false {
+		return nil, newErrorFromWasmer()
+	}
+
 	importObject := NewImportObject()
-	_ = importObject
 
-	/*
-		var wasiImports C.wasm_extern_vec_t
-		C.wasm_extern_vec_new_uninitialized(&wasiImports
-	*/
+	numberOfNamedExterns := int(wasiNamedExterns.size)
+	firstNamedExtern := unsafe.Pointer(wasiNamedExterns.data)
+	sizeOfNamedExtern := unsafe.Sizeof(firstNamedExtern)
 
-	return nil
+	var currentNamedExtern *C.wasm_named_extern_t
+
+	for nth := 0; nth < numberOfNamedExterns; nth++ {
+		currentNamedExtern = *(**C.wasm_named_extern_t)(unsafe.Pointer(uintptr(firstNamedExtern) + uintptr(nth)*sizeOfNamedExtern))
+		module := nameToString(C.wasm_named_extern_module(currentNamedExtern))
+		name := nameToString(C.wasm_named_extern_name(currentNamedExtern))
+		extern := newExtern(C.wasm_named_extern_extern(currentNamedExtern), nil)
+
+		_, exists := importObject.externs[module]
+
+		if exists == false {
+			importObject.externs[module] = make(map[string]IntoExtern)
+		}
+
+		importObject.externs[module][name] = extern
+	}
+
+	//C.wasm_named_extern_vec_delete(&wasiNamedExterns)
+
+	return importObject, nil
 }
