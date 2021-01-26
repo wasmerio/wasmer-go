@@ -24,13 +24,6 @@ func NewImportObject() *ImportObject {
 func (self *ImportObject) intoInner(module *Module) (*C.wasm_extern_vec_t, error) {
 	cExterns := &C.wasm_extern_vec_t{}
 
-	/*
-		// TODO(ivan): review this
-			runtime.SetFinalizer(cExterns, func(cExterns *C.wasm_extern_vec_t) {
-				C.wasm_extern_vec_delete(cExterns)
-			})
-	*/
-
 	var externs []*C.wasm_extern_t
 	var numberOfExterns uint
 
