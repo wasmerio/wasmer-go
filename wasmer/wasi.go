@@ -1,10 +1,42 @@
 package wasmer
 
+// #include <stdlib.h>
+// #include <stdio.h>
 // #include <wasmer_wasm.h>
+//
+// #define BUFFER_SIZE 128
+//
+// size_t to_wasi_env_read_stdout(wasi_env_t *wasi_env, char** buffer) {
+//     FILE *memory_stream;
+//     size_t buffer_size = 0;
+//
+//     memory_stream = open_memstream(buffer, &buffer_size);
+//
+//     if (NULL == memory_stream) {
+//         return 0;
+//     }
+//
+//     char temp_buffer[BUFFER_SIZE] = { 0 };
+//     size_t data_read_size = BUFFER_SIZE;
+//
+//     do {
+//         data_read_size = wasi_env_read_stdout(wasi_env, temp_buffer, BUFFER_SIZE);
+//
+//         if (data_read_size > 0) {
+//             buffer_size += data_read_size;
+//             fwrite(temp_buffer, sizeof(char), data_read_size, memory_stream);
+//         }
+//     } while (BUFFER_SIZE == data_read_size);
+//
+//     fclose(memory_stream);
+//
+//     return buffer_size;
+// }
 import "C"
 import (
-	"unsafe"
+	"reflect"
 	"runtime"
+	"unsafe"
 )
 
 type WasiVersion C.wasi_version_t
@@ -157,6 +189,21 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 
 func (self *WasiEnvironment) inner() *C.wasi_env_t {
 	return self._inner
+}
+
+func (self *WasiEnvironment) readStdout() []byte {
+	var buffer *C.char
+
+	length := int(C.to_wasi_env_read_stdout(self.inner(), &buffer))
+
+	var header reflect.SliceHeader
+	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
+
+	header.Data = uintptr(unsafe.Pointer(buffer))
+	header.Len = length
+	header.Cap = length
+
+	return *(*[]byte)(unsafe.Pointer(&header))
 }
 
 func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) (*ImportObject, error) {

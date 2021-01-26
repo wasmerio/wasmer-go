@@ -16,6 +16,7 @@ func TestWasi(t *testing.T) {
 	    environment("ABC", "DEF").
 	    environment("X", "ZY").
 	    mapDirectory("the_host_current_directory", ".").
+	    captureStdout().
 	    finalize()
 	assert.NoError(t, err)
 
@@ -28,6 +29,10 @@ func TestWasi(t *testing.T) {
 	assert.NoError(t, err)
 
 	start()
+
+	stdout := wasiEnv.readStdout()
+
+	t.Log(stdout)
 }
 
 func TestWasiVersion(t *testing.T) {
