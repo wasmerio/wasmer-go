@@ -91,6 +91,42 @@ func (self *WasiStateBuilder) mapDirectory(alias string, directory string) *Wasi
 	return self
 }
 
+func (self *WasiStateBuilder) captureStdin() *WasiStateBuilder {
+	C.wasi_config_capture_stdin(self.inner())
+
+	return self
+}
+
+func (self *WasiStateBuilder) inheritStdin() *WasiStateBuilder {
+	C.wasi_config_inherit_stdin(self.inner())
+
+	return self
+}
+
+func (self *WasiStateBuilder) captureStdout() *WasiStateBuilder {
+	C.wasi_config_capture_stdout(self.inner())
+
+	return self
+}
+
+func (self *WasiStateBuilder) inheritStdout() *WasiStateBuilder {
+	C.wasi_config_inherit_stdout(self.inner())
+
+	return self
+}
+
+func (self *WasiStateBuilder) captureStderr() *WasiStateBuilder {
+	C.wasi_config_capture_stderr(self.inner())
+
+	return self
+}
+
+func (self *WasiStateBuilder) inheritStderr() *WasiStateBuilder {
+	C.wasi_config_inherit_stderr(self.inner())
+
+	return self
+}
+
 func (self *WasiStateBuilder) finalize() (*WasiEnvironment, error) {
 	return newWasiEnvironment(self)
 }
