@@ -29,3 +29,19 @@ func TestWasi(t *testing.T) {
 
 	start()
 }
+
+func TestWasiVersion(t *testing.T) {
+	assert.Equal(t, WASI_VERSION_LATEST.String(), "__latest__")
+	assert.Equal(t, WASI_VERSION_SNAPSHOT0.String(), "wasi_unstable")
+	assert.Equal(t, WASI_VERSION_SNAPSHOT1.String(), "wasi_snapshot_preview1")
+	assert.Equal(t, WASI_VERSION_INVALID.String(), "__unknown__")
+}
+
+func TestWasiGetVersion(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(store, testGetBytes("wasi.wasm"))
+	assert.NoError(t, err)
+
+	assert.Equal(t, GetWasiVersion(module), WASI_VERSION_SNAPSHOT1)
+}

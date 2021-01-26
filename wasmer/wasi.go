@@ -7,6 +7,33 @@ import (
 	"runtime"
 )
 
+type WasiVersion C.wasi_version_t
+
+const (
+	WASI_VERSION_LATEST = WasiVersion(C.LATEST)
+	WASI_VERSION_SNAPSHOT0 = WasiVersion(C.SNAPSHOT0)
+	WASI_VERSION_SNAPSHOT1 = WasiVersion(C.SNAPSHOT1)
+	WASI_VERSION_INVALID = WasiVersion(C.INVALID_VERSION)
+)
+
+func (self WasiVersion) String() string {
+	switch self {
+	case WASI_VERSION_LATEST:
+		return "__latest__"
+	case WASI_VERSION_SNAPSHOT0:
+		return "wasi_unstable"
+	case WASI_VERSION_SNAPSHOT1:
+		return "wasi_snapshot_preview1"
+	case WASI_VERSION_INVALID:
+		return "__unknown__"
+	}
+	panic("Unknown WASI version")
+}
+
+func GetWasiVersion(module *Module) WasiVersion {
+	return WasiVersion(C.wasi_get_wasi_version(module.inner()))
+}
+
 type WasiStateBuilder struct {
 	_inner *C.wasi_config_t
 }
