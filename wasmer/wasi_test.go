@@ -15,6 +15,7 @@ func TestWasi(t *testing.T) {
 	    argument("--foo").
 	    environment("ABC", "DEF").
 	    environment("X", "ZY").
+	    mapDirectory("the_host_current_directory", ".").
 	    finalize()
 	assert.NoError(t, err)
 

@@ -43,6 +43,27 @@ func (self *WasiStateBuilder) environment(key string, value string) *WasiStateBu
 	return self
 }
 
+func (self *WasiStateBuilder) preopenDirectory(preopenDirectory string) *WasiStateBuilder {
+	cPreopenDirectory := C.CString(preopenDirectory)
+	defer C.free(unsafe.Pointer(cPreopenDirectory))
+
+	C.wasi_config_preopen_dir(self.inner(), cPreopenDirectory)
+
+	return self
+}
+
+func (self *WasiStateBuilder) mapDirectory(alias string, directory string) *WasiStateBuilder {
+	cAlias := C.CString(alias)
+	defer C.free(unsafe.Pointer(cAlias))
+
+	cDirectory := C.CString(directory)
+	defer C.free(unsafe.Pointer(cDirectory))
+
+	C.wasi_config_mapdir(self.inner(), cAlias, cDirectory)
+
+	return self
+}
+
 func (self *WasiStateBuilder) finalize() (*WasiEnvironment, error) {
 	return newWasiEnvironment(self)
 }
