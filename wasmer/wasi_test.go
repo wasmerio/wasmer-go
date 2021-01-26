@@ -11,7 +11,11 @@ func TestWasi(t *testing.T) {
 	module, err := NewModule(store, testGetBytes("wasi.wasm"))
 	assert.NoError(t, err)
 
-	wasiEnv, err := NewWasiStateBuilder("test-program").argument("--foo").finalize()
+	wasiEnv, err := NewWasiStateBuilder("test-program").
+	    argument("--foo").
+	    environment("ABC", "DEF").
+	    environment("X", "ZY").
+	    finalize()
 	assert.NoError(t, err)
 
 	importObject, err := wasiEnv.generateImportObject(store, module)

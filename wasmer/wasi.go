@@ -31,6 +31,18 @@ func (self *WasiStateBuilder) argument(argument string) *WasiStateBuilder {
 	return self
 }
 
+func (self *WasiStateBuilder) environment(key string, value string) *WasiStateBuilder {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+
+	cValue := C.CString(value)
+	defer C.free(unsafe.Pointer(cValue))
+
+	C.wasi_config_env(self.inner(), cKey, cValue)
+
+	return self
+}
+
 func (self *WasiStateBuilder) finalize() (*WasiEnvironment, error) {
 	return newWasiEnvironment(self)
 }
