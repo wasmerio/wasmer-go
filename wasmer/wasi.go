@@ -85,7 +85,7 @@ func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) 
 		currentNamedExtern = *(**C.wasm_named_extern_t)(unsafe.Pointer(uintptr(firstNamedExtern) + uintptr(nth)*sizeOfNamedExtern))
 		module := nameToString(C.wasm_named_extern_module(currentNamedExtern))
 		name := nameToString(C.wasm_named_extern_name(currentNamedExtern))
-		extern := newExtern(C.wasm_named_extern_extern(currentNamedExtern), nil)
+		extern := newExtern(C.wasm_extern_copy(C.wasm_named_extern_unwrap(currentNamedExtern)), nil)
 
 		_, exists := importObject.externs[module]
 
@@ -96,7 +96,7 @@ func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) 
 		importObject.externs[module][name] = extern
 	}
 
-	//C.wasm_named_extern_vec_delete(&wasiNamedExterns)
+	C.wasm_named_extern_vec_delete(&wasiNamedExterns)
 
 	return importObject, nil
 }
