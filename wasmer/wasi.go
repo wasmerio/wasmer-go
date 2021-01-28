@@ -123,12 +123,6 @@ func (self *WasiStateBuilder) mapDirectory(alias string, directory string) *Wasi
 	return self
 }
 
-func (self *WasiStateBuilder) captureStdin() *WasiStateBuilder {
-	C.wasi_config_capture_stdin(self.inner())
-
-	return self
-}
-
 func (self *WasiStateBuilder) inheritStdin() *WasiStateBuilder {
 	C.wasi_config_inherit_stdin(self.inner())
 
