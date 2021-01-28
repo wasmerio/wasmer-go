@@ -4,9 +4,19 @@ package wasmer
 // #include <stdio.h>
 // #include <wasmer_wasm.h>
 //
-// #define BUFFER_SIZE 128
+// // Buffer size for `wasi_env_read_inner`.
+// #define WASI_ENV_READER_BUFFER_SIZE 1024
 //
-// size_t to_wasi_env_read_stdout(wasi_env_t *wasi_env, char** buffer) {
+// // Define a type for the WASI environment captured stream readers
+// // (`wasi_env_read_stdout` and `wasi_env_read_stderr`).
+// typedef intptr_t (*wasi_env_reader)(
+//     wasi_env_t* wasi_env,
+//     char* buffer,
+//     uintptr_t buffer_len
+// );
+//
+// // Common function to read a WASI environment captured stream.
+// size_t to_wasi_env_read_inner(wasi_env_t *wasi_env, char** buffer, wasi_env_reader reader) {
 //     FILE *memory_stream;
 //     size_t buffer_size = 0;
 //
@@ -16,21 +26,31 @@ package wasmer
 //         return 0;
 //     }
 //
-//     char temp_buffer[BUFFER_SIZE] = { 0 };
-//     size_t data_read_size = BUFFER_SIZE;
+//     char temp_buffer[WASI_ENV_READER_BUFFER_SIZE] = { 0 };
+//     size_t data_read_size = WASI_ENV_READER_BUFFER_SIZE;
 //
 //     do {
-//         data_read_size = wasi_env_read_stdout(wasi_env, temp_buffer, BUFFER_SIZE);
+//         data_read_size = reader(wasi_env, temp_buffer, WASI_ENV_READER_BUFFER_SIZE);
 //
 //         if (data_read_size > 0) {
 //             buffer_size += data_read_size;
 //             fwrite(temp_buffer, sizeof(char), data_read_size, memory_stream);
 //         }
-//     } while (BUFFER_SIZE == data_read_size);
+//     } while (WASI_ENV_READER_BUFFER_SIZE == data_read_size);
 //
 //     fclose(memory_stream);
 //
 //     return buffer_size;
+// }
+//
+// // Read the captured `stdout`.
+// size_t to_wasi_env_read_stdout(wasi_env_t *wasi_env, char** buffer) {
+//     return to_wasi_env_read_inner(wasi_env, buffer, wasi_env_read_stdout);
+// }
+//
+// // Read the captured `stderr`.
+// size_t to_wasi_env_read_stderr(wasi_env_t *wasi_env, char** buffer) {
+//     return to_wasi_env_read_inner(wasi_env, buffer, wasi_env_read_stderr);
 // }
 import "C"
 import (
@@ -185,11 +205,7 @@ func (self *WasiEnvironment) inner() *C.wasi_env_t {
 	return self._inner
 }
 
-func (self *WasiEnvironment) readStdout() []byte {
-	var buffer *C.char
-
-	length := int(C.to_wasi_env_read_stdout(self.inner(), &buffer))
-
+func buildByteSliceFromCBuffer(buffer *C.char, length int) []byte {
 	var header reflect.SliceHeader
 	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
 
@@ -198,6 +214,20 @@ func (self *WasiEnvironment) readStdout() []byte {
 	header.Cap = length
 
 	return *(*[]byte)(unsafe.Pointer(&header))
+}
+
+func (self *WasiEnvironment) readStdout() []byte {
+	var buffer *C.char
+	length := int(C.to_wasi_env_read_stdout(self.inner(), &buffer))
+
+	return buildByteSliceFromCBuffer(buffer, length)
+}
+
+func (self *WasiEnvironment) readStderr() []byte {
+	var buffer *C.char
+	length := int(C.to_wasi_env_read_stderr(self.inner(), &buffer))
+
+	return buildByteSliceFromCBuffer(buffer, length)
 }
 
 func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) (*ImportObject, error) {
