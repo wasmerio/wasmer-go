@@ -11,12 +11,14 @@ import (
 type Exports struct {
 	_inner  C.wasm_extern_vec_t
 	exports map[string]*Extern
+	instance *C.wasm_instance_t
 }
 
 func newExports(instance *C.wasm_instance_t, module *Module) *Exports {
 	self := &Exports{}
 	C.wasm_instance_exports(instance, &self._inner)
 
+	runtime.KeepAlive(instance)
 	runtime.SetFinalizer(self, func(exports *Exports) {
 		C.wasm_extern_vec_delete(exports.inner())
 	})
@@ -37,6 +39,7 @@ func newExports(instance *C.wasm_instance_t, module *Module) *Exports {
 	}
 
 	self.exports = exports
+	self.instance = instance
 
 	return self
 }
@@ -163,4 +166,14 @@ func (self *Exports) GetMemory(name string) (*Memory, error) {
 	}
 
 	return exports.IntoMemory(), nil
+}
+
+func (self *Exports) GetWasiStartFunction() (func(...interface{}) (interface{}, error), error) {
+	start := C.wasi_get_start_function(self.instance)
+
+	if start == nil {
+		return nil, newErrorWith("WASI start function is not found")
+	}
+
+	return newFunction(start, nil, nil).Native(), nil
 }
