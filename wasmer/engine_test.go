@@ -37,3 +37,25 @@ func TestNativeEngine(t *testing.T) {
 
 	testEngine(t, NewNativeEngine())
 }
+
+func TestEngineWithTarget(t *testing.T) {
+	triple, err := NewTriple("x86_64-apple-darwin")
+	assert.NoError(t, err)
+
+	cpuFeatures := NewCpuFeatures()
+	err = cpuFeatures.Add("sse2")
+	assert.NoError(t, err)
+
+	target := NewTarget(triple, cpuFeatures)
+
+	config := NewConfig()
+	config.UseTarget(target)
+
+	engine := NewEngineWithConfig(config)
+	store := NewStore(engine)
+
+	module, err := NewModule(store, testGetBytes())
+	assert.NoError(t, err)
+
+	_ = module
+}
