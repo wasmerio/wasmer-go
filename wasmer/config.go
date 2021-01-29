@@ -29,7 +29,7 @@ func (self *Config) inner() *C.wasm_config_t {
 //   config.UseJITEngine()
 //
 func (self *Config) UseJITEngine() {
-	C.wasm_config_set_engine(self._inner, C.JIT)
+	C.wasm_config_set_engine(self.inner(), C.JIT)
 }
 
 // UseNativeEngine sets the engine to Native in the configuration.
@@ -38,7 +38,7 @@ func (self *Config) UseJITEngine() {
 //   config.UseNativeEngine()
 //
 func (self *Config) UseNativeEngine() {
-	C.wasm_config_set_engine(self._inner, C.NATIVE)
+	C.wasm_config_set_engine(self.inner(), C.NATIVE)
 }
 
 // UseCraneliftCompiler sets the compiler to Cranelift in the configuration.
@@ -47,7 +47,7 @@ func (self *Config) UseNativeEngine() {
 //   config.UseCraneliftCompiler()
 //
 func (self *Config) UseCraneliftCompiler() {
-	C.wasm_config_set_engine(self._inner, C.CRANELIFT)
+	C.wasm_config_set_engine(self.inner(), C.CRANELIFT)
 }
 
 // UseLLVMCompiler sets the compiler to LLVM in the configuration.
@@ -56,5 +56,9 @@ func (self *Config) UseCraneliftCompiler() {
 //   config.UseLLVMCompiler()
 //
 func (self *Config) UseLLVMCompiler() {
-	C.wasm_config_set_engine(self._inner, C.LLVM)
+	C.wasm_config_set_engine(self.inner(), C.LLVM)
+}
+
+func (self *Config) UseTarget(target *Target) {
+	C.wasm_config_set_target(self.inner(), target.inner())
 }
