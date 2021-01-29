@@ -18,6 +18,8 @@ jobs:
             os: 'ubuntu-18.04'
           - id: 'darwin-amd64'
             os: 'macos-latest'
+          - id: 'windows-amd64'
+            os: 'windows-latest'
         go: [1.14]
       fail-fast: true
 
