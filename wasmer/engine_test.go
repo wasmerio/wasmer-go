@@ -2,6 +2,7 @@ package wasmer
 
 import (
 	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
 )
 
@@ -30,5 +31,9 @@ func TestJITEngine(t *testing.T) {
 }
 
 func TestNativeEngine(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		return
+	}
+
 	testEngine(t, NewNativeEngine())
 }

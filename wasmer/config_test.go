@@ -2,6 +2,7 @@ package wasmer
 
 import (
 	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
 )
 
@@ -45,6 +46,10 @@ func TestConfig_UseJITEngine(t *testing.T) {
 }
 
 func TestConfig_UseNativeEngine(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		return
+	}
+
 	config := NewConfig()
 	config.UseNativeEngine()
 
@@ -85,6 +90,10 @@ func TestConfig_UseCraneliftCompiler(t *testing.T) {
 }
 
 func TestConfig_UseLLVMCompiler(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		return
+	}
+
 	config := NewConfig()
 	config.UseLLVMCompiler()
 
@@ -126,6 +135,10 @@ func TestConfig_JITWithCranelift(t *testing.T) {
 }
 
 func TestConfig_JITWithLLVM(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		return
+	}
+
 	config := NewConfig()
 	config.UseJITEngine()
 	config.UseLLVMCompiler()
@@ -168,6 +181,10 @@ func TestConfig_NativeWithCranelift(t *testing.T) {
 }
 
 func TestConfig_NativeWithLLVM(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		return
+	}
+
 	config := NewConfig()
 	config.UseNativeEngine()
 	config.UseLLVMCompiler()
