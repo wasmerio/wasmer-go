@@ -13,12 +13,16 @@ jobs:
 
     strategy:
       matrix:
+        go: [1.14, 1.15]
         target:
           - id: 'linux-amd64'
             os: 'ubuntu-18.04'
+
+          - id: 'linux-aarch64'
+            os: ['self-hosted', 'linux', 'ARM64']
+
           - id: 'darwin-amd64'
             os: 'macos-latest'
-        go: [1.14]
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
@@ -37,7 +41,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1
 
       - name: Set up Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
 
