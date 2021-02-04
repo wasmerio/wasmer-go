@@ -107,6 +107,4 @@ func ExampleError() {
 	// Instantiating module...
 	// Calling `div_by_zero` function...
 	// Error caught from `div_by_zero`: integer divide by zero
-	//   Frame #2: function index: 0
-	//   Frame #1: function index: 1
 }
