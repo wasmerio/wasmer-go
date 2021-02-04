@@ -84,21 +84,23 @@ func ExampleError() {
 
 	fmt.Println("Error caught from `div_by_zero`:", err)
 
-	// We'll try to match the error as a trap
-	trap, ok := err.(*wasmer.TrapError)
+	/*
+		// We'll try to match the error as a trap
+		trap, ok := err.(*wasmer.TrapError)
 
-	if !ok {
-		panic(fmt.Sprintln("Error was not of the expected type"))
-	}
+		if !ok {
+			panic(fmt.Sprintln("Error was not of the expected type"))
+		}
 
-	frames := trap.Trace()
-	framesLen := len(frames)
+		frames := trap.Trace()
+		framesLen := len(frames)
 
-	// Errors come with a trace we can inspect to get more
-	// information on the execution flow.
-	for index, frame := range frames {
-		fmt.Printf("  Frame #%d: function index: %d\n", framesLen-index, frame.FunctionIndex())
-	}
+		// Errors come with a trace we can inspect to get more
+		// information on the execution flow.
+		for index, frame := range frames {
+			//fmt.Printf("  Frame #%d: function index: %d\n", framesLen-index, frame.FunctionIndex())
+		}
+	*/
 
 	// Output:
 	// Compiling module...
