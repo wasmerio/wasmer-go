@@ -101,7 +101,7 @@ func (self *Exports) GetRawFunction(name string) (*Function, error) {
 //       exportedFunc()
 //   }
 //
-func (self *Exports) GetFunction(name string) (func(...interface{}) (interface{}, error), error) {
+func (self *Exports) GetFunction(name string) (NativeFunction, error) {
 	function, err := self.GetRawFunction(name)
 
 	if err != nil {
@@ -168,7 +168,7 @@ func (self *Exports) GetMemory(name string) (*Memory, error) {
 	return exports.IntoMemory(), nil
 }
 
-func (self *Exports) GetWasiStartFunction() (func(...interface{}) (interface{}, error), error) {
+func (self *Exports) GetWasiStartFunction() (NativeFunction, error) {
 	start := C.wasi_get_start_function(self.instance)
 
 	if start == nil {
