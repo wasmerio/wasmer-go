@@ -28,15 +28,15 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 	assert.NoError(t, err)
 
 	wasiEnv, err := NewWasiStateBuilder("test-program").
-	    argument("--foo").
-	    environment("ABC", "DEF").
-	    environment("X", "ZY").
-	    mapDirectory("the_host_current_directory", ".").
-	    captureStdout().
-	    finalize()
+		argument("--foo").
+		environment("ABC", "DEF").
+		environment("X", "ZY").
+		mapDirectory("the_host_current_directory", ".").
+		captureStdout().
+		finalize()
 	assert.NoError(t, err)
 
-	importObject, err := wasiEnv.generateImportObject(store, module)
+	importObject, err := wasiEnv.GenerateImportObject(store, module)
 
 	instance, err := NewInstance(module, importObject)
 	assert.NoError(t, err)
@@ -51,9 +51,9 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 	assert.Equal(
 		t,
 		stdout,
-		"Found program name: `test-program`\n" +
-			"Found 1 arguments: --foo\n" +
-			"Found 2 environment variables: ABC=DEF, X=ZY\n" +
+		"Found program name: `test-program`\n"+
+			"Found 1 arguments: --foo\n"+
+			"Found 2 environment variables: ABC=DEF, X=ZY\n"+
 			"Found 1 preopened directories: DirEntry(\"/the_host_current_directory\")\n",
 	)
 }

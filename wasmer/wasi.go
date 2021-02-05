@@ -62,10 +62,10 @@ import (
 type WasiVersion C.wasi_version_t
 
 const (
-	WASI_VERSION_LATEST = WasiVersion(C.LATEST)
+	WASI_VERSION_LATEST    = WasiVersion(C.LATEST)
 	WASI_VERSION_SNAPSHOT0 = WasiVersion(C.SNAPSHOT0)
 	WASI_VERSION_SNAPSHOT1 = WasiVersion(C.SNAPSHOT1)
-	WASI_VERSION_INVALID = WasiVersion(C.INVALID_VERSION)
+	WASI_VERSION_INVALID   = WasiVersion(C.INVALID_VERSION)
 )
 
 func (self WasiVersion) String() string {
@@ -230,7 +230,7 @@ func (self *WasiEnvironment) readStderr() []byte {
 	return buildByteSliceFromCBuffer(buffer, length)
 }
 
-func (self *WasiEnvironment) generateImportObject(store *Store, module *Module) (*ImportObject, error) {
+func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) (*ImportObject, error) {
 	var wasiNamedExterns C.wasm_named_extern_vec_t
 	C.wasm_named_extern_vec_new_empty(&wasiNamedExterns)
 
