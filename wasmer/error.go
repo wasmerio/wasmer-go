@@ -2,7 +2,10 @@ package wasmer
 
 // #include <wasmer_wasm.h>
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 // Error represents a Wasmer runtime error.
 //
@@ -16,7 +19,7 @@ func newErrorWith(message string) *Error {
 	}
 }
 
-func newErrorFromWasmer() *Error {
+func _newErrorFromWasmer() *Error {
 	var errorLength = C.wasmer_last_error_length()
 
 	if errorLength == 0 {
@@ -33,6 +36,17 @@ func newErrorFromWasmer() *Error {
 	}
 
 	return newErrorWith(C.GoStringN(errorMessagePointer, errorLength-1))
+}
+
+func maybeNewErrorFromWasmer(block func() bool) *Error {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	if block() /* has failed */ {
+		return _newErrorFromWasmer()
+	}
+
+	return nil
 }
 
 // Error returns the Error's message.

@@ -186,21 +186,27 @@ type WasiEnvironment struct {
 }
 
 func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error) {
-	environment := C.wasi_env_new(stateBuilder.inner())
+	var environment *C.wasi_env_t
 
-	if environment == nil {
-		return nil, newErrorFromWasmer()
+	err := maybeNewErrorFromWasmer(func() bool {
+		environment = C.wasi_env_new(stateBuilder.inner())
+
+		return environment == nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	output := &WasiEnvironment{
+	self := &WasiEnvironment{
 		_inner: environment,
 	}
 
-	runtime.SetFinalizer(output, func(environment *WasiEnvironment) {
+	runtime.SetFinalizer(self, func(environment *WasiEnvironment) {
 		C.wasi_env_delete(environment.inner())
 	})
 
-	return output, nil
+	return self, nil
 }
 
 func (self *WasiEnvironment) inner() *C.wasi_env_t {
@@ -236,10 +242,12 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 	var wasiNamedExterns C.wasm_named_extern_vec_t
 	C.wasm_named_extern_vec_new_empty(&wasiNamedExterns)
 
-	var success = C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
+	err := maybeNewErrorFromWasmer(func() bool {
+		return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
+	})
 
-	if success == false {
-		return nil, newErrorFromWasmer()
+	if err != nil {
+		return nil, err
 	}
 
 	importObject := NewImportObject()
