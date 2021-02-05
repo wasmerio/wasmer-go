@@ -8,6 +8,12 @@ package wasmer
 //   wasm_val_vec_t* results
 // );
 //
+// extern wasm_trap_t* function_with_environment_trampoline(
+//   void *environment,
+//   /* const */ wasm_val_vec_t* arguments,
+//   wasm_val_vec_t* results
+// );
+//
 // typedef void (*wasm_func_callback_env_finalizer_t)(void* environment);
 //
 // extern void function_environment_finalizer(void *environment);
@@ -99,7 +105,56 @@ func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm
 	}
 
 	arguments := toValueList(args)
-	results, err := (hostFunction.function)(arguments)
+	function := (hostFunction.function).(func([]Value) ([]Value, error))
+	results, err := (function)(arguments)
+
+	if err != nil {
+		trap := NewTrap(hostFunction.store, err.Error())
+
+		runtime.KeepAlive(trap)
+
+		return trap.inner()
+	}
+
+	toValueVec(results, res)
+
+	return nil
+}
+
+func NewFunctionWithEnvironment(store *Store, ty *FunctionType, userEnvironment interface{}, functionWithEnv func(interface{}, []Value) ([]Value, error)) *Function {
+	hostFunction := &hostFunction{
+		store:           store,
+		function:        functionWithEnv,
+		userEnvironment: userEnvironment,
+	}
+	environment := &FunctionEnvironment{
+		hostFunctionStoreIndex: hostFunctionStore.store(hostFunction),
+	}
+	pointer := C.wasm_func_new_with_env(
+		store.inner(),
+		ty.inner(),
+		(C.wasm_func_callback_t)(C.function_with_environment_trampoline),
+		unsafe.Pointer(environment),
+		(C.wasm_func_callback_env_finalizer_t)(C.function_environment_finalizer),
+	)
+
+	runtime.KeepAlive(environment)
+
+	return newFunction(pointer, environment, nil)
+}
+
+//export function_with_environment_trampoline
+func function_with_environment_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm_val_vec_t) *C.wasm_trap_t {
+	environment := (*FunctionEnvironment)(env)
+	hostFunction, err := hostFunctionStore.load(environment.hostFunctionStoreIndex)
+
+	if err != nil {
+		panic(err)
+	}
+
+	arguments := toValueList(args)
+	function := (hostFunction.function).(func(interface{}, []Value) ([]Value, error))
+	results, err := (function)(hostFunction.userEnvironment, arguments)
 
 	if err != nil {
 		trap := NewTrap(hostFunction.store, err.Error())
@@ -268,8 +323,9 @@ type FunctionEnvironment struct {
 func function_environment_finalizer(_ unsafe.Pointer) {}
 
 type hostFunction struct {
-	function func([]Value) ([]Value, error)
-	store    *Store
+	store           *Store
+	function        interface{} // func([]Value) ([]Value, error) or func(interface{}, []Value) ([]Value, error)
+	userEnvironment interface{} // if the host function has an environment
 }
 
 type hostFunctions struct {
