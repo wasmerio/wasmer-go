@@ -192,13 +192,15 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 		return nil, newErrorFromWasmer()
 	}
 
-	runtime.SetFinalizer(environment, func(environment *C.wasi_env_t) {
-		C.wasi_env_delete(environment)
+	output := &WasiEnvironment{
+		_inner: environment,
+	}
+
+	runtime.SetFinalizer(output, func(environment *WasiEnvironment) {
+		C.wasi_env_delete(environment.inner())
 	})
 
-	return &WasiEnvironment{
-		_inner: environment,
-	}, nil
+	return output, nil
 }
 
 func (self *WasiEnvironment) inner() *C.wasi_env_t {
