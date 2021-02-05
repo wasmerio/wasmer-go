@@ -39,11 +39,10 @@ func TestNativeEngine(t *testing.T) {
 }
 
 func TestEngineWithTarget(t *testing.T) {
-	triple, err := NewTriple("x86_64-apple-darwin")
+	triple, err := NewTriple("aarch64-unknown-linux-gnu")
 	assert.NoError(t, err)
 
 	cpuFeatures := NewCpuFeatures()
-	err = cpuFeatures.Add("sse2")
 	assert.NoError(t, err)
 
 	target := NewTarget(triple, cpuFeatures)
