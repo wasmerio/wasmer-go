@@ -9,7 +9,7 @@ type Target struct {
 }
 
 func newTarget(target *C.wasm_target_t) *Target {
-	self := &Target {
+	self := &Target{
 		_inner: target,
 	}
 
@@ -33,7 +33,7 @@ type Triple struct {
 }
 
 func newTriple(triple *C.wasm_triple_t) *Triple {
-	self := &Triple {
+	self := &Triple{
 		_inner: triple,
 	}
 
@@ -46,7 +46,7 @@ func newTriple(triple *C.wasm_triple_t) *Triple {
 
 func NewTriple(triple string) (*Triple, error) {
 	cTripleName := newName(triple)
-	defer C.wasm_name_delete(&cTripleName);
+	defer C.wasm_name_delete(&cTripleName)
 
 	cTriple := C.wasm_triple_new(&cTripleName)
 
@@ -70,7 +70,7 @@ type CpuFeatures struct {
 }
 
 func newCpuFeatures(cpu_features *C.wasm_cpu_features_t) *CpuFeatures {
-	self := &CpuFeatures {
+	self := &CpuFeatures{
 		_inner: cpu_features,
 	}
 
@@ -88,7 +88,7 @@ func NewCpuFeatures() *CpuFeatures {
 func (self *CpuFeatures) Add(feature string) error {
 	cFeature := newName(feature)
 	defer C.wasm_name_delete(&cFeature)
-	
+
 	if !C.wasm_cpu_features_add(self.inner(), &cFeature) {
 		return newErrorFromWasmer()
 	}
