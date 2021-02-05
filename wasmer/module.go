@@ -76,13 +76,19 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 		wasmBytesPtr = (*C.uint8_t)(unsafe.Pointer(&wasmBytes[0]))
 	}
 
-	self := &Module{
-		_inner: C.to_wasm_module_new(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
-		store:  store,
-	}
+	var self *Module
 
-	if self._inner == nil {
-		return nil, newErrorFromWasmer()
+	err2 := maybeNewErrorFromWasmer(func() bool {
+		self = &Module{
+			_inner: C.to_wasm_module_new(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
+			store:  store,
+		}
+
+		return self._inner == nil
+	})
+
+	if err2 != nil {
+		return nil, err2
 	}
 
 	runtime.KeepAlive(bytes)
@@ -117,14 +123,16 @@ func ValidateModule(store *Store, bytes []byte) error {
 		wasmBytesPtr = (*C.uint8_t)(unsafe.Pointer(&wasmBytes[0]))
 	}
 
-	isValid := C.to_wasm_module_validate(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength))
+	err2 := maybeNewErrorFromWasmer(func() bool {
+		return false == C.to_wasm_module_validate(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength))
+	})
+
+	if err2 != nil {
+		return err2
+	}
 
 	runtime.KeepAlive(bytes)
 	runtime.KeepAlive(wasmBytes)
-
-	if !isValid {
-		return newErrorFromWasmer()
-	}
 
 	return nil
 }
@@ -190,10 +198,14 @@ func (self *Module) Exports() []*ExportType {
 func (self *Module) Serialize() ([]byte, error) {
 	var bytes C.wasm_byte_vec_t
 
-	C.wasm_module_serialize(self.inner(), &bytes)
+	err := maybeNewErrorFromWasmer(func() bool {
+		C.wasm_module_serialize(self.inner(), &bytes)
 
-	if bytes.data == nil {
-		return nil, newErrorFromWasmer()
+		return bytes.data == nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	goBytes := C.GoBytes(unsafe.Pointer(bytes.data), C.int(bytes.size))
@@ -220,12 +232,18 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 		bytesPtr = (*C.uint8_t)(unsafe.Pointer(&bytes[0]))
 	}
 
-	self := &Module{
-		_inner: C.to_wasm_module_deserialize(store.inner(), bytesPtr, C.size_t(bytesLength)),
-	}
+	var self *Module
 
-	if self._inner == nil {
-		return nil, newErrorFromWasmer()
+	err := maybeNewErrorFromWasmer(func() bool {
+		self = &Module{
+			_inner: C.to_wasm_module_deserialize(store.inner(), bytesPtr, C.size_t(bytesLength)),
+		}
+
+		return self._inner == nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	return self, nil

@@ -48,10 +48,16 @@ func NewTriple(triple string) (*Triple, error) {
 	cTripleName := newName(triple)
 	defer C.wasm_name_delete(&cTripleName)
 
-	cTriple := C.wasm_triple_new(&cTripleName)
+	var cTriple *C.wasm_triple_t
 
-	if cTriple == nil {
-		return nil, newErrorFromWasmer()
+	err := maybeNewErrorFromWasmer(func() bool {
+		cTriple := C.wasm_triple_new(&cTripleName)
+
+		return cTriple == nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	return newTriple(cTriple), nil
@@ -89,8 +95,12 @@ func (self *CpuFeatures) Add(feature string) error {
 	cFeature := newName(feature)
 	defer C.wasm_name_delete(&cFeature)
 
-	if !C.wasm_cpu_features_add(self.inner(), &cFeature) {
-		return newErrorFromWasmer()
+	err := maybeNewErrorFromWasmer(func() bool {
+		return false == C.wasm_cpu_features_add(self.inner(), &cFeature)
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
