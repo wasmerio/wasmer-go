@@ -172,7 +172,7 @@ func (self *Exports) GetWasiStartFunction() (func(...interface{}) (interface{}, 
 	start := C.wasi_get_start_function(self.instance)
 
 	if start == nil {
-		return nil, newErrorWith("WASI start function is not found")
+		return nil, newErrorWith("WASI start function was not found")
 	}
 
 	return newFunction(start, nil, nil).Native(), nil
