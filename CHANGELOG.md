@@ -4,12 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+* [1.0.0](#100---2021-02-05)
 * [1.0.0-beta2](#100-beta2---2021-01-05)
 * [1.0.0-beta1](#100-beta1---2020-12-03)
 * [0.3.1](#031---2020-02-03)
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
+
+## [1.0.0] - 2021-02-05
+
+### Added
+
+* Implement traps
+* Allow choosing an engine and a compiler through the configuration
+* Added support for `aarch64`
+* Implement WASI
+* Implement corss-compilation
+* Add support for host function environment
+
+### Changed
+
+* Update to Wasmer 1.0.2
 
 ## [1.0.0-beta2] - 2021-01-05
 
@@ -358,6 +374,8 @@ All notable changes to this project will be documented in this file.
 First release.
 
 
+[1.0.0]: https://github.com/wasmerio/wasmer-go/compare/v1.0.0-beta2...v1.0.0
+[1.0.0-beta2]: https://github.com/wasmerio/wasmer-go/compare/v1.0.0-beta1...v1.0.0-beta2
 [1.0.0-beta1]: https://github.com/wasmerio/wasmer-go/compare/v0.3.1...v1.0.0-beta1
 [0.3.1]: https://github.com/wasmerio/wasmer-go/compare/0.3.0...v0.3.1
 [0.3.0]: https://github.com/wasmerio/wasmer-go/compare/0.2.0...0.3.0
