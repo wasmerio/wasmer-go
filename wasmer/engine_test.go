@@ -37,3 +37,24 @@ func TestNativeEngine(t *testing.T) {
 
 	testEngine(t, NewNativeEngine())
 }
+
+func TestEngineWithTarget(t *testing.T) {
+	triple, err := NewTriple("aarch64-unknown-linux-gnu")
+	assert.NoError(t, err)
+
+	cpuFeatures := NewCpuFeatures()
+	assert.NoError(t, err)
+
+	target := NewTarget(triple, cpuFeatures)
+
+	config := NewConfig()
+	config.UseTarget(target)
+
+	engine := NewEngineWithConfig(config)
+	store := NewStore(engine)
+
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
+	assert.NoError(t, err)
+
+	_ = module
+}
