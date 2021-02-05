@@ -53,7 +53,7 @@ func TestEngineWithTarget(t *testing.T) {
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
 
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	_ = module
