@@ -19,11 +19,13 @@ import (
 	"unsafe"
 )
 
+type NativeFunction = func(...interface{}) (interface{}, error)
+
 type Function struct {
 	_inner      *C.wasm_func_t
 	_ownedBy    interface{}
 	environment *FunctionEnvironment
-	lazyNative  func(...interface{}) (interface{}, error)
+	lazyNative  NativeFunction
 }
 
 func newFunction(pointer *C.wasm_func_t, environment *FunctionEnvironment, ownedBy interface{}) *Function {
@@ -181,7 +183,7 @@ func (self *Function) Call(parameters ...interface{}) (interface{}, error) {
 //   nativeFunction = function.Native()
 //   _ = nativeFunction(1, 2, 3)
 //
-func (self *Function) Native() func(...interface{}) (interface{}, error) {
+func (self *Function) Native() NativeFunction {
 	if self.lazyNative != nil {
 		return self.lazyNative
 	}
