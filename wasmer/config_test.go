@@ -11,7 +11,7 @@ func TestConfig(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -31,7 +31,7 @@ func TestConfig_UseJITEngine(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -55,7 +55,7 @@ func TestConfig_UseNativeEngine(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -75,7 +75,7 @@ func TestConfig_UseCraneliftCompiler(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -99,7 +99,7 @@ func TestConfig_UseLLVMCompiler(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -120,7 +120,7 @@ func TestConfig_JITWithCranelift(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -145,7 +145,7 @@ func TestConfig_JITWithLLVM(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -166,7 +166,7 @@ func TestConfig_NativeWithCranelift(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
@@ -191,7 +191,7 @@ func TestConfig_NativeWithLLVM(t *testing.T) {
 
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())

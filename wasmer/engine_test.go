@@ -8,7 +8,7 @@ import (
 
 func testEngine(t *testing.T, engine *Engine) {
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes())
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, NewImportObject())
