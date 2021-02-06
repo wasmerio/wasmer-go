@@ -54,23 +54,21 @@ A complete and mature WebAssembly runtime for Go based on [Wasmer].
 To install the library, follow the classical:
 
 ```sh
-# Enable cgo
-$ export CGO_ENABLED=1; export CC=gcc;
-
 $ go get github.com/wasmerio/wasmer-go/wasmer
 ```
 
 > Note: Wasmer doesn't work on Windows yet.
 
-If the pre-compiled shared libraries are not compatible with your system, you can try [installing it manuallly](#manual-install).
-
+If the pre-compiled shared libraries are not compatible with your
+system, please wait, we are writing the documentation.
 
 # Examples
 
 ## Basic example: Exported function
 
-There is a toy program in `wasmer/test/testdata/examples/simple.rs`,
-written in Rust (or any other language that compiles to WebAssembly):
+There is a toy program in `wasmer/testdata/tests.rs`, written in Rust
+(or any other language that compiles to WebAssembly), which contains a
+function like this one:
 
 ```rust
 #[no_mangle]
@@ -80,9 +78,9 @@ pub extern fn sum(x: i32, y: i32) -> i32 {
 ```
 
 After compilation to WebAssembly, the
-[`wasmer/test/testdata/examples/simple.wasm`](https://github.com/wasmerio/wasmer-go/blob/master/wasmer/test/testdata/examples/simple.wasm)
+[`wasmer/testdata/tests.wasm`](https://github.com/wasmerio/wasmer-go/blob/master/wasmer/testdata/tests.wasm)
 binary file is generated. ([Download
-it](https://github.com/wasmerio/wasmer-go/raw/master/wasmer/test/testdata/examples/simple.wasm)).
+it](https://github.com/wasmerio/wasmer-go/raw/master/wasmer/testdata/tests.wasm)).
 
 Then, we can execute it in Go:
 
@@ -91,11 +89,12 @@ package main
 
 import (
 	"fmt"
-	wasm "github.com/wasmerio/wasmer-go/wasmer"
+    "io/ioutil"
+	wasmer "github.com/wasmerio/wasmer-go/wasmer"
 )
 
 func main() {
-    wasmBytes, _ := wasm.ReadBytes("simple.wasm")
+    wasmBytes, _ := ioutil.ReadFile("path/to/tests.wasm")
 
     engine := wasmer.NewEngine()
     store := wasmer.NewStore(engine)
@@ -110,7 +109,6 @@ func main() {
     // Gets the `sum` exported function from the WebAssembly instance.
     sum, _ := instance.Exports.GetFunction("sum")
 
-
     // Calls that exported function with Go standard values. The WebAssembly
     // types are inferred and values are casted automatically.
     result, _ := sum(5, 37)
@@ -122,10 +120,10 @@ func main() {
 ## Imported function
 
 A WebAssembly module can export functions, this is how to run a
-WebAssembly function, like we did in the previous example with
-`instance.Exports["sum"](1, 2)`. Nonetheless, a WebAssembly module can
-depend on “extern functions”, then called imported functions. For
-instance, let's consider the basic following Rust program:
+WebAssembly function, like we did in the previous
+example. Nonetheless, a WebAssembly module can depend on “extern
+functions”, then called imported functions. For instance, let's
+consider the basic following Rust program:
 
 ```rust
 extern {
@@ -142,70 +140,44 @@ In this case, the `add1` function is a WebAssembly exported function,
 whilst the `sum` function is a WebAssembly imported function (the
 WebAssembly instance needs to _import_ it to complete the
 program). Good news: We can write the implementation of the `sum`
-function directly in Go!
-
-First, we need to declare the `sum` function signature in C inside a
-Go comment (with the help of [cgo]):
+function directly in Go! Let's declare the complete host function:
 
 ```go
-package main
+function := wasmer.NewFunction(
+	store,
+	wasmer.NewFunctionType(wasmer.NewValueTypes(I32, I32), wasmer.NewValueTypes(I32)),
+	func(args []wasmer.Value) ([]wasmer.Value, error) {
+		x := args[0].I32()
+		y := args[1].I32()
 
-// #include <stdlib.h>
-//
-// extern int32_t sum(void *context, int32_t x, int32_t y);
-import "C"
+		return []wasmer.Value{wasmer.NewI32(x + y)}, nil
+	},
+)
 ```
 
-Second, we declare the `sum` function implementation in Go. Notice the
-`//export` which is the way cgo uses to map Go code to C code.
+Then, we need to define an `ImportObject` and register the funtion
+inside the correct namespace:
 
 ```go
-//export sum
-func sum(x int32, y int32) int32 {
-	return x + y
-}
+importObject.Register(
+	"math",
+	map[string]IntoExtern{
+		"sum": function,
+	},
+)
 ```
 
-Third, we use `NewImports` to create the WebAssembly imports. In this
-code:
-
-* `"sum"` is the imported function name,
-* `sum` is the Go function pointer, and
-* `C.sum` is the cgo function pointer.
+Here we are. Now let's instantiate the module with the import object,
+and let's call the `add_one` function:
 
 ```go
-importObject := wasmer.NewImportObject()
-```
-
-Finally, we use `NewInstanceWithImports` to inject the imports:
-
-```go
-wasmBytes, _ := wasm.ReadBytes("imported_function.wasm")
-
-engine := wasmer.NewEngine()
-store := wasmer.NewStore(engine)
-
-// Compiles the module
-module, _ := wasmer.NewModule(store, wasmBytes)
-
-// Instantiates the Module
 instance, _ := wasmer.NewInstance(module, importObject)
 
-// Gets the `sum` exported function from the WebAssembly instance.
-add1, _ := instance.Exports.GetFunction("add1")
+addOne, _ := instance.Exports.GetFunction("add_one")
 
-// Gets and calls the `add1` exported function from the WebAssembly instance.
-results, _ := add1(1, 2)
-
-fmt.Println(result)
-//   add1(1, 2)
-// = sum(1 + 2) + 1
-// = 1 + 2 + 1
-// = 4
-// QED
+result, _ := addOne(41)
+fmt.Println(result) # 42!
 ```
-
-[cgo]: https://golang.org/cmd/cgo/
 
 ## Read the memory
 
@@ -254,63 +226,13 @@ terminates by a null byte, which means we could iterate over the
 memory starting from `pointer` until a null byte is met; that's a
 similar approach.
 
-For a more complete example, see the [Greet Example][greet-example].
-
-[greet-example]: https://godoc.org/github.com/wasmerio/wasmer-go/wasmer#example-package--Greet
-
 # Documentation
 
 [The documentation can be read online on pkg.go.dev][documentation]. It
 contains function descriptions, short examples, long examples
 etc. Everything one need to start using Wasmer with Go!
 
-Also, there is this article written for the announcement that
-introduces the project: [Announcing the fastest WebAssembly runtime
-for Go: wasmer][medium].
-
 [documentation]: https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer?tab=doc
-[medium]: https://medium.com/wasmer/announcing-the-fastest-webassembly-runtime-for-go-wasmer-19832d77c050
-
-# Development
-
-The Go library is written in Go and Rust.
-
-To build both parts, run the following commands:
-
-```sh
-$ just build-runtime
-$ just build
-```
-
-To build the Go part, run:
-
-```sh
-$ just build
-```
-
-(Yes, you need [`just`]).
-
-[`just`]: https://github.com/casey/just/
-
-## Manual Install
-
-You can install Wasmer manually with the following command:
-
-```sh
-$ just build-runtime
-$ just build
-$ go install github.com/wasmerio/wasmer-go/wasmer
-```
-
-If you are a bazel user, add following to your WORKSPACE file 
-
-```
-git_repository(
-    name = "com_github_wasmerio_wasmer_go",
-    remote = "https://github.com/wasmerio/wasmer-go",
-    commit = "",
-)
-```
 
 # Testing
 
