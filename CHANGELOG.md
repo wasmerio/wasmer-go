@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+* [1.0.1](#101---2021-02-06)
 * [1.0.0](#100---2021-02-05)
 * [1.0.0-beta2](#100-beta2---2021-01-05)
 * [1.0.0-beta1](#100-beta1---2020-12-03)
@@ -11,6 +12,12 @@ All notable changes to this project will be documented in this file.
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
+
+## [1.0.1] - 2021-02-06
+
+### Changed
+
+* Fix the instructions in the `README.md`
 
 ## [1.0.0] - 2021-02-05
 
