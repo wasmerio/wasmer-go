@@ -89,7 +89,7 @@ package main
 
 import (
 	"fmt"
-    "io/ioutil"
+	"io/ioutil"
 	wasmer "github.com/wasmerio/wasmer-go/wasmer"
 )
 
