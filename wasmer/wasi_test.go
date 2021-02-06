@@ -28,12 +28,12 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 	assert.NoError(t, err)
 
 	wasiEnv, err := NewWasiStateBuilder("test-program").
-		argument("--foo").
-		environment("ABC", "DEF").
-		environment("X", "ZY").
-		mapDirectory("the_host_current_directory", ".").
-		captureStdout().
-		finalize()
+		Argument("--foo").
+		Environment("ABC", "DEF").
+		Environment("X", "ZY").
+		MapDirectory("the_host_current_directory", ".").
+		CaptureStdout().
+		Finalize()
 	assert.NoError(t, err)
 
 	importObject, err := wasiEnv.GenerateImportObject(store, module)

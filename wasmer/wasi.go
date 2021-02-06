@@ -102,7 +102,7 @@ func NewWasiStateBuilder(programName string) *WasiStateBuilder {
 	return stateBuilder
 }
 
-func (self *WasiStateBuilder) argument(argument string) *WasiStateBuilder {
+func (self *WasiStateBuilder) Argument(argument string) *WasiStateBuilder {
 	cArgument := C.CString(argument)
 	defer C.free(unsafe.Pointer(cArgument))
 	C.wasi_config_arg(self.inner(), cArgument)
@@ -110,7 +110,7 @@ func (self *WasiStateBuilder) argument(argument string) *WasiStateBuilder {
 	return self
 }
 
-func (self *WasiStateBuilder) environment(key string, value string) *WasiStateBuilder {
+func (self *WasiStateBuilder) Environment(key string, value string) *WasiStateBuilder {
 	cKey := C.CString(key)
 	defer C.free(unsafe.Pointer(cKey))
 
@@ -122,7 +122,7 @@ func (self *WasiStateBuilder) environment(key string, value string) *WasiStateBu
 	return self
 }
 
-func (self *WasiStateBuilder) preopenDirectory(preopenDirectory string) *WasiStateBuilder {
+func (self *WasiStateBuilder) PreopenDirectory(preopenDirectory string) *WasiStateBuilder {
 	cPreopenDirectory := C.CString(preopenDirectory)
 	defer C.free(unsafe.Pointer(cPreopenDirectory))
 
@@ -131,7 +131,7 @@ func (self *WasiStateBuilder) preopenDirectory(preopenDirectory string) *WasiSta
 	return self
 }
 
-func (self *WasiStateBuilder) mapDirectory(alias string, directory string) *WasiStateBuilder {
+func (self *WasiStateBuilder) MapDirectory(alias string, directory string) *WasiStateBuilder {
 	cAlias := C.CString(alias)
 	defer C.free(unsafe.Pointer(cAlias))
 
@@ -143,37 +143,37 @@ func (self *WasiStateBuilder) mapDirectory(alias string, directory string) *Wasi
 	return self
 }
 
-func (self *WasiStateBuilder) inheritStdin() *WasiStateBuilder {
+func (self *WasiStateBuilder) InheritStdin() *WasiStateBuilder {
 	C.wasi_config_inherit_stdin(self.inner())
 
 	return self
 }
 
-func (self *WasiStateBuilder) captureStdout() *WasiStateBuilder {
+func (self *WasiStateBuilder) CaptureStdout() *WasiStateBuilder {
 	C.wasi_config_capture_stdout(self.inner())
 
 	return self
 }
 
-func (self *WasiStateBuilder) inheritStdout() *WasiStateBuilder {
+func (self *WasiStateBuilder) InheritStdout() *WasiStateBuilder {
 	C.wasi_config_inherit_stdout(self.inner())
 
 	return self
 }
 
-func (self *WasiStateBuilder) captureStderr() *WasiStateBuilder {
+func (self *WasiStateBuilder) CaptureStderr() *WasiStateBuilder {
 	C.wasi_config_capture_stderr(self.inner())
 
 	return self
 }
 
-func (self *WasiStateBuilder) inheritStderr() *WasiStateBuilder {
+func (self *WasiStateBuilder) InheritStderr() *WasiStateBuilder {
 	C.wasi_config_inherit_stderr(self.inner())
 
 	return self
 }
 
-func (self *WasiStateBuilder) finalize() (*WasiEnvironment, error) {
+func (self *WasiStateBuilder) Finalize() (*WasiEnvironment, error) {
 	return newWasiEnvironment(self)
 }
 
