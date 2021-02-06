@@ -277,13 +277,3 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 
 	return importObject, nil
 }
-
-func GenerateWasiImportObject(builder *WasiStateBuilder, store *Store, module *Module) (*ImportObject, error) {
-	env, err := builder.Finalize()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return env.GenerateImportObject(store, module)
-}
