@@ -1,3 +1,5 @@
+// +build !customlib
+
 package wasmer
 
 // #cgo CFLAGS: -I${SRCDIR}/packaged/include
