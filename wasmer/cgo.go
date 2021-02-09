@@ -1,4 +1,4 @@
-// +build !customlib
+// +build !custom_wasmer_runtime
 
 package wasmer
 
