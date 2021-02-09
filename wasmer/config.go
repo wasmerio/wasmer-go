@@ -3,6 +3,7 @@ package wasmer
 // #include <wasmer_wasm.h>
 import "C"
 
+// Config holds the compiler and the Engine used by the Store.
 type Config struct {
 	_inner *C.wasm_config_t
 }
@@ -10,7 +11,6 @@ type Config struct {
 // NewConfig instantiates and returns a new Config.
 //
 //   config := NewConfig()
-//
 func NewConfig() *Config {
 	config := C.wasm_config_new()
 
@@ -59,6 +59,14 @@ func (self *Config) UseLLVMCompiler() {
 	C.wasm_config_set_engine(self.inner(), C.LLVM)
 }
 
+// Use a specific target for doing cross-compilation.
+//
+//   triple, _ := NewTriple("aarch64-unknown-linux-gnu")
+//   cpuFeatures := NewCpuFeatures()
+//   target := NewTarget(triple, cpuFeatures)
+//
+//   config := NewConfig()
+//   config.UseTarget(target)
 func (self *Config) UseTarget(target *Target) {
 	C.wasm_config_set_target(self.inner(), target.inner())
 }
