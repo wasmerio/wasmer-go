@@ -14,4 +14,23 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer = "1.0"
+wasmer-c-api = "1.0"
+
+[features]
+default = [
+    "wat",
+    "cranelift",
+    "jit",
+    "wasi",
+]
+wat = ["wasmer-c-api/wat"]
+wasi = ["wasmer-c-api/wasi"]
+engine = ["wasmer-c-api/engine"]
+jit = ["wasmer-c-api/jit"]
+native = ["wasmer-c-api/native"]
+object-file = ["wasmer-c-api/object-file"]
+compiler = ["wasmer-c-api/compiler"]
+singlepass = ["wasmer-c-api/singlepass"]
+cranelift = ["wasmer-c-api/cranelift"]
+llvm = ["wasmer-c-api/llvm"]
+system-libffi = ["wasmer-c-api/system-libffi"]

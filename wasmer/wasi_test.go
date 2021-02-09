@@ -46,7 +46,7 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 
 	start()
 
-	stdout := string(wasiEnv.readStdout())
+	stdout := string(wasiEnv.ReadStdout())
 
 	assert.Equal(
 		t,
