@@ -118,12 +118,16 @@ this library works (and is tested) on the following platforms:
   Here are the steps to do that manually:
   
   ```sh
+  $ # Build the new Wasmer C API shared object library.
   $ cargo build --release
-  $ mkdir wasmer/packaged/lib/{{ platform }}/
-  $ cp target/release/libwasmer_go.{{ ext }} wasmer/packaged/lib/{{ platform }}/libwasmer.{{ ext }}
-  $ vi wasmer/cgo.go
-  # Update the `#cgo` directives to match your platform,
-  # or play with `CGO_*` environment variables.
+  $
+  $ # Configure cgo.
+  $ export CGO_CFLAGS="-I$(pwd)/wasmer/packaged/include/"
+  $ export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/target/release/ -L$(pwd)/target/release/ -lwasmer_go"
+  $
+  $ # Run the tests.
+  $ cd wasmer
+  $ go test -v -tags custom_wasmer_runtime
   ```
 </details>
 

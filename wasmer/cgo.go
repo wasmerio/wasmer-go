@@ -1,3 +1,5 @@
+// +build !custom_wasmer_runtime
+
 package wasmer
 
 // #cgo CFLAGS: -I${SRCDIR}/packaged/include

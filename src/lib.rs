@@ -1,1 +1,1 @@
-// Empty module, so that we can install Wasmer through Cargo more easily.
+pub use wasmer_c_api::*;
