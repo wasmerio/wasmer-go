@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+* [1.0.2](#101---2021-02-08)
 * [1.0.1](#101---2021-02-06)
 * [1.0.0](#100---2021-02-05)
 * [1.0.0-beta2](#100-beta2---2021-01-05)
@@ -12,6 +13,17 @@ All notable changes to this project will be documented in this file.
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
+
+## [1.0.2] - 2021-02-08
+
+### Added
+
+* [#190](https://github.com/wasmerio/wasmer-go/pull/190),
+  [#193](https://github.com/wasmerio/wasmer-go/pull/193) Add the
+  `custom_wasmer_runtime` tag to use a specific Wasmer shared library
+  object if the one you need is missing from the pre-compiled set.
+* [#192](https://github.com/wasmerio/wasmer-go/pull/192) Improved the
+  documentation by covering the entire API
 
 ## [1.0.1] - 2021-02-06
 
