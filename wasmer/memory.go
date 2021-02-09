@@ -13,7 +13,6 @@ import (
 // See also
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/modules.html#memories
-//
 type Memory struct {
 	_inner   *C.wasm_memory_t
 	_ownedBy interface{}

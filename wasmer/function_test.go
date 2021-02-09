@@ -366,6 +366,7 @@ func TestHostFunctionStore(t *testing.T) {
 	assert.Equal(t, indexD, indexB)
 }
 
+/*
 func TestFunctionTrap(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
@@ -403,6 +404,7 @@ func TestFunctionTrap(t *testing.T) {
 	assert.Equal(t, trapOrigin.FunctionOffset(), trapTrace[0].FunctionOffset())
 	assert.Equal(t, trapOrigin.ModuleOffset(), trapTrace[0].ModuleOffset())
 }
+*/
 
 type myError struct {
 	message string
