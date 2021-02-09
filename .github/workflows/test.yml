@@ -51,6 +51,13 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           cargo install just
 
+      - name: Install Wasmer
+        run: |
+          curl https://get.wasmer.io -sSfL | sh
+          source /home/runner/.wasmer/wasmer.sh
+          sudo mkdir -p /usr/local/lib/pkgconfig
+          wasmer config --pkg-config | sudo tee /usr/local/lib/pkgconfig/wasmer.pc
+
       - name: Run all the tests
         shell: bash
         run: |
