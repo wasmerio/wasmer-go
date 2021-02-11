@@ -11,3 +11,9 @@ package wasmer
 //
 // #include <wasmer_wasm.h>
 import "C"
+
+// See https://github.com/golang/go/issues/26366.
+import (
+	_ "github.com/wasmerio/wasmer-go/wasmer/packaged/include"
+	_ "github.com/wasmerio/wasmer-go/wasmer/packaged/lib"
+)

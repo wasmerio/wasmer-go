@@ -38,8 +38,6 @@ jobs:
           default: true
           override: true
 
-      - uses: Swatinem/rust-cache@v1
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
