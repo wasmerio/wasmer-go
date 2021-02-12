@@ -23,6 +23,9 @@ jobs:
 
           - id: 'darwin-amd64'
             os: 'macos-latest'
+
+          - id: 'windows-amd64'
+            os: 'windows-latest'
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
