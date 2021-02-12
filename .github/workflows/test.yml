@@ -15,14 +15,14 @@ jobs:
       matrix:
         go: [1.14, 1.15]
         target:
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
+          #- id: 'linux-amd64'
+          #  os: 'ubuntu-18.04'
 
-          - id: 'linux-aarch64'
-            os: ['self-hosted', 'linux', 'ARM64']
+          #- id: 'linux-aarch64'
+          #  os: ['self-hosted', 'linux', 'ARM64']
 
-          - id: 'darwin-amd64'
-            os: 'macos-latest'
+          #- id: 'darwin-amd64'
+          #  os: 'macos-latest'
 
           - id: 'windows-amd64'
             os: 'windows-latest'
@@ -47,20 +47,22 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Set up just
-        shell: bash
+        #shell: bash
+        shell: pwsh
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           cargo install just
 
       - name: Run all the tests
-        shell: bash
+        #shell: bash
+        shell: pwsh
         run: |
           just test
 
-      - name: Run all the examples
-        shell: bash
-        run: |
-          just examples
+      #- name: Run all the examples
+      #  shell: bash
+      #  run: |
+      #    just examples
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
