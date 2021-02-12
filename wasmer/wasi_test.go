@@ -50,10 +50,10 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 
 	assert.Equal(
 		t,
-		stdout,
 		"Found program name: `test-program`\n"+
 			"Found 1 arguments: --foo\n"+
 			"Found 2 environment variables: ABC=DEF, X=ZY\n"+
 			"Found 1 preopened directories: DirEntry(\"/the_host_current_directory\")\n",
+		stdout,
 	)
 }
