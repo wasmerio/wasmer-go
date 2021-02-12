@@ -34,30 +34,32 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          default: false
+      #- name: Set up Rust
+      #  uses: actions-rs/toolchain@v1
+      #  with:
+      #    toolchain: stable
+      #    override: true
+      #    default: false
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Set up just
-        #shell: bash
-        shell: pwsh
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          cargo install just
+      #- name: Set up just
+      #  #shell: bash
+      #  shell: pwsh
+      #  run: |
+      #    export PATH="$HOME/.cargo/bin:$PATH"
+      #    cargo install just
 
       - name: Run all the tests
         #shell: bash
         shell: pwsh
         run: |
-          just test
+          cd wasmer
+          go test -v
+          #just test
 
       #- name: Run all the examples
       #  shell: bash
