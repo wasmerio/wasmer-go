@@ -5,7 +5,7 @@ package wasmer
 // #cgo CFLAGS: -I${SRCDIR}/packaged/include
 //
 // #cgo !windows LDFLAGS: -lwasmer
-// #cgo windows LDFLAGS: -lwasmer -luserenv -lole32 -lntdll -lws2_32 -lkernel32
+// #cgo windows LDFLAGS: -lwasmer -luserenv -lWs2_32 -ladvapi32 -lbcrypt
 //
 // #cgo darwin,amd64 LDFLAGS: -Wl,-rpath,${SRCDIR}/packaged/lib/darwin-amd64 -L${SRCDIR}/packaged/lib/darwin-amd64
 // #cgo linux,amd64 LDFLAGS: -Wl,-rpath,${SRCDIR}/packaged/lib/linux-amd64 -L${SRCDIR}/packaged/lib/linux-amd64
