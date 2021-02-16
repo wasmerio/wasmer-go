@@ -277,9 +277,10 @@ func (self *Function) Native() NativeFunction {
 		return self.lazyNative
 	}
 
+	ty := self.Type()
+	expectedParameters := ty.Params()
+
 	self.lazyNative = func(receivedParameters ...interface{}) (interface{}, error) {
-		ty := self.Type()
-		expectedParameters := ty.Params()
 		numberOfReceivedParameters := len(receivedParameters)
 		numberOfExpectedParameters := len(expectedParameters)
 		diff := numberOfExpectedParameters - numberOfReceivedParameters
