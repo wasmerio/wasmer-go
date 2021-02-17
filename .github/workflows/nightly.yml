@@ -1,0 +1,63 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test on ${{ matrix.id }} with Go ${{ matrix.go }}
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      matrix:
+        go: [1.14, 1.15]
+        target:
+          - id: 'linux-amd64'
+            os: 'ubuntu-18.04'
+            nightly: wasmer-linux-amd64.tar.gz
+          - id: 'linux-aarch64'
+            os: ['self-hosted', 'linux', 'ARM64']
+            nightly: wasmer-linux-aarch64.tar.gz
+          - id: 'darwin-amd64'
+            os: 'macos-latest'
+            nightly: wasmer-darwin-amd64.tar.gz
+      fail-fast: true
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: false
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Set up just
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cargo install just
+      - name: Install Wasmer nightly
+        run: |
+          GH_URL="https://github.com"
+          LATEST_URL="${GH_URL}/wasmerio/wasmer-nightly/releases/latest/"
+          ASSET_PATTERN="/wasmerio/wasmer-nightly/.*/${{ matrix.nightly }}"
+          ASSET_URL=$(curl -Ls ${LATEST_URL} | grep -wo ${ASSET_PATTERN})
+
+          curl -Ls ${GH_URL}${ASSET_URL} --output ${{ matrix.nightly }}
+          mkdir -p /tmp/wasmer
+          tar xzf ${{ matrix.nightly }} -C /tmp/wasmer
+          cp -f /tmp/wasmer/include/{wasm,wasmer_wasm}.h wasmer/packaged/include
+          cp -f /tmp/wasmer/lib/libwasmer.*  wasmer/packaged/lib/${{ matrix.target.os }}
+      - name: Run all the tests
+        shell: bash
+        run: |
+          just test
+      - name: Run all the examples
+        shell: bash
+        run: |
+          just examples
