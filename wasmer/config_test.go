@@ -48,22 +48,24 @@ func TestConfig_AllCombinations(t *testing.T) {
 		configs = append(configs, Test{"Cranelift", "Native", NewConfig().UseCraneliftCompiler().UseNativeEngine()})
 	}
 
-	// LLVM with the JIT engine works on Linux+Darwin/amd64.
-	if is_amd64 && (is_linux || is_darwin) {
-		configs = append(configs, Test{"LLVM", "JIT", NewConfig().UseLLVMCompiler().UseJITEngine()})
-	}
+	/*
+		LLVM isn't part of the prepacked `libwasmer` for the moment.
 
-	// LLVM with the Native engine works on Linux+Darwin/amd64.
-	if is_amd64 && (is_linux || is_darwin) {
-		configs = append(configs, Test{"LLVM", "Native", NewConfig().UseLLVMCompiler().UseNativeEngine()})
-	}
+			// LLVM with the JIT engine works on Linux+Darwin/amd64.
+			if is_amd64 && (is_linux || is_darwin) {
+				configs = append(configs, Test{"LLVM", "JIT", NewConfig().UseLLVMCompiler().UseJITEngine()})
+			}
+
+			// LLVM with the Native engine works on Linux+Darwin/amd64.
+			if is_amd64 && (is_linux || is_darwin) {
+				configs = append(configs, Test{"LLVM", "Native", NewConfig().UseLLVMCompiler().UseNativeEngine()})
+			}
+	*/
 
 	// Singlepass with the JIT engine works on Linux+Darwin/amd64.
-	/*
-		if is_amd64 && (is_linux || is_darwin) {
-			configs = append(configs, Test{"Singlepass", "JIT", NewConfig().UseSinglepassCompiler().UseJITEngine()})
-		}
-	*/
+	if is_amd64 && (is_linux || is_darwin) {
+		configs = append(configs, Test{"Singlepass", "JIT", NewConfig().UseSinglepassCompiler().UseJITEngine()})
+	}
 
 	for _, test := range configs {
 		t.Run(
