@@ -28,8 +28,10 @@ func (self *Config) inner() *C.wasm_config_t {
 //   config := NewConfig()
 //   config.UseJITEngine()
 //
-func (self *Config) UseJITEngine() {
+func (self *Config) UseJITEngine() *Config {
 	C.wasm_config_set_engine(self.inner(), C.JIT)
+
+	return self
 }
 
 // UseNativeEngine sets the engine to Native in the configuration.
@@ -37,8 +39,10 @@ func (self *Config) UseJITEngine() {
 //   config := NewConfig()
 //   config.UseNativeEngine()
 //
-func (self *Config) UseNativeEngine() {
+func (self *Config) UseNativeEngine() *Config {
 	C.wasm_config_set_engine(self.inner(), C.NATIVE)
+
+	return self
 }
 
 // UseCraneliftCompiler sets the compiler to Cranelift in the configuration.
@@ -46,8 +50,10 @@ func (self *Config) UseNativeEngine() {
 //   config := NewConfig()
 //   config.UseCraneliftCompiler()
 //
-func (self *Config) UseCraneliftCompiler() {
+func (self *Config) UseCraneliftCompiler() *Config {
 	C.wasm_config_set_engine(self.inner(), C.CRANELIFT)
+
+	return self
 }
 
 // UseLLVMCompiler sets the compiler to LLVM in the configuration.
@@ -55,8 +61,10 @@ func (self *Config) UseCraneliftCompiler() {
 //   config := NewConfig()
 //   config.UseLLVMCompiler()
 //
-func (self *Config) UseLLVMCompiler() {
+func (self *Config) UseLLVMCompiler() *Config {
 	C.wasm_config_set_engine(self.inner(), C.LLVM)
+
+	return self
 }
 
 // UseSinglepassCompiler sets the compiler to Singlepass in the
@@ -65,8 +73,10 @@ func (self *Config) UseLLVMCompiler() {
 //   config := NewConfig()
 //   config.UseSinglepassCompiler()
 //
-func (self *Config) UseSinglepassCompiler() {
+func (self *Config) UseSinglepassCompiler() *Config {
 	C.wasm_config_set_engine(self.inner(), C.SINGLEPASS)
+
+	return self
 }
 
 // Use a specific target for doing cross-compilation.
@@ -77,6 +87,8 @@ func (self *Config) UseSinglepassCompiler() {
 //
 //   config := NewConfig()
 //   config.UseTarget(target)
-func (self *Config) UseTarget(target *Target) {
+func (self *Config) UseTarget(target *Target) *Config {
 	C.wasm_config_set_target(self.inner(), target.inner())
+
+	return self
 }

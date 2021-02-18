@@ -1,6 +1,7 @@
 package wasmer
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"runtime"
 	"testing"
@@ -25,182 +26,66 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, result, int32(42))
 }
 
-func TestConfig_UseJITEngine(t *testing.T) {
-	config := NewConfig()
-	config.UseJITEngine()
+func TestConfig_AllCombinations(t *testing.T) {
+	type Test struct {
+		compilerName string
+		engineName   string
+		config       *Config
+	}
+	var configs = []Test{}
 
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
+	is_amd64 := runtime.GOARCH == "amd64"
+	//is_aarch64 := runtime.GOARCH == "arm64"
+	is_linux := runtime.GOOS == "linux"
+	is_darwin := runtime.GOOS == "darwin"
+	//is_windows := runtime.GOOS == "windows"
 
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
+	// Cranelift with the JIT engine works everywhere
+	configs = append(configs, Test{"Cranelift", "JIT", NewConfig().UseCraneliftCompiler().UseJITEngine()})
 
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_UseNativeEngine(t *testing.T) {
-	if runtime.GOARCH != "amd64" {
-		return
+	// Cranelift with the Native engine works on Linux+Darwin/amd64.
+	if is_amd64 && (is_linux || is_darwin) {
+		configs = append(configs, Test{"Cranelift", "Native", NewConfig().UseCraneliftCompiler().UseNativeEngine()})
 	}
 
-	config := NewConfig()
-	config.UseNativeEngine()
+	/*
+		LLVM isn't part of the prepacked `libwasmer` for the moment.
 
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
+			// LLVM with the JIT engine works on Linux+Darwin/amd64.
+			if is_amd64 && (is_linux || is_darwin) {
+				configs = append(configs, Test{"LLVM", "JIT", NewConfig().UseLLVMCompiler().UseJITEngine()})
+			}
 
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
+			// LLVM with the Native engine works on Linux+Darwin/amd64.
+			if is_amd64 && (is_linux || is_darwin) {
+				configs = append(configs, Test{"LLVM", "Native", NewConfig().UseLLVMCompiler().UseNativeEngine()})
+			}
+	*/
 
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_UseCraneliftCompiler(t *testing.T) {
-	config := NewConfig()
-	config.UseCraneliftCompiler()
-
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
-
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
-
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_UseLLVMCompiler(t *testing.T) {
-	if runtime.GOARCH != "amd64" {
-		return
+	// Singlepass with the JIT engine works on Linux+Darwin/amd64.
+	if is_amd64 && (is_linux || is_darwin) {
+		configs = append(configs, Test{"Singlepass", "JIT", NewConfig().UseSinglepassCompiler().UseJITEngine()})
 	}
 
-	config := NewConfig()
-	config.UseLLVMCompiler()
+	for _, test := range configs {
+		t.Run(
+			fmt.Sprintf("compiler=%s, engine=%s", test.compilerName, test.engineName),
+			func(t *testing.T) {
+				engine := NewEngineWithConfig(test.config)
+				store := NewStore(engine)
+				module, err := NewModule(store, testGetBytes("tests.wasm"))
+				assert.NoError(t, err)
 
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
+				instance, err := NewInstance(module, NewImportObject())
+				assert.NoError(t, err)
 
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
+				sum, err := instance.Exports.GetFunction("sum")
+				assert.NoError(t, err)
 
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_JITWithCranelift(t *testing.T) {
-	config := NewConfig()
-	config.UseJITEngine()
-	config.UseCraneliftCompiler()
-
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
-
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
-
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_JITWithLLVM(t *testing.T) {
-	if runtime.GOARCH != "amd64" {
-		return
+				result, err := sum(37, 5)
+				assert.NoError(t, err)
+				assert.Equal(t, result, int32(42))
+			},
+		)
 	}
-
-	config := NewConfig()
-	config.UseJITEngine()
-	config.UseLLVMCompiler()
-
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
-
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
-
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_NativeWithCranelift(t *testing.T) {
-	config := NewConfig()
-	config.UseNativeEngine()
-	config.UseCraneliftCompiler()
-
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
-
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
-
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
-}
-
-func TestConfig_NativeWithLLVM(t *testing.T) {
-	if runtime.GOARCH != "amd64" {
-		return
-	}
-
-	config := NewConfig()
-	config.UseNativeEngine()
-	config.UseLLVMCompiler()
-
-	engine := NewEngineWithConfig(config)
-	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
-	assert.NoError(t, err)
-
-	instance, err := NewInstance(module, NewImportObject())
-	assert.NoError(t, err)
-
-	sum, err := instance.Exports.GetFunction("sum")
-	assert.NoError(t, err)
-
-	result, err := sum(37, 5)
-	assert.NoError(t, err)
-	assert.Equal(t, result, int32(42))
 }
