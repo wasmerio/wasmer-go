@@ -158,7 +158,7 @@ func (self *Module) inner() *C.wasm_module_t {
 func (self *Module) Name() string {
 	var name C.wasm_name_t
 
-	C.wasm_module_name(self.inner(), &name)
+	C.wasmer_module_name(self.inner(), &name)
 
 	goName := nameToString(&name)
 
