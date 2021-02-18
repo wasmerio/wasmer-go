@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func TestCompilerKind(t *testing.T) {
+	assert.Equal(t, CRANELIFT.String(), "cranelift")
+	assert.Equal(t, LLVM.String(), "llvm")
+	assert.Equal(t, SINGLEPASS.String(), "singlepass")
+}
+
+func TestEngineKind(t *testing.T) {
+	assert.Equal(t, JIT.String(), "jit")
+	assert.Equal(t, NATIVE.String(), "native")
+}
+
 func TestConfig(t *testing.T) {
 	config := NewConfig()
 
