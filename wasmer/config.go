@@ -36,7 +36,7 @@ func (self CompilerKind) String() string {
 }
 
 // IsCompilerAvailable checks that the given compiler is available
-// with the current `wasmer-go` built.
+// in this current version of `wasmer-go`.
 //
 //   IsCompilerAvailable(CRANELIFT)
 func IsCompilerAvailable(compiler CompilerKind) bool {
@@ -69,8 +69,8 @@ func (self EngineKind) String() string {
 	panic("Unknown engine")
 }
 
-// IsEngineAvailable checks that the given engine is available with
-// the current `wasmer-go` built.
+// IsEngineAvailable checks that the given engine is available in this
+// current version of `wasmer-go`.
 //
 //   IsEngineAvailable(JIT)
 func IsEngineAvailable(engine EngineKind) bool {
@@ -101,9 +101,12 @@ func (self *Config) inner() *C.wasm_config_t {
 //
 //   config := NewConfig()
 //   config.UseJITEngine()
+//
+// This method might fail if the JIT engine isn't available. Check
+// `IsEngineAvailable` to learn more.
 func (self *Config) UseJITEngine() *Config {
 	if !IsEngineAvailable(JIT) {
-		panic("This `wasmer-go` version doesn't include the JIT engine")
+		panic("This `wasmer-go` version doesn't include the JIT engine; use `IsEngineAvailable(JIT)` to avoid this panic")
 	}
 
 	C.wasm_config_set_engine(self.inner(), C.wasmer_engine_t(JIT))
@@ -115,9 +118,12 @@ func (self *Config) UseJITEngine() *Config {
 //
 //   config := NewConfig()
 //   config.UseNativeEngine()
+//
+// This method might fail if the Native engine isn't available. Check
+// `IsEngineAvailable` to learn more.
 func (self *Config) UseNativeEngine() *Config {
 	if !IsEngineAvailable(NATIVE) {
-		panic("This `wasmer-go` version doesn't include the NATIVE engine")
+		panic("This `wasmer-go` version doesn't include the NATIVE engine; use `IsEngineAvailable(NATIVE)` to avoid this panic")
 	}
 
 	C.wasm_config_set_engine(self.inner(), C.wasmer_engine_t(NATIVE))
@@ -129,9 +135,12 @@ func (self *Config) UseNativeEngine() *Config {
 //
 //   config := NewConfig()
 //   config.UseCraneliftCompiler()
+//
+// This method might fail if the Cranelift compiler isn't
+// available. Check `IsCompilerAvailable` to learn more.
 func (self *Config) UseCraneliftCompiler() *Config {
 	if !IsCompilerAvailable(CRANELIFT) {
-		panic("This `wasmer-go` version doesn't include the Cranelift compiler")
+		panic("This `wasmer-go` version doesn't include the Cranelift compiler; use `IsCompilerAvailable(CRANELIFT)` to avoid this panic")
 	}
 
 	C.wasm_config_set_compiler(self.inner(), C.wasmer_compiler_t(CRANELIFT))
@@ -143,9 +152,12 @@ func (self *Config) UseCraneliftCompiler() *Config {
 //
 //   config := NewConfig()
 //   config.UseLLVMCompiler()
+//
+// This method might fail if the LLVM compiler isn't available. Check
+// `IsCompilerAvailable` to learn more.
 func (self *Config) UseLLVMCompiler() *Config {
 	if !IsCompilerAvailable(LLVM) {
-		panic("This `wasmer-go` version doesn't include the LLVM compiler")
+		panic("This `wasmer-go` version doesn't include the LLVM compiler; use `IsCompilerAvailable(LLVM)` to avoid this panic")
 	}
 
 	C.wasm_config_set_compiler(self.inner(), C.wasmer_compiler_t(LLVM))
@@ -158,9 +170,12 @@ func (self *Config) UseLLVMCompiler() *Config {
 //
 //   config := NewConfig()
 //   config.UseSinglepassCompiler()
+//
+// This method might fail if the Singlepass compiler isn't
+// available. Check `IsCompilerAvailable` to learn more.
 func (self *Config) UseSinglepassCompiler() *Config {
 	if !IsCompilerAvailable(SINGLEPASS) {
-		panic("This `wasmer-go` version doesn't include the Singlepass compiler")
+		panic("This `wasmer-go` version doesn't include the Singlepass compiler; use `IsCompilerAvailable(SINGLEPASS)` to avoid this panic")
 	}
 
 	C.wasm_config_set_compiler(self.inner(), C.wasmer_compiler_t(SINGLEPASS))
