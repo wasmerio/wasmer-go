@@ -1,9 +1,9 @@
 # Run all the tests.
-test:
+test +ARGS:
 	#!/usr/bin/env bash
 	cd wasmer
 	# Run the tests.
-	GODEBUG=cgocheck=2 go test -v
+	GODEBUG=cgocheck=2 go test -v {{ARGS}}
 
 examples:
 	#!/usr/bin/env bash
