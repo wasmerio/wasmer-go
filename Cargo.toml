@@ -14,7 +14,7 @@ categories = ["wasm"]
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-c-api = "1.0"
+wasmer-c-api = { git = "https://github.com/wasmerio/wasmer", branch = "master" }
 
 [features]
 default = [
