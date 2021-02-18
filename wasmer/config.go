@@ -59,6 +59,16 @@ func (self *Config) UseLLVMCompiler() {
 	C.wasm_config_set_engine(self.inner(), C.LLVM)
 }
 
+// UseSinglepassCompiler sets the compiler to Singlepass in the
+// configuration.
+//
+//   config := NewConfig()
+//   config.UseSinglepassCompiler()
+//
+func (self *Config) UseSinglepassCompiler() {
+	C.wasm_config_set_engine(self.inner(), C.SINGLEPASS)
+}
+
 // Use a specific target for doing cross-compilation.
 //
 //   triple, _ := NewTriple("aarch64-unknown-linux-gnu")
