@@ -115,9 +115,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.66"
+version = "1.0.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
+checksum = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
 
 [[package]]
 name = "cfg-if"
@@ -145,12 +145,6 @@ dependencies = [
  "unicode-width",
  "vec_map",
 ]
-
-[[package]]
-name = "const_fn"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28b9d6de7f49e22cf97ad17fc4036ece69300032f45f78f30b4a4482cdc3f4a6"
 
 [[package]]
 name = "cranelift-bforest"
@@ -249,27 +243,28 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1aaa739f95311c2c7887a76863f500026092fb1dce0161dab577e559ef3569d"
+checksum = "d60ab4a8dba064f2fbb5aa270c28da5cf4bbd0e72dae1140a6b0353a779dbe00"
 dependencies = [
  "cfg-if 1.0.0",
- "const_fn",
  "crossbeam-utils",
  "lazy_static",
+ "loom",
  "memoffset",
  "scopeguard",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02d96d1e189ef58269ebe5b97953da3274d83a93af647c2ddd6f9dab28cedb8d"
+checksum = "bae8f328835f8f5a6ceb6a7842a7f2d0c03692adb5c889347235d59194731fe3"
 dependencies = [
  "autocfg",
  "cfg-if 1.0.0",
  "lazy_static",
+ "loom",
 ]
 
 [[package]]
@@ -399,6 +394,19 @@ checksum = "8e1d3b771574f62d0548cee0ad9057857e9fc25d7a3335f140c84f6acd0bf601"
 dependencies = [
  "cfg-if 0.1.10",
  "serde",
+]
+
+[[package]]
+name = "generator"
+version = "0.6.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9fed24fd1e18827652b4d55652899a1e9da8e54d91624dc3437a5bc3a9f9a9c"
+dependencies = [
+ "cc",
+ "libc",
+ "log",
+ "rustversion",
+ "winapi",
 ]
 
 [[package]]
@@ -645,6 +653,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "loom"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d44c73b4636e497b4917eb21c33539efa3816741a2d3ff26c6316f1b529481a4"
+dependencies = [
+ "cfg-if 1.0.0",
+ "generator",
+ "scoped-tls",
+]
+
+[[package]]
 name = "mach"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -721,9 +740,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.5.2"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13bd41f508810a131401606d54ac32a467c97172d74ba7662562ebba5ad07fa0"
+checksum = "4ad167a2f54e832b82dbe003a046280dceffe5227b5f79e08e363a29638cfddd"
 
 [[package]]
 name = "parking_lot"
@@ -971,10 +990,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb5d2a036dc6d2d8fd16fde3498b04306e29bd193bf306a57427019b823d5acd"
+
+[[package]]
 name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
+
+[[package]]
+name = "scoped-tls"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
 
 [[package]]
 name = "scopeguard"
@@ -1141,18 +1172,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.23"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76cc616c6abf8c8928e2fdcc0dbfab37175edd8fb49a4641066ad1364fdab146"
+checksum = "e0f4a65597094d4483ddaed134f409b2cb7c1beccf25201a9f73c719254fa98e"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.23"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9be73a2caec27583d0046ef3796c3794f868a5bc813db689eed00c7631275cd1"
+checksum = "7765189610d8241a44529806d6fd1f2e0a08734313a35d5b3a556f92b381f3c0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1289,7 +1320,7 @@ checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
 [[package]]
 name = "wasmer"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "cfg-if 0.1.10",
  "indexmap",
@@ -1308,7 +1339,7 @@ dependencies = [
 [[package]]
 name = "wasmer-c-api"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "cbindgen",
  "cfg-if 1.0.0",
@@ -1336,7 +1367,7 @@ dependencies = [
 [[package]]
 name = "wasmer-compiler"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "enumset",
  "serde",
@@ -1352,7 +1383,7 @@ dependencies = [
 [[package]]
 name = "wasmer-compiler-cranelift"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "cranelift-codegen",
  "cranelift-frontend",
@@ -1370,7 +1401,7 @@ dependencies = [
 [[package]]
 name = "wasmer-compiler-llvm"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "byteorder",
  "cc",
@@ -1393,7 +1424,7 @@ dependencies = [
 [[package]]
 name = "wasmer-compiler-singlepass"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "byteorder",
  "dynasm",
@@ -1411,7 +1442,7 @@ dependencies = [
 [[package]]
 name = "wasmer-derive"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1422,7 +1453,7 @@ dependencies = [
 [[package]]
 name = "wasmer-engine"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "backtrace",
  "bincode",
@@ -1442,7 +1473,7 @@ dependencies = [
 [[package]]
 name = "wasmer-engine-jit"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "bincode",
  "cfg-if 0.1.10",
@@ -1459,7 +1490,7 @@ dependencies = [
 [[package]]
 name = "wasmer-engine-native"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "bincode",
  "cfg-if 0.1.10",
@@ -1479,7 +1510,7 @@ dependencies = [
 [[package]]
 name = "wasmer-engine-object-file"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "bincode",
  "cfg-if 0.1.10",
@@ -1505,7 +1536,7 @@ dependencies = [
 [[package]]
 name = "wasmer-object"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "object",
  "thiserror",
@@ -1516,7 +1547,7 @@ dependencies = [
 [[package]]
 name = "wasmer-types"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "cranelift-entity",
  "serde",
@@ -1526,7 +1557,7 @@ dependencies = [
 [[package]]
 name = "wasmer-vm"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "backtrace",
  "cc",
@@ -1545,7 +1576,7 @@ dependencies = [
 [[package]]
 name = "wasmer-wasi"
 version = "1.0.2"
-source = "git+https://github.com/wasmerio/wasmer?branch=master#5b2fa1a8fca0f78aa73c1385e1aa7ebb5a446233"
+source = "git+https://github.com/wasmerio/wasmer?branch=master#d1bd9eac00a3e1d445499e47d8cb3a632985e0c6"
 dependencies = [
  "bincode",
  "byteorder",
@@ -1569,18 +1600,18 @@ checksum = "4a4d63608421d9a22d4bce220f2841f3b609a5aaabd3ed3aeeb5fed2702c3c78"
 
 [[package]]
 name = "wast"
-version = "33.0.0"
+version = "34.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d04fe175c7f78214971293e7d8875673804e736092206a3a4544dbc12811c1b"
+checksum = "3de71ea922e46a60d0bde4b27ebf24ab7c4991006fd5de23ce9c58e129b3ab3c"
 dependencies = [
  "leb128",
 ]
 
 [[package]]
 name = "wat"
-version = "1.0.34"
+version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ec9c6ee01ae07a26adadcdfed22c7a97e0b8cbee9c06e0e96076ece5aeb5cfe"
+checksum = "474403335b9a90b21120ab8131dd888f0a8d041c2d365ab960feddfe5a73c4b6"
 dependencies = [
  "wast",
 ]
