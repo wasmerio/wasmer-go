@@ -1,10 +1,5 @@
 status = [
-    "Build and Test (1.14, linux-amd64, ubuntu-%)",
-    "Build and Test (1.14, linux-aarch64, self-hosted, linux, ARM64)",
-    "Build and Test (1.14, darwin-amd64, macos-%)",
-    "Build and Test (1.15, linux-amd64, ubuntu-%)",
-    "Build and Test (1.15, linux-aarch64, self-hosted, linux, ARM64)",
-    "Build and Test (1.15, darwin-amd64, macos-%)"
+    "Build and Test (%)",
 ]
 required_approvals = 1
 timeout_sec = 7200
