@@ -63,7 +63,7 @@ jobs:
         if: matrix.target.libwasmer_archive_name
         shell: bash
         run: |
-          libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer/releases/latest | jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
+          libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer-nightly/releases/latest | jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
           mkdir -p libwasmer
           curl -L $libwasmer_url > release.tar.gz
           tar xzvf release.tar.gz -C libwasmer
