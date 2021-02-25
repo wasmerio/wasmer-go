@@ -126,8 +126,7 @@ this library works (and is tested) on the following platforms:
   $ export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/target/release/ -L$(pwd)/target/release/ -lwasmer_go"
   $
   $ # Run the tests.
-  $ cd wasmer
-  $ go test -v -tags custom_wasmer_runtime
+  $ just test -tags custom_wasmer_runtime
   ```
 </details>
 

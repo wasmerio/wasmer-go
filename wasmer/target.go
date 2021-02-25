@@ -6,16 +6,16 @@ import "runtime"
 
 // Target represents a triple + CPU features pairs.
 type Target struct {
-	_inner *C.wasm_target_t
+	_inner *C.wasmer_target_t
 }
 
-func newTarget(target *C.wasm_target_t) *Target {
+func newTarget(target *C.wasmer_target_t) *Target {
 	self := &Target{
 		_inner: target,
 	}
 
 	runtime.SetFinalizer(self, func(self *Target) {
-		C.wasm_target_delete(self.inner())
+		C.wasmer_target_delete(self.inner())
 	})
 
 	return self
@@ -27,26 +27,26 @@ func newTarget(target *C.wasm_target_t) *Target {
 //  cpuFeatures := NewCpuFeatures()
 //  target := NewTarget(triple, cpuFeatures)
 func NewTarget(triple *Triple, cpuFeatures *CpuFeatures) *Target {
-	return newTarget(C.wasm_target_new(triple.inner(), cpuFeatures.inner()))
+	return newTarget(C.wasmer_target_new(triple.inner(), cpuFeatures.inner()))
 }
 
-func (self *Target) inner() *C.wasm_target_t {
+func (self *Target) inner() *C.wasmer_target_t {
 	return self._inner
 }
 
 // Triple; historically such things had three fields, though they have
 // added additional fields over time.
 type Triple struct {
-	_inner *C.wasm_triple_t
+	_inner *C.wasmer_triple_t
 }
 
-func newTriple(triple *C.wasm_triple_t) *Triple {
+func newTriple(triple *C.wasmer_triple_t) *Triple {
 	self := &Triple{
 		_inner: triple,
 	}
 
 	runtime.SetFinalizer(self, func(self *Triple) {
-		C.wasm_triple_delete(self.inner())
+		C.wasmer_triple_delete(self.inner())
 	})
 
 	return self
@@ -60,10 +60,10 @@ func NewTriple(triple string) (*Triple, error) {
 	cTripleName := newName(triple)
 	defer C.wasm_name_delete(&cTripleName)
 
-	var cTriple *C.wasm_triple_t
+	var cTriple *C.wasmer_triple_t
 
 	err := maybeNewErrorFromWasmer(func() bool {
-		cTriple := C.wasm_triple_new(&cTripleName)
+		cTriple := C.wasmer_triple_new(&cTripleName)
 
 		return cTriple == nil
 	})
@@ -77,10 +77,10 @@ func NewTriple(triple string) (*Triple, error) {
 
 // NewTripleFromHost creates a new triple from the current host.
 func NewTripleFromHost() *Triple {
-	return newTriple(C.wasm_triple_new_from_host())
+	return newTriple(C.wasmer_triple_new_from_host())
 }
 
-func (self *Triple) inner() *C.wasm_triple_t {
+func (self *Triple) inner() *C.wasmer_triple_t {
 	return self._inner
 }
 
@@ -122,16 +122,16 @@ func (self *Triple) inner() *C.wasm_triple_t {
 //
 // • lzcnt.
 type CpuFeatures struct {
-	_inner *C.wasm_cpu_features_t
+	_inner *C.wasmer_cpu_features_t
 }
 
-func newCpuFeatures(cpu_features *C.wasm_cpu_features_t) *CpuFeatures {
+func newCpuFeatures(cpu_features *C.wasmer_cpu_features_t) *CpuFeatures {
 	self := &CpuFeatures{
 		_inner: cpu_features,
 	}
 
 	runtime.SetFinalizer(self, func(self *CpuFeatures) {
-		C.wasm_cpu_features_delete(self.inner())
+		C.wasmer_cpu_features_delete(self.inner())
 	})
 
 	return self
@@ -140,7 +140,7 @@ func newCpuFeatures(cpu_features *C.wasm_cpu_features_t) *CpuFeatures {
 // NewCpuFeatures creates a new CpuFeatures, which is a set of CPU
 // features.
 func NewCpuFeatures() *CpuFeatures {
-	return newCpuFeatures(C.wasm_cpu_features_new())
+	return newCpuFeatures(C.wasmer_cpu_features_new())
 }
 
 // Add adds a new CPU feature to the existing set.
@@ -149,7 +149,7 @@ func (self *CpuFeatures) Add(feature string) error {
 	defer C.wasm_name_delete(&cFeature)
 
 	err := maybeNewErrorFromWasmer(func() bool {
-		return false == C.wasm_cpu_features_add(self.inner(), &cFeature)
+		return false == C.wasmer_cpu_features_add(self.inner(), &cFeature)
 	})
 
 	if err != nil {
@@ -159,6 +159,6 @@ func (self *CpuFeatures) Add(feature string) error {
 	return nil
 }
 
-func (self *CpuFeatures) inner() *C.wasm_cpu_features_t {
+func (self *CpuFeatures) inner() *C.wasmer_cpu_features_t {
 	return self._inner
 }

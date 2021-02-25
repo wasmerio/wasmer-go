@@ -349,8 +349,8 @@ func (self *WasiEnvironment) ReadStderr() []byte {
 //
 //  start()
 func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) (*ImportObject, error) {
-	var wasiNamedExterns C.wasm_named_extern_vec_t
-	C.wasm_named_extern_vec_new_empty(&wasiNamedExterns)
+	var wasiNamedExterns C.wasmer_named_extern_vec_t
+	C.wasmer_named_extern_vec_new_empty(&wasiNamedExterns)
 
 	err := maybeNewErrorFromWasmer(func() bool {
 		return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
@@ -366,13 +366,13 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 	firstNamedExtern := unsafe.Pointer(wasiNamedExterns.data)
 	sizeOfNamedExtern := unsafe.Sizeof(firstNamedExtern)
 
-	var currentNamedExtern *C.wasm_named_extern_t
+	var currentNamedExtern *C.wasmer_named_extern_t
 
 	for nth := 0; nth < numberOfNamedExterns; nth++ {
-		currentNamedExtern = *(**C.wasm_named_extern_t)(unsafe.Pointer(uintptr(firstNamedExtern) + uintptr(nth)*sizeOfNamedExtern))
-		module := nameToString(C.wasm_named_extern_module(currentNamedExtern))
-		name := nameToString(C.wasm_named_extern_name(currentNamedExtern))
-		extern := newExtern(C.wasm_extern_copy(C.wasm_named_extern_unwrap(currentNamedExtern)), nil)
+		currentNamedExtern = *(**C.wasmer_named_extern_t)(unsafe.Pointer(uintptr(firstNamedExtern) + uintptr(nth)*sizeOfNamedExtern))
+		module := nameToString(C.wasmer_named_extern_module(currentNamedExtern))
+		name := nameToString(C.wasmer_named_extern_name(currentNamedExtern))
+		extern := newExtern(C.wasm_extern_copy(C.wasmer_named_extern_unwrap(currentNamedExtern)), nil)
 
 		_, exists := importObject.externs[module]
 
@@ -383,7 +383,7 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 		importObject.externs[module][name] = extern
 	}
 
-	C.wasm_named_extern_vec_delete(&wasiNamedExterns)
+	C.wasmer_named_extern_vec_delete(&wasiNamedExterns)
 
 	return importObject, nil
 }
