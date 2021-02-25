@@ -27,9 +27,9 @@ jobs:
           - id: 'windows-amd64'
             os: 'windows-latest'
 
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
-            libwasmer_archive_name: 'wasmer-linux-amd64.tar.gz'
+          #- id: 'linux-amd64'
+          #  os: 'ubuntu-18.04'
+          #  libwasmer_archive_name: 'wasmer-linux-amd64.tar.gz'
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
