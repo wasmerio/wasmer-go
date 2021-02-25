@@ -51,15 +51,12 @@ jobs:
           go-version: ${{ matrix.go }}
 
       #- name: Set up just
-      #  #shell: bash
-      #  shell: pwsh
       #  run: |
       #    export PATH="$HOME/.cargo/bin:$PATH"
       #    cargo install just
 
       - name: Run all the tests (default)
         if: ${{ !matrix.target.libwasmer_archive_name }}
-        shell: bash
         run: |
           cd wasmer
           go test -v
@@ -78,9 +75,9 @@ jobs:
       #    just test -tags custom_wasmer_runtime
 
       #- name: Run all the examples
-      #  shell: bash
       #  run: |
       #    just examples
+
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
