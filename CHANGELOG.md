@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
-* [1.0.2](#101---2021-02-08)
+* [1.0.3](#103---2021-02-26)
+* [1.0.2](#102---2021-02-08)
 * [1.0.1](#101---2021-02-06)
 * [1.0.0](#100---2021-02-05)
 * [1.0.0-beta2](#100-beta2---2021-01-05)
@@ -13,6 +14,26 @@ All notable changes to this project will be documented in this file.
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
+
+## [1.0.3] - 2021-02-26
+
+### Added
+
+* [#213](https://github.com/wasmerio/wasmer-go/pull/213) Add the `CompilerKind`, `EngineKind`, `IsCompilerAvailable` and `IsEngineAvailable` symbols.
+* [#206](https://github.com/wasmerio/wasmer-go/pull/206) Use parameterized tests to check all available configurations.
+* [#204](https://github.com/wasmerio/wasmer-go/pull/204) Add `Config.UseSinglepassCompiler`.
+* [#193](https://github.com/wasmerio/wasmer-go/pull/193), [#190](https://github.com/wasmerio/wasmer-go/pull/190) and [#211](https://github.com/wasmerio/wasmer-go/pull/211) Add the `custom_wasmer_runtime` build tag.
+* [#192](https://github.com/wasmerio/wasmer-go/pull/192) Add missing documentation.
+
+### Changed
+
+### Fixed
+
+* [#220](https://github.com/wasmerio/wasmer-go/pull/220) Test with more compilers and more engines.
+* [#209](https://github.com/wasmerio/wasmer-go/pull/209) Fix documentation format.
+* [#207](https://github.com/wasmerio/wasmer-go/pull/207) Avoid calling `Function.Type()` for every function call.
+* [#198](https://github.com/wasmerio/wasmer-go/pull/198) Update shared libraries to fix a bug with `CpuFeatures.Add`.
+* [#197](https://github.com/wasmerio/wasmer-go/pull/197) Force `go mod vendor` to copy the `packaged/` directory.
 
 ## [1.0.2] - 2021-02-08
 
