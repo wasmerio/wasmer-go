@@ -298,10 +298,12 @@ func TestHostFunctionWithEnv(t *testing.T) {
 	assert.NoError(t, err)
 
 	type MyEnvironment struct {
+		instance  *Instance
 		theAnswer int32
 	}
 
 	environment := &MyEnvironment{
+		instance:  nil,
 		theAnswer: 42,
 	}
 
@@ -311,6 +313,8 @@ func TestHostFunctionWithEnv(t *testing.T) {
 		environment,
 		func(environment interface{}, args []Value) ([]Value, error) {
 			env := environment.(*MyEnvironment)
+			assert.NotNil(t, env.instance)
+
 			x := args[0].I32()
 			y := args[1].I32()
 
@@ -328,6 +332,8 @@ func TestHostFunctionWithEnv(t *testing.T) {
 
 	instance, err := NewInstance(module, importObject)
 	assert.NoError(t, err)
+
+	environment.instance = instance
 
 	addOne, err := instance.Exports.GetFunction("add_one")
 	assert.NoError(t, err)
@@ -366,7 +372,6 @@ func TestHostFunctionStore(t *testing.T) {
 	assert.Equal(t, indexD, indexB)
 }
 
-/*
 func TestFunctionTrap(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
@@ -404,7 +409,6 @@ func TestFunctionTrap(t *testing.T) {
 	assert.Equal(t, trapOrigin.FunctionOffset(), trapTrace[0].FunctionOffset())
 	assert.Equal(t, trapOrigin.ModuleOffset(), trapTrace[0].ModuleOffset())
 }
-*/
 
 type myError struct {
 	message string
