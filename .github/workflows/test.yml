@@ -70,7 +70,7 @@ jobs:
           curl -L $libwasmer_url > release.tar.gz
           tar xzvf release.tar.gz -C libwasmer
           export CGO_CFLAGS="-I$(pwd)/libwasmer/include/"
-          export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/libwasmer/lib/ -L$(pwd)/libwasmer/lib/ -lwasmer"
+          export CGO_LDFLAGS="-static -Wl,-rpath,$(pwd)/libwasmer/lib/ -L$(pwd)/libwasmer/lib/ -lwasmer -lm -ldl"
           just test -tags custom_wasmer_runtime
 
       - name: Run all the examples

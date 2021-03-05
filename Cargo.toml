@@ -11,7 +11,7 @@ keywords = ["golang", "extension", "webassembly"]
 categories = ["wasm"]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["staticlib"]
 
 [dependencies]
 wasmer-c-api = { git = "https://github.com/wasmerio/wasmer", branch = "master" }

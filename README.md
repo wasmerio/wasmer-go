@@ -119,11 +119,11 @@ this library works (and is tested) on the following platforms:
   
   ```sh
   $ # Build the new Wasmer C API shared object library.
-  $ cargo build --release
+  $ cargo build --release --features native
   $
   $ # Configure cgo.
   $ export CGO_CFLAGS="-I$(pwd)/wasmer/packaged/include/"
-  $ export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/target/release/ -L$(pwd)/target/release/ -lwasmer_go"
+  $ export CGO_LDFLAGS="-static -Wl,-rpath,$(pwd)/target/release/ -L$(pwd)/target/release/ -lwasmer_go -lm -ldl"
   $
   $ # Run the tests.
   $ just test -tags custom_wasmer_runtime
