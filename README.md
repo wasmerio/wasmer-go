@@ -138,7 +138,7 @@ directory, which contains a sequence of examples/tutorials. It's the
 best place to learn by reading examples.
 
 But for the most eager of you, there is a quick toy program in
-`examples/appendices/simple.go`, written in Rust:
+`examples/appendices/simple.rs`, written in Rust:
 
 ```rust
 #[no_mangle]
