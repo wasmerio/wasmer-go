@@ -281,6 +281,52 @@ func TestHostFunction(t *testing.T) {
 	assert.Equal(t, result, int32(42))
 }
 
+func TestHostFunction_WithI64(t *testing.T) {
+	engine := NewEngine()
+	store := NewStore(engine)
+	module, err := NewModule(
+		store,
+		[]byte(`
+			(module
+			  (import "math" "sum" (func $sum (param i64 i64) (result i64)))
+			  (func (export "add_one") (param $x i64) (result i64)
+			    local.get $x
+			    i64.const 1
+			    call $sum))
+		`),
+	)
+	assert.NoError(t, err)
+
+	function := NewFunction(
+		store,
+		NewFunctionType(NewValueTypes(I64, I64), NewValueTypes(I64)),
+		func(args []Value) ([]Value, error) {
+			x := args[0].I64()
+			y := args[1].I64()
+
+			return []Value{NewI64(x + y)}, nil
+		},
+	)
+
+	importObject := NewImportObject()
+	importObject.Register(
+		"math",
+		map[string]IntoExtern{
+			"sum": function,
+		},
+	)
+
+	instance, err := NewInstance(module, importObject)
+	assert.NoError(t, err)
+
+	addOne, err := instance.Exports.GetFunction("add_one")
+	assert.NoError(t, err)
+
+	result, err := addOne(41)
+	assert.NoError(t, err)
+	assert.Equal(t, result, int64(42))
+}
+
 func TestHostFunctionWithEnv(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
