@@ -294,8 +294,7 @@ func toValueVec(list []Value, vec *C.wasm_val_vec_t) {
 	values := make([]C.wasm_val_t, numberOfValues)
 
 	for nth, item := range list {
-		value, err := fromGoValue(item.I32(), item.Kind())
-
+		value, err := fromGoValue(item.Unwrap(), item.Kind())
 		if err != nil {
 			panic(err)
 		}
