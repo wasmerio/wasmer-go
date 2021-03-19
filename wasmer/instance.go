@@ -7,6 +7,7 @@ import "runtime"
 type Instance struct {
 	_inner  *C.wasm_instance_t
 	Exports *Exports
+	imports *ImportObject
 }
 
 // NewInstance instantiates a new Instance.
@@ -59,15 +60,30 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	self := &Instance{
 		_inner:  instance,
 		Exports: newExports(instance, module),
+		imports: imports,
 	}
 
 	runtime.SetFinalizer(self, func(self *Instance) {
 		C.wasm_instance_delete(self.inner())
 	})
 
+	self.keepImportsSafe()
 	return self, nil
 }
 
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
+}
+
+func (self *Instance) keepImportsSafe() {
+	for _, namespace := range self.imports.externs {
+		for _, extern := range namespace {
+			if extern.IntoExtern().Kind().String() != "func" {
+				continue
+			}
+
+			f := extern.IntoExtern().IntoFunction()
+			runtime.KeepAlive(f)
+		}
+	}
 }
