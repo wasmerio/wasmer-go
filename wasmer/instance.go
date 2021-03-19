@@ -7,6 +7,8 @@ import "runtime"
 type Instance struct {
 	_inner  *C.wasm_instance_t
 	Exports *Exports
+
+	// without this, imported functions may be freed before execution of an exported function is complete.
 	imports *ImportObject
 }
 
@@ -67,23 +69,9 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 		C.wasm_instance_delete(self.inner())
 	})
 
-	self.keepImportsSafe()
 	return self, nil
 }
 
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
-}
-
-func (self *Instance) keepImportsSafe() {
-	for _, namespace := range self.imports.externs {
-		for _, extern := range namespace {
-			if extern.IntoExtern().Kind().String() != "func" {
-				continue
-			}
-
-			f := extern.IntoExtern().IntoFunction()
-			runtime.KeepAlive(f)
-		}
-	}
 }
