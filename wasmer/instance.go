@@ -7,6 +7,9 @@ import "runtime"
 type Instance struct {
 	_inner  *C.wasm_instance_t
 	Exports *Exports
+
+	// without this, imported functions may be freed before execution of an exported function is complete.
+	imports *ImportObject
 }
 
 // NewInstance instantiates a new Instance.
@@ -59,6 +62,7 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	self := &Instance{
 		_inner:  instance,
 		Exports: newExports(instance, module),
+		imports: imports,
 	}
 
 	runtime.SetFinalizer(self, func(self *Instance) {
