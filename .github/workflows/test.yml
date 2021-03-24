@@ -17,18 +17,21 @@ jobs:
       matrix:
         go: [1.14, 1.15]
         target:
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
+          #- id: 'linux-amd64'
+          #  os: 'ubuntu-18.04'
 
-          - id: 'linux-aarch64'
-            os: ['self-hosted', 'linux', 'ARM64']
+          #- id: 'linux-aarch64'
+          #  os: ['self-hosted', 'linux', 'ARM64']
 
-          - id: 'darwin-amd64'
-            os: 'macos-latest'
+          #- id: 'darwin-amd64'
+          #  os: 'macos-latest'
 
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
-            libwasmer_archive_name: 'wasmer-linux-amd64.tar.gz'
+          - id: 'windows-amd64'
+            os: 'windows-latest'
+
+          #- id: 'linux-amd64'
+          #  os: 'ubuntu-18.04'
+          #  libwasmer_archive_name: 'wasmer-linux-amd64.tar.gz'
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
@@ -37,46 +40,46 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          default: false
+      #- name: Set up Rust
+      #  uses: actions-rs/toolchain@v1
+      #  with:
+      #    toolchain: stable
+      #    override: true
+      #    default: false
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Set up just
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          cargo install just
+      #- name: Set up just
+      #  run: |
+      #    export PATH="$HOME/.cargo/bin:$PATH"
+      #    cargo install just
 
       - name: Run all the tests (default)
         if: ${{ !matrix.target.libwasmer_archive_name }}
-        shell: bash
         run: |
-          just test
+          cd wasmer
+          go test -v
+          #just test
 
-      - name: Run all the tests (with custom Wasmer runtime)
-        if: matrix.target.libwasmer_archive_name
-        shell: bash
-        run: |
-          libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer-nightly/releases/latest | jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
-          mkdir -p libwasmer
-          curl -L $libwasmer_url > release.tar.gz
-          tar xzvf release.tar.gz -C libwasmer
-          export CGO_CFLAGS="-I$(pwd)/libwasmer/include/"
-          export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/libwasmer/lib/ -L$(pwd)/libwasmer/lib/ -lwasmer"
-          just test -tags custom_wasmer_runtime
+      #- name: Run all the tests (with custom Wasmer runtime)
+      #  if: matrix.target.libwasmer_archive_name
+      #  shell: bash
+      #  run: |
+      #    libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer-nightly/releases/latest | jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
+      #    mkdir -p libwasmer
+      #    curl -L $libwasmer_url > release.tar.gz
+      #    tar xzvf release.tar.gz -C libwasmer
+      #    export CGO_CFLAGS="-I$(pwd)/libwasmer/include/"
+      #    export CGO_LDFLAGS="-Wl,-rpath,$(pwd)/libwasmer/lib/ -L$(pwd)/libwasmer/lib/ -lwasmer"
+      #    just test -tags custom_wasmer_runtime
 
-      - name: Run all the examples
-        shell: bash
-        run: |
-          just examples
+      #- name: Run all the examples
+      #  run: |
+      #    just examples
+
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build

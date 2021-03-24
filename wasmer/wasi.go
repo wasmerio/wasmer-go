@@ -1,7 +1,7 @@
 package wasmer
 
 // #include <stdlib.h>
-// #include <stdio.h>
+// #include <string.h>
 // #include <wasmer_wasm.h>
 //
 // // Buffer size for `wasi_env_read_inner`.
@@ -17,28 +17,23 @@ package wasmer
 //
 // // Common function to read a WASI environment captured stream.
 // size_t to_wasi_env_read_inner(wasi_env_t *wasi_env, char** buffer, wasi_env_reader reader) {
-//     FILE *memory_stream;
+//     char* buffer_ptr = (char*) malloc(1);
 //     size_t buffer_size = 0;
 //
-//     memory_stream = open_memstream(buffer, &buffer_size);
-//
-//     if (NULL == memory_stream) {
-//         return 0;
-//     }
-//
 //     char temp_buffer[WASI_ENV_READER_BUFFER_SIZE] = { 0 };
-//     size_t data_read_size = WASI_ENV_READER_BUFFER_SIZE;
+//     size_t data_read_size = 0;
 //
 //     do {
 //         data_read_size = reader(wasi_env, temp_buffer, WASI_ENV_READER_BUFFER_SIZE);
 //
 //         if (data_read_size > 0) {
+//             buffer_ptr = realloc(buffer_ptr, buffer_size + data_read_size);
+//             memcpy(buffer_ptr + buffer_size, temp_buffer, data_read_size);
 //             buffer_size += data_read_size;
-//             fwrite(temp_buffer, sizeof(char), data_read_size, memory_stream);
 //         }
 //     } while (WASI_ENV_READER_BUFFER_SIZE == data_read_size);
 //
-//     fclose(memory_stream);
+//     *buffer = buffer_ptr;
 //
 //     return buffer_size;
 // }
