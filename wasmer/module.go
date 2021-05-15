@@ -247,6 +247,7 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 		return nil, err
 	}
 
+	runtime.KeepAlive(bytes)
 	runtime.SetFinalizer(self, func(self *Module) {
 		C.wasm_module_delete(self.inner())
 	})
