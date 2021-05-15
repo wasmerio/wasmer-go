@@ -237,6 +237,7 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 	err := maybeNewErrorFromWasmer(func() bool {
 		self = &Module{
 			_inner: C.to_wasm_module_deserialize(store.inner(), bytesPtr, C.size_t(bytesLength)),
+			store:  store,
 		}
 
 		return self._inner == nil
@@ -245,6 +246,10 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	runtime.SetFinalizer(self, func(self *Module) {
+		C.wasm_module_delete(self.inner())
+	})
 
 	return self, nil
 }
