@@ -200,4 +200,7 @@ func TestModuleDeserialize(t *testing.T) {
 	functionType := type0.IntoFunctionType()
 	assert.Equal(t, len(functionType.Params()), 2)
 	assert.Equal(t, len(functionType.Results()), 0)
+
+	_, err = NewInstance(moduleAgain, NewImportObject())
+	assert.NoError(t, err)
 }
