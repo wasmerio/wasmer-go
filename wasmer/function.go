@@ -1,6 +1,6 @@
 package wasmer
 
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 //
 // extern wasm_trap_t* function_trampoline(
 //   void *environment,
