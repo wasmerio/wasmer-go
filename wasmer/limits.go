@@ -1,6 +1,6 @@
 package wasmer
 
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 //
 // uint32_t to_limit_max_unbound() {
 //     return wasm_limits_max_default;

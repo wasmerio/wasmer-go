@@ -14,8 +14,12 @@ func TestCompilerKind(t *testing.T) {
 }
 
 func TestEngineKind(t *testing.T) {
-	assert.Equal(t, JIT.String(), "jit")
-	assert.Equal(t, NATIVE.String(), "native")
+	assert.Equal(t, UNIVERSAL.String(), "universal")
+	assert.Equal(t, DYLIB.String(), "dylib")
+
+	// Deprecated.
+	assert.Equal(t, JIT.String(), "universal")
+	assert.Equal(t, NATIVE.String(), "dylib")
 }
 
 func TestConfig(t *testing.T) {
@@ -50,37 +54,37 @@ func TestConfig_AllCombinations(t *testing.T) {
 	is_linux := runtime.GOOS == "linux"
 	is_darwin := runtime.GOOS == "darwin"
 	//is_windows := runtime.GOOS == "windows"
-	has_jit := IsEngineAvailable(JIT)
-	has_native := IsEngineAvailable(NATIVE)
+	has_universal := IsEngineAvailable(UNIVERSAL)
+	has_dylib := IsEngineAvailable(DYLIB)
 
 	if IsCompilerAvailable(CRANELIFT) {
-		// Cranelift with the JIT engine works everywhere
-		if has_jit {
-			configs = append(configs, Test{"Cranelift", "JIT", NewConfig().UseCraneliftCompiler().UseJITEngine()})
+		// Cranelift with the Universal engine works everywhere
+		if has_universal {
+			configs = append(configs, Test{"Cranelift", "Universal", NewConfig().UseCraneliftCompiler().UseUniversalEngine()})
 		}
 
-		// Cranelift with the Native engine works on Linux+Darwin/amd64.
-		if has_native && is_amd64 && (is_linux || is_darwin) {
-			configs = append(configs, Test{"Cranelift", "Native", NewConfig().UseCraneliftCompiler().UseNativeEngine()})
+		// Cranelift with the Dylib engine works on Linux+Darwin/amd64.
+		if has_dylib && is_amd64 && (is_linux || is_darwin) {
+			configs = append(configs, Test{"Cranelift", "Dylib", NewConfig().UseCraneliftCompiler().UseDylibEngine()})
 		}
 	}
 
 	if IsCompilerAvailable(LLVM) {
-		// LLVM with the JIT engine works on Linux+Darwin/amd64.
-		if has_jit && is_amd64 && (is_linux || is_darwin) {
-			configs = append(configs, Test{"LLVM", "JIT", NewConfig().UseLLVMCompiler().UseJITEngine()})
+		// LLVM with the Universal engine works on Linux+Darwin/amd64.
+		if has_universal && is_amd64 && (is_linux || is_darwin) {
+			configs = append(configs, Test{"LLVM", "Universal", NewConfig().UseLLVMCompiler().UseUniversalEngine()})
 		}
 
-		// LLVM with the Native engine works on Linux+Darwin/amd64+aarch64.
-		if has_native && (is_linux || is_darwin) {
-			configs = append(configs, Test{"LLVM", "Native", NewConfig().UseLLVMCompiler().UseNativeEngine()})
+		// LLVM with the Dylib engine works on Linux+Darwin/amd64+aarch64.
+		if has_dylib && (is_linux || is_darwin) {
+			configs = append(configs, Test{"LLVM", "Dylib", NewConfig().UseLLVMCompiler().UseDylibEngine()})
 		}
 	}
 
 	if IsCompilerAvailable(SINGLEPASS) {
-		// Singlepass with the JIT engine works on Linux+Darwin/amd64.
-		if has_jit && is_amd64 && (is_linux || is_darwin) {
-			configs = append(configs, Test{"Singlepass", "JIT", NewConfig().UseSinglepassCompiler().UseJITEngine()})
+		// Singlepass with the Universal engine works on Linux+Darwin/amd64.
+		if has_universal && is_amd64 && (is_linux || is_darwin) {
+			configs = append(configs, Test{"Singlepass", "Universal", NewConfig().UseSinglepassCompiler().UseUniversalEngine()})
 		}
 	}
 

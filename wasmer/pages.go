@@ -1,6 +1,6 @@
 package wasmer
 
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 import "C"
 
 // Units of WebAssembly pages (as specified to be 65,536 bytes).

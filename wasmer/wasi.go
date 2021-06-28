@@ -2,7 +2,7 @@ package wasmer
 
 // #include <stdlib.h>
 // #include <stdio.h>
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 //
 // // Buffer size for `wasi_env_read_inner`.
 // #define WASI_ENV_READER_BUFFER_SIZE 1024

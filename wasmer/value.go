@@ -1,6 +1,6 @@
 package wasmer
 
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 //
 // int32_t to_int32(wasm_val_t *value) {
 //     return value->of.i32;
