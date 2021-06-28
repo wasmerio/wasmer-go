@@ -51,10 +51,6 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 		return nil, err2
 	}
 
-	runtime.KeepAlive(module)
-	runtime.KeepAlive(module.store)
-	runtime.KeepAlive(imports)
-
 	if traps != nil {
 		return nil, newErrorFromTrap(traps)
 	}
@@ -66,7 +62,7 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	}
 
 	runtime.SetFinalizer(self, func(self *Instance) {
-		C.wasm_instance_delete(self.inner())
+		self.Close()
 	})
 
 	return self, nil
@@ -74,4 +70,15 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 
 func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
+}
+
+// Force to close the Instance.
+//
+// A runtime finalizer is registered on the Instance, but it is
+// possible to force the destruction of the Instance by calling Close
+// manually.
+func (self *Instance) Close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_instance_delete(self.inner())
+	self.Exports.Close()
 }

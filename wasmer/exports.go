@@ -20,9 +20,8 @@ func newExports(instance *C.wasm_instance_t, module *Module) *Exports {
 	self := &Exports{}
 	C.wasm_instance_exports(instance, &self._inner)
 
-	runtime.KeepAlive(instance)
-	runtime.SetFinalizer(self, func(exports *Exports) {
-		C.wasm_extern_vec_delete(exports.inner())
+	runtime.SetFinalizer(self, func(self *Exports) {
+		self.Close()
 	})
 
 	numberOfExports := int(self.inner().size)
@@ -195,4 +194,19 @@ func (self *Exports) GetWasiStartFunction() (NativeFunction, error) {
 	}
 
 	return newFunction(start, nil, nil).Native(), nil
+}
+
+// Force to close the Exports.
+//
+// A runtime finalizer is registered on the Exports, but it is
+// possible to force the destruction of the Exports by calling Close
+// manually.
+func (self *Exports) Close() {
+	runtime.SetFinalizer(self, nil)
+
+	for extern := range self.exports {
+		delete(self.exports, extern)
+	}
+
+	C.wasm_extern_vec_delete(&self._inner)
 }

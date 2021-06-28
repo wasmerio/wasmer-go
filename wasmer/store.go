@@ -31,7 +31,7 @@ func NewStore(engine *Engine) *Store {
 	}
 
 	runtime.SetFinalizer(self, func(self *Store) {
-		C.wasm_store_delete(self.inner())
+		self.Close()
 	})
 
 	return self
@@ -39,4 +39,13 @@ func NewStore(engine *Engine) *Store {
 
 func (self *Store) inner() *C.wasm_store_t {
 	return self._inner
+}
+
+// Force to close the Store.
+//
+// A runtime finalizer is registered on the Store, but it is possible
+// to force the destruction of the Store by calling Close manually.
+func (self *Store) Close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_store_delete(self.inner())
 }
