@@ -26,9 +26,9 @@
 // deserialized. By default, the wasmer package comes with 2 headless
 // engines:
 //
-// • JIT, the compiled machine code lives in memory,
+// • Universal, the compiled machine code lives in memory,
 //
-// • Native, the compiled machine code lives in a shared object file
+// • Dylib, the compiled machine code lives in a shared object file
 // (.so, .dylib, or .dll), and is natively executed.
 //
 // The wasmer Go packages comes with 3 compilers:

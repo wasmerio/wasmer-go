@@ -1,6 +1,6 @@
 package wasmer
 
-// #include <wasmer_wasm.h>
+// #include <wasmer.h>
 import "C"
 import "runtime"
 
@@ -39,28 +39,38 @@ func NewEngineWithConfig(config *Config) *Engine {
 	return newEngine(C.wasm_engine_new_with_config(config.inner()))
 }
 
-// NewJITEngine instantiates and returns a new JIT engine.
+// NewUniversalEngine instantiates and returns a new Universal engine.
 //
-//   engine := NewJITEngine()
+//   engine := NewUniversalEngine()
 //
-func NewJITEngine() *Engine {
+func NewUniversalEngine() *Engine {
 	config := NewConfig()
-	config.UseJITEngine()
+	config.UseUniversalEngine()
 
 	return NewEngineWithConfig(config)
 }
 
-// NewNativeEngine instantiates and returns a new Native engine.
+// NewDylibEngine instantiates and returns a new Dylib engine.
 //
-//   engine := NewNativeEngine()
+//   engine := NewDylibEngine()
 //
-func NewNativeEngine() *Engine {
+func NewDylibEngine() *Engine {
 	config := NewConfig()
-	config.UseNativeEngine()
+	config.UseDylibEngine()
 
 	return NewEngineWithConfig(config)
 }
 
 func (self *Engine) inner() *C.wasm_engine_t {
 	return self._inner
+}
+
+// NewJITEngine is a deprecated function. Please use NewUniversalEngine instead.
+func NewJITEngine() *Engine {
+	return NewUniversalEngine()
+}
+
+// NewNativeEngine is a deprecated function. Please use NewDylibEngine instead.
+func NewNativeEngine() *Engine {
+	return NewDylibEngine()
 }
