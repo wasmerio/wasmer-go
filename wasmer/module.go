@@ -53,6 +53,10 @@ import (
 type Module struct {
 	_inner *C.wasm_module_t
 	store  *Store
+	// Stored if computed to avoid further reallocations.
+	importTypes *importTypes
+	// Stored if computed to avoid further reallocations.
+	exportTypes *exportTypes
 }
 
 // NewModule instantiates a new Module with the given Store.
@@ -93,10 +97,8 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 		return nil, err2
 	}
 
-	runtime.KeepAlive(bytes)
-	runtime.KeepAlive(wasmBytes)
 	runtime.SetFinalizer(self, func(self *Module) {
-		C.wasm_module_delete(self.inner())
+		self.Close()
 	})
 
 	return self, nil
@@ -175,7 +177,11 @@ func (self *Module) Name() string {
 //   module, _ := wasmer.NewModule(store, wasmBytes)
 //   imports := module.Imports()
 func (self *Module) Imports() []*ImportType {
-	return newImportTypes(self).importTypes
+	if nil == self.importTypes {
+		self.importTypes = newImportTypes(self)
+	}
+
+	return self.importTypes.importTypes
 }
 
 // Exports returns the Module's exports as an ExportType array.
@@ -186,7 +192,11 @@ func (self *Module) Imports() []*ImportType {
 //   module, _ := wasmer.NewModule(store, wasmBytes)
 //   exports := module.Exports()
 func (self *Module) Exports() []*ExportType {
-	return newExportTypes(self).exportTypes
+	if nil == self.exportTypes {
+		self.exportTypes = newExportTypes(self)
+	}
+
+	return self.exportTypes.exportTypes
 }
 
 // Serialize serializes the module and returns the Wasm code as an byte array.
@@ -247,10 +257,26 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 		return nil, err
 	}
 
-	runtime.KeepAlive(bytes)
 	runtime.SetFinalizer(self, func(self *Module) {
 		C.wasm_module_delete(self.inner())
 	})
 
 	return self, nil
+}
+
+// Force to close the Module.
+//
+// A runtime finalizer is registered on the Module, but it is possible
+// to force the destruction of the Module by calling Close manually.
+func (self *Module) Close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_module_delete(self.inner())
+
+	if nil != self.importTypes {
+		self.importTypes.close()
+	}
+
+	if nil != self.exportTypes {
+		self.exportTypes.close()
+	}
 }

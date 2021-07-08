@@ -16,9 +16,8 @@ func newImportTypes(module *Module) *importTypes {
 	self := &importTypes{}
 	C.wasm_module_imports(module.inner(), &self._inner)
 
-	runtime.KeepAlive(module)
 	runtime.SetFinalizer(self, func(self *importTypes) {
-		C.wasm_importtype_vec_delete(self.inner())
+		self.close()
 	})
 
 	numberOfImportTypes := int(self.inner().size)
@@ -43,6 +42,11 @@ func (self *importTypes) inner() *C.wasm_importtype_vec_t {
 	return &self._inner
 }
 
+func (self *importTypes) close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_importtype_vec_delete(&self._inner)
+}
+
 // ImportType is a descriptor for an imported value into a WebAssembly
 // module.
 type ImportType struct {
@@ -54,8 +58,8 @@ func newImportType(pointer *C.wasm_importtype_t, ownedBy interface{}) *ImportTyp
 	importType := &ImportType{_inner: pointer, _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(importType, func(importType *ImportType) {
-			C.wasm_importtype_delete(importType.inner())
+		runtime.SetFinalizer(importType, func(self *ImportType) {
+			self.Close()
 		})
 	}
 
@@ -142,4 +146,14 @@ func (self *ImportType) Type() *ExternType {
 	runtime.KeepAlive(self)
 
 	return newExternType(ty, self.ownedBy())
+}
+
+// Force to close the ImportType.
+//
+// A runtime finalizer is registered on the ImportType, but it is
+// possible to force the destruction of the ImportType by calling
+// Close manually.
+func (self *ImportType) Close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_importtype_delete(self.inner())
 }

@@ -16,9 +16,8 @@ func newExportTypes(module *Module) *exportTypes {
 	self := &exportTypes{}
 	C.wasm_module_exports(module.inner(), &self._inner)
 
-	runtime.KeepAlive(module)
 	runtime.SetFinalizer(self, func(self *exportTypes) {
-		C.wasm_exporttype_vec_delete(self.inner())
+		self.close()
 	})
 
 	numberOfExportTypes := int(self.inner().size)
@@ -43,6 +42,11 @@ func (self *exportTypes) inner() *C.wasm_exporttype_vec_t {
 	return &self._inner
 }
 
+func (self *exportTypes) close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_exporttype_vec_delete(&self._inner)
+}
+
 // ExportType is a descriptor for an exported WebAssembly value.
 type ExportType struct {
 	_inner   *C.wasm_exporttype_t
@@ -53,8 +57,8 @@ func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportTyp
 	exportType := &ExportType{_inner: pointer, _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(exportType, func(exportType *ExportType) {
-			C.wasm_exporttype_delete(exportType.inner())
+		runtime.SetFinalizer(exportType, func(self *ExportType) {
+			self.Close()
 		})
 	}
 
@@ -115,4 +119,14 @@ func (self *ExportType) Type() *ExternType {
 	runtime.KeepAlive(self)
 
 	return newExternType(ty, self.ownedBy())
+}
+
+// Force to close the ExportType.
+//
+// A runtime finalizer is registered on the ExportType, but it is
+// possible to force the destruction of the ExportType by calling
+// Close manually.
+func (self *ExportType) Close() {
+	runtime.SetFinalizer(self, nil)
+	C.wasm_exporttype_delete(self.inner())
 }
