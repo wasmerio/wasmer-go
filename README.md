@@ -229,3 +229,57 @@ The entire project is under the MIT License. Please read [the
 
 
 [license]: https://github.com/wasmerio/wasmer/blob/master/LICENSE
+
+# FAQ
+
+## How to run Go programs compiled to WebAssembly modules with `wasmer-go`?
+
+Let's start by emphasing that `wasmer-go` is a WebAssembly runtime. It
+allows to _run_ WebAssembly inside Go. It's not a tool to _compile_ a
+Go program into WebAssembly. Nonetheless, many people are reporting
+issues when compiling Go programs to WebAssembly, and then trying to
+run them with `wasmer-go` (or in another hosts, like
+[Python](https://github.com/wasmerio/wasmer-python),
+[C](https://github.com/wasmerio/wasmer/tree/master/lib/c-api),
+[PHP](https://github.com/wasmerio/wasmer-php),
+[Ruby](https://github.com/wasmerio/wasmer-ruby),
+[Rust](https://github.com/wasmerio/wasmer)…).
+
+The major problem is that, whilst the Go compiler supports
+WebAssembly, [it does not support
+WASI](https://github.com/golang/go/issues/31105) (WebAssembly System
+Interface). It generates an ABI that is deeply tied to JavaScript, and
+one needs to use the `wasm_exec.js` file provided by the Go toolchain,
+which doesn't work outside a JavaScript host.
+
+Fortunately, there are two solutions to this problem:
+
+1. Use [TinyGo](https://tinygo.org) to compile your Go program to
+   WebAssembly with the `-target wasi` option, e.g.:
+   
+   ```sh
+   $ tinygo build -o module.wasm -target wasi .
+   ```
+   
+   The generated WebAssembly module will be portable across all
+   WebAssembly runtimes that support WASI.
+
+2. Use the Go compiler with adapters. Let's see how to compile:
+
+   ```sh
+   $ GOOS=js GOARCH=wasm go build -o module.wasm .
+   ```
+   
+   (the `GOOS=js` is the sign that JavaScript is targeted, not a surprise).
+   
+   Then pick one adapter (they are written by the community):
+   
+   * [`mattn/gowasmer`](https://github.com/mattn/gowasmer/),
+   * [`go-wasm-adapter/go-wasm`](https://github.com/go-wasm-adapter/go-wasm/),
+
+   and follow their documentation.
+
+We highly recommend the first solution (with TinyGo) if it works for
+you as the WebAssembly module will be portable across all WebAssembly
+runtimes. It's not a hacky solution based on adapters; it's the right
+way to… go.
