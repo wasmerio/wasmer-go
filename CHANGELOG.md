@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Table of Contents
 
+* [1.0.4](#104---2021-08-12)
 * [1.0.3](#103---2021-02-26)
 * [1.0.2](#102---2021-02-08)
 * [1.0.1](#101---2021-02-06)
@@ -14,6 +15,25 @@ All notable changes to this project will be documented in this file.
 * [0.3.0](#030---2020-02-02)
 * [0.2.0](#020---2019-07-16)
 * [0.1.0](#010---2019-05-29)
+
+## [1.0.4] - 2021-08-12
+
+### Added
+
+* [#230](https://github.com/wasmerio/wasmer-go/pull/230) Test against the nightly version of Wasmer everyday at 2am.
+* [#229](https://github.com/wasmerio/wasmer-go/pull/229) Showcase how to get `Instance` inside a host function.
+
+### Changed
+
+* [#276](https://github.com/wasmerio/wasmer-go/pull/276) Update the underlying runtime to Wasmer 2.0, which provides improved performances, and better stability.
+* [#268](https://github.com/wasmerio/wasmer-go/pull/268) and [#247](https://github.com/wasmerio/wasmer-go/pull/247) Update all Rust dependencies.
+
+### Fixed
+
+* [#277](https://github.com/wasmerio/wasmer-go/pull/277) Force finalizers to explore the graph of objects.
+* [#264](https://github.com/wasmerio/wasmer-go/pull/264) Update the `store` field when deserializing a `Module`.
+* [#244](https://github.com/wasmerio/wasmer-go/pull/244) Place `imports` in `Instance` to prevent them being freed during function execution.
+* [#242](https://github.com/wasmerio/wasmer-go/pull/242) Correctly handle `I64` (and other) values returned from imported functions.
 
 ## [1.0.3] - 2021-02-26
 
@@ -414,6 +434,7 @@ All notable changes to this project will be documented in this file.
 First release.
 
 
+[1.0.4]: https://github.com/wasmerio/wasmer-go/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/wasmerio/wasmer-go/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/wasmerio/wasmer-go/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/wasmerio/wasmer-go/compare/v1.0.0...v1.0.1
