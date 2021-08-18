@@ -62,7 +62,8 @@ func NewTrap(store *Store, message string) *Trap {
 	runtime.KeepAlive(store)
 	runtime.KeepAlive(message)
 
-	return newTrap(trap, nil)
+	//return newTrap(trap, nil)
+	return &Trap{_inner: trap}
 }
 
 func (self *Trap) inner() *C.wasm_trap_t {

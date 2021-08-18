@@ -18,6 +18,7 @@ package wasmer
 import (
 	"fmt"
 	"github.com/wasmerio/wasmer-go/wasmer"
+	"runtime"
 )
 
 type exitCode struct {
@@ -101,6 +102,7 @@ func ExampleFunction_Call() {
 
 	fmt.Println("Exited early with:", err)
 
+	runtime.GC()
 	// Output:
 	// Compiling module...
 	// Instantiating module...
