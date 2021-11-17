@@ -294,14 +294,14 @@ func (self *WasiEnvironment) inner() *C.wasi_env_t {
 }
 
 func buildByteSliceFromCBuffer(buffer *C.char, length int) []byte {
-	var header reflect.SliceHeader
-	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
+	var byteSlice []byte
+	var header = (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
 
 	header.Data = uintptr(unsafe.Pointer(buffer))
 	header.Len = length
 	header.Cap = length
 
-	return *(*[]byte)(unsafe.Pointer(&header))
+	return byteSlice
 }
 
 // ReadStdout reads the WASI module stdout if captured with

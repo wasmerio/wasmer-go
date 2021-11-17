@@ -102,14 +102,14 @@ func (self *Memory) Data() []byte {
 
 	runtime.KeepAlive(self)
 
-	var header reflect.SliceHeader
-	header = *(*reflect.SliceHeader)(unsafe.Pointer(&header))
+	var byteSlice []byte
+	var header = (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
 
 	header.Data = uintptr(unsafe.Pointer(data))
 	header.Len = length
 	header.Cap = length
 
-	return *(*[]byte)(unsafe.Pointer(&header))
+	return byteSlice
 }
 
 // Grow grows the Memory's size by a given number of Pages (the delta).

@@ -205,7 +205,7 @@ func (self *Module) Exports() []*ExportType {
 //   engine := wasmer.NewEngine()
 //   store := wasmer.NewStore(engine)
 //   module, _ := wasmer.NewModule(store, wasmBytes)
-//   bytes := module.Serialize()
+//   bytes, err := module.Serialize()
 func (self *Module) Serialize() ([]byte, error) {
 	var bytes C.wasm_byte_vec_t
 
@@ -231,9 +231,9 @@ func (self *Module) Serialize() ([]byte, error) {
 //   engine := wasmer.NewEngine()
 //   store := wasmer.NewStore(engine)
 //   module, _ := wasmer.NewModule(store, wasmBytes)
-//   bytes := module.Serialize()
+//   bytes, err := module.Serialize()
 //   //...
-//   deserializedModule := wasmer.DeserializeModule(store, bytes)
+//   deserializedModule, err := wasmer.DeserializeModule(store, bytes)
 func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 	var bytesPtr *C.uint8_t
 	bytesLength := len(bytes)
