@@ -1,3 +1,4 @@
+//go:build !custom_wasmer_runtime
 // +build !custom_wasmer_runtime
 
 package wasmer
