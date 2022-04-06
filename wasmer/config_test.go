@@ -2,9 +2,10 @@ package wasmer
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCompilerKind(t *testing.T) {
@@ -39,6 +40,32 @@ func TestConfig(t *testing.T) {
 	result, err := sum(37, 5)
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(42))
+}
+
+func TestConfigForMetering(t *testing.T) {
+	opmap := map[uint32]uint32{
+		13: 1,
+		25: 1,
+		99: 4,
+	}
+	config := NewConfig().PushMiddleware(800000000, opmap)
+	engine := NewEngineWithConfig(config)
+	store := NewStore(engine)
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module, NewImportObject())
+	assert.NoError(t, err)
+
+	sum, err := instance.Exports.GetFunction("sum")
+	assert.NoError(t, err)
+
+	result, err := sum(37, 5)
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(42))
+	rp := instance.GetRemainingPoints()
+	assert.Equal(t, int(rp), 800000000-7)
+	// total instruction count should be 27
 }
 
 func TestConfig_AllCombinations(t *testing.T) {

@@ -72,6 +72,18 @@ func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
 }
 
+func (self *Instance) GetRemainingPoints() uint64 {
+	return uint64(C.wasmer_metering_get_remaining_points(self._inner))
+}
+
+func (self *Instance) MeteringPointsExhausted() bool {
+	return bool(C.wasmer_metering_points_are_exhausted(self._inner))
+}
+
+func (self *Instance) SetRemainingPoints(newLimit uint64) {
+	C.wasmer_metering_set_remaining_points(self._inner, C.uint64_t(newLimit))
+}
+
 // Force to close the Instance.
 //
 // A runtime finalizer is registered on the Instance, but it is
