@@ -180,7 +180,14 @@ func metering_delegate(op C.wasmer_parser_operator_t) C.uint64_t {
 	return C.uint64_t(v)
 }
 
-// PushMiddleware
+// PushMiddleware allows the middleware metering to be engaged on a map of opcode to cost
+//   config := NewConfig()
+//	 opmap := map[uint32]uint32{
+//		13: 1,
+//		25: 1,
+//		99: 4,
+//	 }
+//   config.PushMiddleware(7865444, opmap)
 func (self *Config) PushMiddleware(maxGasUsageAllowed uint64, opMap map[uint32]uint32) *Config {
 	if opCodeMap == nil {
 		// REVIEW only allowing this to be set once
