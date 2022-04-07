@@ -200,7 +200,7 @@ func (self *Config) PushMeteringMiddleware(maxGasUsageAllowed uint64, opMap map[
 
 // PushMeteringMiddlewarePtr allows the middleware metering to be engaged on an unsafe.Pointer
 // this pointer must be a to C based function with a signature of:
-//        extern uint64_t cost-delegate_func(enum wasmer_parser_operator_t op);
+//        extern uint64_t cost_delegate_func(enum wasmer_parser_operator_t op);
 // package main
 //
 // #include <wasmer.h>
