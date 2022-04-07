@@ -72,6 +72,21 @@ func (self *Instance) inner() *C.wasm_instance_t {
 	return self._inner
 }
 
+// GetRemainingPoints exposes wasm meterings remaining gas or points
+func (self *Instance) GetRemainingPoints() uint64 {
+	return uint64(C.wasmer_metering_get_remaining_points(self._inner))
+}
+
+// GetRemainingPoints a bool to determine if the engine has been shutdown from meter exhaustion
+func (self *Instance) MeteringPointsExhausted() bool {
+	return bool(C.wasmer_metering_points_are_exhausted(self._inner))
+}
+
+// SetRemainingPoints imposes a new gas limit on the wasm engine
+func (self *Instance) SetRemainingPoints(newLimit uint64) {
+	C.wasmer_metering_set_remaining_points(self._inner, C.uint64_t(newLimit))
+}
+
 // Force to close the Instance.
 //
 // A runtime finalizer is registered on the Instance, but it is
