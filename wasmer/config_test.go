@@ -68,6 +68,28 @@ func TestConfigForMetering(t *testing.T) {
 	// total instruction count should be 27
 }
 
+func TestConfigForMeteringFn(t *testing.T) {
+
+	config := NewConfig().PushMeteringMiddlewarePtr(800000000, getInternalCPointer())
+	engine := NewEngineWithConfig(config)
+	store := NewStore(engine)
+	module, err := NewModule(store, testGetBytes("tests.wasm"))
+	assert.NoError(t, err)
+
+	instance, err := NewInstance(module, NewImportObject())
+	assert.NoError(t, err)
+
+	sum, err := instance.Exports.GetFunction("sum")
+	assert.NoError(t, err)
+
+	result, err := sum(37, 5)
+	assert.NoError(t, err)
+	assert.Equal(t, result, int32(42))
+	rp := instance.GetRemainingPoints()
+	assert.Equal(t, int(rp), 800000000-7)
+	// total instruction count should be 27
+}
+
 func TestConfig_AllCombinations(t *testing.T) {
 	type Test struct {
 		compilerName string
