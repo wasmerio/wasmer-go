@@ -43,12 +43,12 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigForMetering(t *testing.T) {
-	opmap := map[uint32]uint32{
-		13: 1,
-		25: 1,
-		99: 4,
+	opmap := map[Opcode]uint32{
+		End:      1,
+		LocalGet: 1,
+		I32Add:   4,
 	}
-	config := NewConfig().PushMiddleware(800000000, opmap)
+	config := NewConfig().PushMeteringMiddleware(800000000, opmap)
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
 	module, err := NewModule(store, testGetBytes("tests.wasm"))

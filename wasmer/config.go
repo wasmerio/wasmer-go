@@ -167,28 +167,28 @@ func (self *Config) UseCraneliftCompiler() *Config {
 	return self
 }
 
-var opCodeMap map[uint32]uint32 = nil
+var opCodeMap map[Opcode]uint32 = nil
 
 //export metering_delegate
 func metering_delegate(op C.wasmer_parser_operator_t) C.uint64_t {
 	// a simple alogorithm for now just map from opcode to cost directly
-	// all the responsibility is placed on the caller of PushMiddleware
-	v, b := opCodeMap[uint32(op)]
+	// all the responsibility is placed on the caller of PushMeteringMiddleware
+	v, b := opCodeMap[Opcode(op)]
 	if !b {
 		return 0 // no value means no cost
 	}
 	return C.uint64_t(v)
 }
 
-// PushMiddleware allows the middleware metering to be engaged on a map of opcode to cost
+// PushMeteringMiddleware allows the middleware metering to be engaged on a map of opcode to cost
 //   config := NewConfig()
 //	 opmap := map[uint32]uint32{
 //		13: 1,
 //		25: 1,
 //		99: 4,
 //	 }
-//   config.PushMiddleware(7865444, opmap)
-func (self *Config) PushMiddleware(maxGasUsageAllowed uint64, opMap map[uint32]uint32) *Config {
+//   config.PushMeteringMiddleware(7865444, opmap)
+func (self *Config) PushMeteringMiddleware(maxGasUsageAllowed uint64, opMap map[Opcode]uint32) *Config {
 	if opCodeMap == nil {
 		// REVIEW only allowing this to be set once
 		opCodeMap = opMap
