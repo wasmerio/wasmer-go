@@ -1,6 +1,9 @@
 package wasmer
 
-type Opcode int64
+// #include <wasmer.h>
+import "C"
+
+type Opcode C.wasmer_parser_operator_t
 
 const (
 	Unreachable        Opcode = 0
