@@ -194,7 +194,7 @@ func (self *Config) PushMeteringMiddleware(maxGasUsageAllowed uint64, opMap map[
 		// REVIEW only allowing this to be set once
 		opCodeMap = opMap
 	}
-	C.wasm_config_push_middleware(self.inner(), C.wasmer_metering_as_middleware(C.wasmer_metering_new(C.ulong(maxGasUsageAllowed), (*[0]byte)(C.metering_delegate))))
+	C.wasm_config_push_middleware(self.inner(), C.wasmer_metering_as_middleware(C.wasmer_metering_new(getPlatformLong(maxGasUsageAllowed), (*[0]byte)(C.metering_delegate))))
 	return self
 }
 
@@ -221,7 +221,7 @@ func (self *Config) PushMeteringMiddleware(maxGasUsageAllowed uint64, opMap map[
 //   config.PushMeteringMiddlewarePtr(800000000, getInternalCPointer())
 // }
 func (self *Config) PushMeteringMiddlewarePtr(maxGasUsageAllowed uint64, p unsafe.Pointer) *Config {
-	C.wasm_config_push_middleware(self.inner(), C.wasmer_metering_as_middleware(C.wasmer_metering_new(C.ulong(maxGasUsageAllowed), (*[0]byte)(p))))
+	C.wasm_config_push_middleware(self.inner(), C.wasmer_metering_as_middleware(C.wasmer_metering_new(getPlatformLong(maxGasUsageAllowed), (*[0]byte)(p))))
 	return self
 }
 
