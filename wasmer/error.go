@@ -65,7 +65,7 @@ type TrapError struct {
 }
 
 func newErrorFromTrap(pointer *C.wasm_trap_t) *TrapError {
-	trap := newTrap(pointer, nil)
+	trap := newTrapFromPointer(pointer, nil)
 
 	return &TrapError{
 		message: trap.Message(),
