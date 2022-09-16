@@ -11,7 +11,7 @@ func getInternalCPointer() unsafe.Pointer {
 
 //export metering_delegate_alt
 func metering_delegate_alt(op C.wasmer_parser_operator_t) C.uint64_t {
-	// a simple alogorithm for now just map from opcode to cost directly
+	// a simple algorithm for now just map from opcode to cost directly
 	// all the responsibility is placed on the caller of PushMeteringMiddleware
 	v, b := opCodeMap[Opcode(op)]
 	if !b {
