@@ -17,6 +17,8 @@ package wasmer
 
 import (
 	"fmt"
+	"runtime"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -100,6 +102,10 @@ func ExampleFunction_Call() {
 	}
 
 	fmt.Println("Exited early with:", err)
+
+	// These lines are here to ensure that SetFinalizer works correctly
+	runtime.GC()
+	runtime.GC()
 
 	// Output:
 	// Compiling module...

@@ -24,12 +24,34 @@ type Trap struct {
 	_ownedBy interface{}
 }
 
-func newTrap(pointer *C.wasm_trap_t, ownedBy interface{}) *Trap {
+// newWasmTrap creates C wasm_trap structure and returns it's pointer
+func newWasmTrap(store *Store, message string) *C.wasm_trap_t {
+	messageBytes := []byte(message)
+	var bytesPointer *C.uint8_t
+	bytesLength := len(messageBytes)
+
+	if bytesLength > 0 {
+		bytesPointer = (*C.uint8_t)(unsafe.Pointer(&messageBytes[0]))
+	}
+
+	runtime.KeepAlive(store)
+	runtime.KeepAlive(message)
+
+	return C.to_wasm_trap_new(store.inner(), bytesPointer, C.size_t(bytesLength))
+}
+
+// newTrapFromPonter creates Trap from C.wasm_trap structure and attaches GC finalizer for it
+func newTrapFromPointer(pointer *C.wasm_trap_t, ownedBy interface{}) *Trap {
 	trap := &Trap{
 		_inner:   pointer,
 		_ownedBy: ownedBy,
 	}
 
+	return trapWithFinalizer(trap, ownedBy)
+}
+
+// trapWithFinalizer attaches GC finalizer to the trap
+func trapWithFinalizer(trap *Trap, ownedBy interface{}) *Trap {
 	if ownedBy == nil {
 		runtime.SetFinalizer(trap, func(trap *Trap) {
 			inner := trap.inner()
@@ -49,20 +71,9 @@ func newTrap(pointer *C.wasm_trap_t, ownedBy interface{}) *Trap {
 //   store := wasmer.NewStore(engine)
 //   trap := NewTrap(store, "oops")
 func NewTrap(store *Store, message string) *Trap {
-	messageBytes := []byte(message)
-	var bytesPointer *C.uint8_t
-	bytesLength := len(messageBytes)
-
-	if bytesLength > 0 {
-		bytesPointer = (*C.uint8_t)(unsafe.Pointer(&messageBytes[0]))
-	}
-
-	trap := C.to_wasm_trap_new(store.inner(), bytesPointer, C.size_t(bytesLength))
-
-	runtime.KeepAlive(store)
-	runtime.KeepAlive(message)
-
-	return newTrap(trap, nil)
+	pointer := newWasmTrap(store, message)
+	trap := &Trap{_inner: pointer}
+	return trapWithFinalizer(trap, nil)
 }
 
 func (self *Trap) inner() *C.wasm_trap_t {
