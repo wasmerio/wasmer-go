@@ -132,7 +132,7 @@ func (self *ValueType) Kind() ValueKind {
 }
 
 // NewValueTypes instantiates a new ValueType array from a list of
-// ValueKind. Not that the list may be empty.
+// ValueKind. Note that this list may be empty.
 //
 //   valueTypes := NewValueTypes(I32, I64, F32)
 //
