@@ -17,6 +17,7 @@ package wasmer
 
 import (
 	"fmt"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
