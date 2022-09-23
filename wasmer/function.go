@@ -117,11 +117,8 @@ func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm
 	results, err := (function)(arguments)
 
 	if err != nil {
-		trap := NewTrap(hostFunction.store, err.Error())
-
-		runtime.KeepAlive(trap)
-
-		return trap.inner()
+		pointer := newWasmTrap(hostFunction.store, err.Error())
+		return pointer
 	}
 
 	toValueVec(results, res)
@@ -191,11 +188,8 @@ func function_with_environment_trampoline(env unsafe.Pointer, args *C.wasm_val_v
 	results, err := (function)(hostFunction.userEnvironment, arguments)
 
 	if err != nil {
-		trap := NewTrap(hostFunction.store, err.Error())
-
-		runtime.KeepAlive(trap)
-
-		return trap.inner()
+		pointer := newWasmTrap(hostFunction.store, err.Error())
+		return pointer
 	}
 
 	toValueVec(results, res)
