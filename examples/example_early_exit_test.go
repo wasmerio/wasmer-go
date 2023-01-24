@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/wasmerio/wasmer-go/wasmer"
+	"github.com/iden3/wasmer-go/wasmer"
 )
 
 type exitCode struct {

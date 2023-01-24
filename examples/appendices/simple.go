@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	wasmer "github.com/wasmerio/wasmer-go/wasmer"
 	"io/ioutil"
+
+	wasmer "github.com/iden3/wasmer-go/wasmer"
 )
 
 func main() {

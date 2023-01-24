@@ -6,10 +6,10 @@
   <h1>Wasmer Go</h1>
   
   <p>
-    <a href="https://github.com/wasmerio/wasmer-go/actions?query=workflow%3A%22Build+and+Test%22">
-      <img src="https://github.com/wasmerio/wasmer-go/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
+    <a href="https://github.com/iden3/wasmer-go/actions?query=workflow%3A%22Build+and+Test%22">
+      <img src="https://github.com/iden3/wasmer-go/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
     </a>
-    <a href="https://github.com/wasmerio/wasmer-go/blob/master/LICENSE">
+    <a href="https://github.com/iden3/wasmer-go/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/wasmerio/wasmer-go.svg" alt="License">
     </a>
     <a href="https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer">
@@ -48,7 +48,7 @@ documentation](https://pkg.go.dev/github.com/wasmerio/wasmer-go/wasmer)
 full of examples.
 
 **Examples** as tutorials: [browse the `examples/`
-directory](https://github.com/wasmerio/wasmer-go/tree/master/examples),
+directory](https://github.com/iden3/wasmer-go/tree/master/examples),
 it's the best place for a complete introduction!
 
 # Install
@@ -56,7 +56,7 @@ it's the best place for a complete introduction!
 To install the library, follow the classical:
 
 ```sh
-$ go get github.com/wasmerio/wasmer-go/wasmer
+$ go get github.com/iden3/wasmer-go/wasmer
 ```
 
 And you're ready to get fun!
@@ -133,7 +133,7 @@ this library works (and is tested) on the following platforms:
 # Examples
 
 We highly recommend to read the
-[`examples/`](https://github.com/wasmerio/wasmer-go/tree/master/examples)
+[`examples/`](https://github.com/iden3/wasmer-go/tree/master/examples)
 directory, which contains a sequence of examples/tutorials. It's the
 best place to learn by reading examples.
 
@@ -148,7 +148,7 @@ pub extern "C" fn sum(x: i32, y: i32) -> i32 {
 ```
 
 A compiled WebAssembly binary is included in
-[`examples/appendices/simple.wasm`]((https://github.com/wasmerio/wasmer-go/blob/master/examples/appendices/simple.wasm)).
+[`examples/appendices/simple.wasm`]((https://github.com/iden3/wasmer-go/blob/master/examples/appendices/simple.wasm)).
 
 Then, we can execute it in Go:
 
@@ -158,7 +158,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	wasmer "github.com/wasmerio/wasmer-go/wasmer"
+	wasmer "github.com/iden3/wasmer-go/wasmer"
 )
 
 func main() {

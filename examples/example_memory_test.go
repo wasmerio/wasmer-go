@@ -2,9 +2,9 @@
 //
 // This example illustrates the basics of the basics of interacting with Wasm module memory:
 //
-//   1. How to load a Wasm modules as bytes
-//   2. How to compile the module
-//   3. How to create an instance of the module
+//  1. How to load a Wasm modules as bytes
+//  2. How to compile the module
+//  3. How to create an instance of the module
 //
 // You can run the example directly by executing in Wasmer root:
 //
@@ -17,8 +17,9 @@ package wasmer
 
 import (
 	"fmt"
-	"github.com/wasmerio/wasmer-go/wasmer"
 	"unsafe"
+
+	"github.com/iden3/wasmer-go/wasmer"
 )
 
 func ExampleMemory() {

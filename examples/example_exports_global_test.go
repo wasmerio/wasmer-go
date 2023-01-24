@@ -4,8 +4,8 @@
 // This example illustrates how to use exported globals. They come
 // in 2 flavors:
 //
-//   1. Immutable globals (const),
-//   2. Mutable globals.
+//  1. Immutable globals (const),
+//  2. Mutable globals.
 //
 // You can run the example directly by executing in Wasmer root:
 //
@@ -18,7 +18,8 @@ package wasmer
 
 import (
 	"fmt"
-	"github.com/wasmerio/wasmer-go/wasmer"
+
+	"github.com/iden3/wasmer-go/wasmer"
 )
 
 func ExampleGlobal_Set() {

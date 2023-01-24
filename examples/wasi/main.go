@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	wasmer "github.com/wasmerio/wasmer-go/wasmer"
+	wasmer "github.com/iden3/wasmer-go/wasmer"
 )
 
 func main() {
