@@ -269,7 +269,8 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 	var environment *C.wasi_env_t
 
 	err := maybeNewErrorFromWasmer(func() bool {
-		environment = C.wasi_env_new(stateBuilder.inner())
+		// TODO: fix this
+		//environment = C.wasi_env_new(stateBuilder.inner())
 
 		return environment == nil
 	})
@@ -358,7 +359,8 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 	C.wasmer_named_extern_vec_new_empty(&wasiNamedExterns)
 
 	err := maybeNewErrorFromWasmer(func() bool {
-		return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
+		//return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
+		return false == C.wasi_get_unordered_imports(self.inner(), module.inner(), &wasiNamedExterns)
 	})
 
 	if err != nil {

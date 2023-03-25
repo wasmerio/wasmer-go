@@ -53,7 +53,7 @@ const (
 	UNIVERSAL = EngineKind(C.UNIVERSAL)
 
 	// Represents the Dylib engine.
-	DYLIB = EngineKind(C.DYLIB)
+	DYLIB = EngineKind(1)
 
 	// Deprecated constant. Please use UNIVERSAL instead.
 	JIT = UNIVERSAL
