@@ -15,7 +15,7 @@ func init() {
 }
 
 func main() {
-	wasmBytes, _ := ioutil.ReadFile("/Users/oker/workspace/github/wasmer-go/examples/appendices/target/wasm32-unknown-unknown/release/simple.wasm")
+	wasmBytes, _ := ioutil.ReadFile("./target/wasm32-unknown-unknown/release/simple.wasm")
 
 	flag.Parse()
 
