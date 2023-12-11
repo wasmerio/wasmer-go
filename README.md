@@ -157,12 +157,12 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	wasmer "github.com/wasmerio/wasmer-go/wasmer"
 )
 
 func main() {
-    wasmBytes, _ := ioutil.ReadFile("simple.wasm")
+    wasmBytes, _ := os.ReadFile("simple.wasm")
 
     engine := wasmer.NewEngine()
     store := wasmer.NewStore(engine)
