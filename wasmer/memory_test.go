@@ -1,9 +1,16 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"embed"
+	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+//go:embed testdata
+var testData embed.FS
 
 func TestMemory(t *testing.T) {
 	engine := NewEngine()
@@ -85,4 +92,60 @@ func TestMemoryData(t *testing.T) {
 	assert.Equal(t, "Aello, World!", string(data1[pointer:pointer+13]))
 	assert.Equal(t, "Aello, World!", string(data2[pointer:pointer+13]))
 
+}
+
+// This test exercises proper memory management.
+// To do so, we run many iterations of "sum" function, while
+// invoking GC.
+//
+// Errors observed prior to this fix include: SIGSEGV, SIGBUS as
+// well as simply test failure, followed by panic, where the sum
+// function points to an incorrect function
+// (Parameters of type [I32, I32] did not match signature [] -> [])
+//
+// https://github.com/wasmerio/wasmer-go/issues/391
+// https://github.com/wasmerio/wasmer-go/issues/364
+func TestSumLoop(t *testing.T) {
+	//debug.SetGCPercent(1) -- This also reproduces the issue,
+	//but having explicit runtime.GC call below does that too.
+	e := NewEngineWithConfig(NewConfig().UseCraneliftCompiler())
+	s := NewStore(e)
+
+	src, err := testData.ReadFile("testdata/sum.wasm")
+	require.NoError(t, err)
+
+	mod, err := NewModule(s, src)
+	require.NoError(t, err)
+
+	// Configure WASI_VERSION_SNAPSHOT1 environment
+	we, err := NewWasiStateBuilder(mod.Name()).
+		CaptureStdout().
+		CaptureStderr().
+		Finalize()
+	require.NoError(t, err)
+
+	imp, err := we.GenerateImportObject(s, mod)
+	require.NoError(t, err)
+
+	// Let's instantiate the WebAssembly module.
+	instance, err := NewInstance(mod, imp)
+	require.NoError(t, err)
+
+	sum, release, err := instance.GetFunctionSafe("sum")
+	require.NoError(t, err)
+	defer release(instance)
+
+	// This causes the issue to reproduce on the very first iteration
+	// if KeepAlive call removed.
+	runtime.GC()
+
+	hi := 10240
+	n := int32(0)
+	for i := range hi {
+		res, err := sum(n, i+1)
+		//runtime.GC()
+		require.NoError(t, err)
+		n = res.(int32)
+	}
+	require.EqualValues(t, hi*(hi+1)/2, n)
 }

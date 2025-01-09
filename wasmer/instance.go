@@ -19,13 +19,12 @@ type Instance struct {
 // Note:️ Instantiating a module may return TrapError if the module's
 // start function traps.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, err := wasmer.NewModule(store, wasmBytes)
-//   importObject := wasmer.NewImportObject()
-//   instance, err := wasmer.NewInstance(module, importObject)
-//
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, err := wasmer.NewModule(store, wasmBytes)
+//	importObject := wasmer.NewImportObject()
+//	instance, err := wasmer.NewInstance(module, importObject)
 func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	var traps *C.wasm_trap_t
 	externs, err := imports.intoInner(module)
@@ -85,6 +84,47 @@ func (self *Instance) MeteringPointsExhausted() bool {
 // SetRemainingPoints imposes a new gas limit on the wasm engine
 func (self *Instance) SetRemainingPoints(newLimit uint64) {
 	C.wasmer_metering_set_remaining_points(self._inner, C.uint64_t(newLimit))
+}
+
+// ReleaseFn is a function to release resources
+// This function is parameterized to make sure that the correct
+// argument is passed to the function.
+type ReleaseFn[T any] func(T)
+
+func keepAlive[T any](value T) {
+	runtime.KeepAlive(value)
+}
+
+// GetFunctionSafe performs the same job as instance.Exports.GetFunction
+// but it returns a ReleaseFn to release the resources.
+//
+// The reason for this is that the following code *IS NOT SAFE*:
+//
+//	instance, err := NewInstance(module, NewImportObject())
+//	fn, err := instance.Exports.GetFunction("function_name")
+//	// No further usages of instance after this line.
+//	fn()
+//
+// The problem is that when fn() is called, it will issue CGo call to the
+// function.  When that happens, the instance may be garbage collected
+// because there are no longer any uses of instance.  The returned function
+// however *does* depended on the instance; we must ensure that instance
+// remains live as long long as the calls to *any* instance functions may happen.
+// One way to do that is to add the following line *immediately* after the
+// instance intialization:
+//
+//	defer runtime.KeepAlive(instance)
+//
+// Another mechanism is to use GetFunctionSafe which returns a ReleaseFn
+// which should be called if this function returns non-error value.
+// This usage is preferred because it is less error-prone (i.e. it
+// returns 3 values that should all be handled appropriately).
+func (self *Instance) GetFunctionSafe(name string) (NativeFunction, ReleaseFn[*Instance], error) {
+	fn, err := self.Exports.GetFunction(name)
+	if err != nil {
+		return nil, nil, err
+	}
+	return fn, keepAlive, nil
 }
 
 // Force to close the Instance.
