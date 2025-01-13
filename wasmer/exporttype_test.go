@@ -1,8 +1,10 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExportTypeForFunctionType(t *testing.T) {
@@ -23,11 +25,12 @@ func TestExportTypeForFunctionType(t *testing.T) {
 }
 
 func TestExportTypeForGlobalType(t *testing.T) {
-	valueType := NewValueType(I32)
-	globalType := NewGlobalType(valueType, MUTABLE)
+	globalType := NewGlobalType(NewValueType(I32), MUTABLE)
+	defer runtime.KeepAlive(globalType)
 
 	name := "foo"
 	exportType := NewExportType(name, globalType)
+	defer runtime.KeepAlive(exportType)
 	assert.Equal(t, exportType.Name(), name)
 
 	externType := exportType.Type()
@@ -46,7 +49,7 @@ func TestExportTypeForTableType(t *testing.T) {
 	limits, err := NewLimits(minimum, maximum)
 	assert.NoError(t, err)
 
-	tableType := NewTableType(valueType, limits)
+	tableType := NewTableType(valueType.release(), limits)
 
 	name := "foo"
 	exportType := NewExportType(name, tableType)

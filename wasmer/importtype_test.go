@@ -1,8 +1,10 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestImportTypeForFunctionType(t *testing.T) {
@@ -50,7 +52,7 @@ func TestImportTypeForTableType(t *testing.T) {
 	limits, err := NewLimits(minimum, maximum)
 	assert.NoError(t, err)
 
-	tableType := NewTableType(valueType, limits)
+	tableType := NewTableType(valueType.release(), limits)
 
 	module := "foo"
 	name := "bar"
@@ -68,6 +70,15 @@ func TestImportTypeForTableType(t *testing.T) {
 	limitsAgain := tableTypeAgain.Limits()
 	assert.Equal(t, limitsAgain.Minimum(), minimum)
 	assert.Equal(t, limitsAgain.Maximum(), maximum)
+
+	runtime.KeepAlive(valueType)
+	runtime.KeepAlive(limits)
+	runtime.KeepAlive(tableType)
+	runtime.KeepAlive(importType)
+	runtime.KeepAlive(externType)
+	runtime.KeepAlive(tableTypeAgain)
+	runtime.KeepAlive(valueTypeAgain)
+	runtime.KeepAlive(limitsAgain)
 }
 
 func TestImportTypeForMemoryType(t *testing.T) {

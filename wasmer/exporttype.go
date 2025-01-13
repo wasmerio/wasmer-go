@@ -49,16 +49,16 @@ func (self *exportTypes) close() {
 
 // ExportType is a descriptor for an exported WebAssembly value.
 type ExportType struct {
-	_inner   *C.wasm_exporttype_t
+	CPtrBase[*C.wasm_exporttype_t]
 	_ownedBy interface{}
 }
 
 func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportType {
-	exportType := &ExportType{_inner: pointer, _ownedBy: ownedBy}
+	exportType := &ExportType{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(exportType, func(self *ExportType) {
-			self.Close()
+		exportType.SetFinalizer(func(v *C.wasm_exporttype_t) {
+			C.wasm_exporttype_delete(v)
 		})
 	}
 
@@ -69,9 +69,9 @@ func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportTyp
 //
 // Note: An extern type is anything implementing IntoExternType: FunctionType, GlobalType, MemoryType, TableType.
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   exportType := NewExportType("a_global", globalType)
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	exportType := NewExportType("a_global", globalType)
 func NewExportType(name string, ty IntoExternType) *ExportType {
 	nameName := newName(name)
 	externType := ty.IntoExternType().inner()
@@ -85,7 +85,7 @@ func NewExportType(name string, ty IntoExternType) *ExportType {
 }
 
 func (self *ExportType) inner() *C.wasm_exporttype_t {
-	return self._inner
+	return self.ptr()
 }
 
 func (self *ExportType) ownedBy() interface{} {
@@ -98,8 +98,8 @@ func (self *ExportType) ownedBy() interface{} {
 
 // Name returns the name of the export type.
 //
-//   exportType := NewExportType("a_global", globalType)
-//   exportType.Name() // "global"
+//	exportType := NewExportType("a_global", globalType)
+//	exportType.Name() // "global"
 func (self *ExportType) Name() string {
 	byteVec := C.wasm_exporttype_name(self.inner())
 	name := C.GoStringN(byteVec.data, C.int(byteVec.size))
@@ -111,8 +111,8 @@ func (self *ExportType) Name() string {
 
 // Type returns the type of the export type.
 //
-//   exportType := NewExportType("a_global", globalType)
-//   exportType.Type() // ExternType
+//	exportType := NewExportType("a_global", globalType)
+//	exportType.Type() // ExternType
 func (self *ExportType) Type() *ExternType {
 	ty := C.wasm_exporttype_type(self.inner())
 

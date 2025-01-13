@@ -66,10 +66,12 @@ func TestMemoryDataSize(t *testing.T) {
 }
 
 func TestMemoryData(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	getString, err := instance.Exports.GetFunction("string")
 	assert.NoError(t, err)
+	defer runtime.KeepAlive(instance)
 
 	ptr, err := getString()
 	assert.NoError(t, err)
@@ -114,8 +116,9 @@ func TestSumLoop(t *testing.T) {
 	src, err := testData.ReadFile("testdata/sum.wasm")
 	require.NoError(t, err)
 
-	mod, err := NewModule(s, src)
+	mod, moddone, err := NewModuleSafe(s, src)
 	require.NoError(t, err)
+	defer moddone(mod)
 
 	// Configure WASI_VERSION_SNAPSHOT1 environment
 	we, err := NewWasiStateBuilder(mod.Name()).
@@ -139,11 +142,13 @@ func TestSumLoop(t *testing.T) {
 	// if KeepAlive call removed.
 	runtime.GC()
 
-	hi := 10240
+	// Number of iterations is set fairly low because the overhead
+	// of using `-tags memcheck` (and runtime.GC) adds up rather quickly.
+	hi := 128
 	n := int32(0)
 	for i := range hi {
+		// t.Logf("Iteration %d: sum=%d", i, n)
 		res, err := sum(n, i+1)
-		//runtime.GC()
 		require.NoError(t, err)
 		n = res.(int32)
 	}

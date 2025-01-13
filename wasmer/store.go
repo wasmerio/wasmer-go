@@ -12,33 +12,31 @@ import "runtime"
 // The Store holds the Engine (that is — amongst many things — used to
 // compile the Wasm bytes into a valid module artifact).
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/exec/runtime.html#store
 type Store struct {
-	_inner *C.wasm_store_t
+	CPtrBase[*C.wasm_store_t]
 	Engine *Engine
 }
 
 // NewStore instantiates a new Store with an Engine.
 //
-//   engine := NewEngine()
-//   store := NewStore(engine)
+//	engine := NewEngine()
+//	store := NewStore(engine)
 func NewStore(engine *Engine) *Store {
 	self := &Store{
-		_inner: C.wasm_store_new(engine.inner()),
-		Engine: engine,
+		CPtrBase: mkPtr(C.wasm_store_new(engine.inner())),
+		Engine:   engine,
 	}
-
-	runtime.SetFinalizer(self, func(self *Store) {
-		self.Close()
+	self.SetFinalizer(func(self *C.wasm_store_t) {
+		C.wasm_store_delete(self)
 	})
-
 	return self
 }
 
 func (self *Store) inner() *C.wasm_store_t {
-	return self._inner
+	return self.ptr()
 }
 
 // Force to close the Store.

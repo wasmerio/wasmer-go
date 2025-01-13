@@ -1,8 +1,10 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var TestBytes = []byte(`
@@ -19,7 +21,7 @@ var TestBytes = []byte(`
 	      (i32.add (global.get $x) (i32.const 1)))))
 `)
 
-func testGetGlobalInstance(t *testing.T) *Instance {
+func testGetGlobalInstance(t *testing.T) (*Instance, func()) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, TestBytes)
@@ -28,11 +30,17 @@ func testGetGlobalInstance(t *testing.T) *Instance {
 	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
-	return instance
+	return instance, func() {
+		runtime.KeepAlive(store)
+		runtime.KeepAlive(module)
+		runtime.KeepAlive(instance)
+	}
 }
 
 func TestGlobalGetType(t *testing.T) {
-	x, err := testGetGlobalInstance(t).Exports.GetGlobal("x")
+	inst, release := testGetGlobalInstance(t)
+	defer release()
+	x, err := inst.Exports.GetGlobal("x")
 	assert.NoError(t, err)
 
 	ty := x.Type()
@@ -41,7 +49,9 @@ func TestGlobalGetType(t *testing.T) {
 }
 
 func TestGlobalMutable(t *testing.T) {
-	exports := testGetGlobalInstance(t).Exports
+	inst, release := testGetGlobalInstance(t)
+	defer release()
+	exports := inst.Exports
 
 	x, err := exports.GetGlobal("x")
 	assert.NoError(t, err)
@@ -49,15 +59,17 @@ func TestGlobalMutable(t *testing.T) {
 
 	y, err := exports.GetGlobal("y")
 	assert.NoError(t, err)
-	assert.Equal(t, y.Type().Mutability(), MUTABLE)
+	assert.Equal(t, MUTABLE, y.Type().Mutability())
 
 	z, err := exports.GetGlobal("z")
 	assert.NoError(t, err)
-	assert.Equal(t, z.Type().Mutability(), IMMUTABLE)
+	assert.Equal(t, IMMUTABLE, z.Type().Mutability())
 }
 
 func TestGlobalReadWrite(t *testing.T) {
-	y, err := testGetGlobalInstance(t).Exports.GetGlobal("y")
+	inst, release := testGetGlobalInstance(t)
+	defer release()
+	y, err := inst.Exports.GetGlobal("y")
 	assert.NoError(t, err)
 
 	inititalValue, err := y.Get()
@@ -73,7 +85,8 @@ func TestGlobalReadWrite(t *testing.T) {
 }
 
 func TestGlobalReadWriteAndExportedFunctions(t *testing.T) {
-	instance := testGetGlobalInstance(t)
+	instance, release := testGetGlobalInstance(t)
+	defer release()
 	x, err := instance.Exports.GetGlobal("x")
 	assert.NoError(t, err)
 
@@ -103,7 +116,9 @@ func TestGlobalReadWriteAndExportedFunctions(t *testing.T) {
 }
 
 func TestGlobalReadWriteConstant(t *testing.T) {
-	z, err := testGetGlobalInstance(t).Exports.GetGlobal("z")
+	inst, release := testGetGlobalInstance(t)
+	defer release()
+	z, err := inst.Exports.GetGlobal("z")
 	assert.NoError(t, err)
 
 	value, err := z.Get()
