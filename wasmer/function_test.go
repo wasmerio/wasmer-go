@@ -1,8 +1,11 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRawFunction(t *testing.T) {
@@ -26,6 +29,8 @@ func TestRawFunction(t *testing.T) {
 	assert.NoError(t, err)
 
 	sum, err := instance.Exports.GetRawFunction("sum")
+	defer runtime.KeepAlive(instance) // Keep instance around as long as sum is around.
+
 	assert.NoError(t, err)
 	assert.Equal(t, sum.ParameterArity(), uint(2))
 	assert.Equal(t, sum.ResultArity(), uint(1))
@@ -57,6 +62,7 @@ func TestFunctionNative(t *testing.T) {
 
 	sum, err := instance.Exports.GetFunction("sum")
 	assert.NoError(t, err)
+	defer runtime.KeepAlive(instance) // Keep instance around as long as sum is around.
 
 	result, err := sum(1, 2)
 	assert.NoError(t, err)
@@ -80,8 +86,9 @@ func TestFunctionCallReturnZeroValue(t *testing.T) {
 	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
-	test, err := instance.Exports.GetFunction("test")
+	test, release, err := instance.GetFunctionSafe("test")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	result, err := test(1, 2)
 	assert.NoError(t, err)
@@ -107,8 +114,9 @@ func TestFunctionCallReturnMultipleValues(t *testing.T) {
 	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
-	swap, err := instance.Exports.GetFunction("swap")
+	swap, release, err := instance.GetFunctionSafe("swap")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	results, err := swap(41, 42)
 	assert.NoError(t, err)
@@ -116,27 +124,37 @@ func TestFunctionCallReturnMultipleValues(t *testing.T) {
 }
 
 func TestFunctionSum(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
-	f, _ := instance.Exports.GetFunction("sum")
+	f, release, err := instance.GetFunctionSafe("sum")
+	require.NoError(t, err)
+	defer release(instance)
+
 	result, err := f(1, 2)
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(3))
 }
 
 func TestFunctionArity0(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("arity_0")
+	defer runtime.KeepAlive(instance) // Keep instance around as long as f is around.
+
 	result, err := f()
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(42))
 }
 
 func TestFunctionI32I32(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("i32_i32")
+	defer runtime.KeepAlive(instance) // Keep instance around as long as f is around.
+
 	result, err := f(7)
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(7))
@@ -164,9 +182,12 @@ func TestFunctionI32I32(t *testing.T) {
 }
 
 func TestFunctionI64I64(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("i64_i64")
+	defer runtime.KeepAlive(instance) // Keep instance around as long as f is around.
+
 	result, err := f(7)
 	assert.NoError(t, err)
 	assert.Equal(t, result, int64(7))
@@ -197,18 +218,24 @@ func TestFunctionI64I64(t *testing.T) {
 }
 
 func TestFunctionF32F32(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("f32_f32")
+	defer runtime.KeepAlive(instance) // Keep instance around as long as f is around.
+
 	result, err := f(float32(7.42))
 	assert.NoError(t, err)
 	assert.Equal(t, result, float32(7.42))
 }
 
 func TestFunctionF64F64(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("f64_f64")
+	defer runtime.KeepAlive(instance)
+
 	result, err := f(7.42)
 	assert.NoError(t, err)
 	assert.Equal(t, result, float64(7.42))
@@ -218,18 +245,23 @@ func TestFunctionF64F64(t *testing.T) {
 }
 
 func TestFunctionI32I64F32F64F64(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("i32_i64_f32_f64_f64")
+	defer runtime.KeepAlive(instance)
+
 	result, err := f(1, 2, float32(3.4), 5.6)
 	assert.NoError(t, err)
 	assert.Equal(t, float64(int(result.(float64)*10000000))/10000000, 1+2+3.4+5.6)
 }
 
 func TestFunctionBoolCastedtoI32(t *testing.T) {
-	instance := testGetInstance(t)
+	instance, done := testGetInstance(t)
+	defer done()
 
 	f, _ := instance.Exports.GetFunction("bool_casted_to_i32")
+	defer runtime.KeepAlive(instance)
 	result, err := f()
 	assert.NoError(t, err)
 	assert.Equal(t, result, int32(1))
@@ -275,6 +307,7 @@ func TestHostFunction(t *testing.T) {
 
 	addOne, err := instance.Exports.GetFunction("add_one")
 	assert.NoError(t, err)
+	defer runtime.KeepAlive(instance)
 
 	result, err := addOne(41)
 	assert.NoError(t, err)
@@ -319,8 +352,9 @@ func TestHostFunction_WithI64(t *testing.T) {
 	instance, err := NewInstance(module, importObject)
 	assert.NoError(t, err)
 
-	addOne, err := instance.Exports.GetFunction("add_one")
+	addOne, release, err := instance.GetFunctionSafe("add_one")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	result, err := addOne(41)
 	assert.NoError(t, err)
@@ -381,8 +415,9 @@ func TestHostFunctionWithEnv(t *testing.T) {
 
 	environment.instance = instance
 
-	addOne, err := instance.Exports.GetFunction("add_one")
+	addOne, release, err := instance.GetFunctionSafe("add_one")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	result, err := addOne(7)
 	assert.NoError(t, err)
@@ -502,8 +537,9 @@ func TestHostFunctionTrap(t *testing.T) {
 	instance, err := NewInstance(module, importObject)
 	assert.NoError(t, err)
 
-	addOne, err := instance.Exports.GetFunction("add_one")
+	addOne, release, err := instance.GetFunctionSafe("add_one")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	_, err = addOne(41)
 	assert.IsType(t, err, &TrapError{})

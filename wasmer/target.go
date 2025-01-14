@@ -2,60 +2,51 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
-import "runtime"
 
 // Target represents a triple + CPU features pairs.
 type Target struct {
-	_inner *C.wasmer_target_t
+	CPtrBase[*C.wasmer_target_t]
 }
 
 func newTarget(target *C.wasmer_target_t) *Target {
-	self := &Target{
-		_inner: target,
-	}
-
-	runtime.SetFinalizer(self, func(self *Target) {
-		C.wasmer_target_delete(self.inner())
+	self := &Target{CPtrBase: mkPtr(target)}
+	self.SetFinalizer(func(v *C.wasmer_target_t) {
+		C.wasmer_target_delete(v)
 	})
-
 	return self
 }
 
 // NewTarget creates a new target.
 //
-//  triple, err := NewTriple("aarch64-unknown-linux-gnu")
-//  cpuFeatures := NewCpuFeatures()
-//  target := NewTarget(triple, cpuFeatures)
+//	triple, err := NewTriple("aarch64-unknown-linux-gnu")
+//	cpuFeatures := NewCpuFeatures()
+//	target := NewTarget(triple, cpuFeatures)
 func NewTarget(triple *Triple, cpuFeatures *CpuFeatures) *Target {
-	return newTarget(C.wasmer_target_new(triple.inner(), cpuFeatures.inner()))
+	return newTarget(C.wasmer_target_new(triple.release(), cpuFeatures.release()))
 }
 
 func (self *Target) inner() *C.wasmer_target_t {
-	return self._inner
+	return self.ptr()
 }
 
 // Triple; historically such things had three fields, though they have
 // added additional fields over time.
 type Triple struct {
-	_inner *C.wasmer_triple_t
+	CPtrBase[*C.wasmer_triple_t]
 }
 
 func newTriple(triple *C.wasmer_triple_t) *Triple {
-	self := &Triple{
-		_inner: triple,
-	}
-
-	runtime.SetFinalizer(self, func(self *Triple) {
-		C.wasmer_triple_delete(self.inner())
+	self := &Triple{CPtrBase: mkPtr(triple)}
+	self.SetFinalizer(func(v *C.wasmer_triple_t) {
+		C.wasmer_triple_delete(v)
 	})
-
 	return self
 }
 
 // NewTriple creates a new triple, otherwise it returns an error
 // specifying why the provided triple isn't valid.
 //
-//   triple, err := NewTriple("aarch64-unknown-linux-gnu")
+//	triple, err := NewTriple("aarch64-unknown-linux-gnu")
 func NewTriple(triple string) (*Triple, error) {
 	cTripleName := newName(triple)
 	defer C.wasm_name_delete(&cTripleName)
@@ -81,7 +72,7 @@ func NewTripleFromHost() *Triple {
 }
 
 func (self *Triple) inner() *C.wasmer_triple_t {
-	return self._inner
+	return self.ptr()
 }
 
 // CpuFeatures holds a set of CPU features. They are identified by
@@ -122,18 +113,16 @@ func (self *Triple) inner() *C.wasmer_triple_t {
 //
 // • lzcnt.
 type CpuFeatures struct {
-	_inner *C.wasmer_cpu_features_t
+	CPtrBase[*C.wasmer_cpu_features_t]
 }
 
 func newCpuFeatures(cpu_features *C.wasmer_cpu_features_t) *CpuFeatures {
 	self := &CpuFeatures{
-		_inner: cpu_features,
+		CPtrBase: mkPtr(cpu_features),
 	}
-
-	runtime.SetFinalizer(self, func(self *CpuFeatures) {
-		C.wasmer_cpu_features_delete(self.inner())
+	self.SetFinalizer(func(v *C.wasmer_cpu_features_t) {
+		C.wasmer_cpu_features_delete(v)
 	})
-
 	return self
 }
 
@@ -160,5 +149,5 @@ func (self *CpuFeatures) Add(feature string) error {
 }
 
 func (self *CpuFeatures) inner() *C.wasmer_cpu_features_t {
-	return self._inner
+	return self.ptr()
 }

@@ -1,8 +1,9 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestModule(t *testing.T) {
@@ -39,6 +40,18 @@ func TestModuleNameNone(t *testing.T) {
 	assert.Equal(t, name, "")
 }
 
+// Almost immediate crash w/ memcheck:
+// === RUN   TestModuleImports
+// runtime: out of memory: cannot allocate 18446744073189457920-byte block (3702784 in use)
+// fatal error: out of memory
+//
+// Or:
+//
+//	module_test.go:67:
+//	      	Error Trace:	module_test.go:67
+//	      	Error:      	Not equal:
+//	      	            	expected: "function"
+//	      	            	actual  : ""
 func TestModuleImports(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
@@ -54,55 +67,57 @@ func TestModuleImports(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	imports := module.Imports()
+	imports, release := module.ImportsSafe()
+	defer release(module) // Keep module alive.
+
 	assert.Equal(t, len(imports), 4)
 
 	// 0
-	assert.Equal(t, imports[0].Module(), "ns")
-	assert.Equal(t, imports[0].Name(), "function")
+	assert.Equal(t, "ns", imports[0].Module())
+	assert.Equal(t, "function", imports[0].Name())
 
 	type0 := imports[0].Type()
-	assert.Equal(t, type0.Kind(), FUNCTION)
+	assert.Equal(t, FUNCTION, type0.Kind())
 
 	functionType := type0.IntoFunctionType()
-	assert.Equal(t, len(functionType.Params()), 0)
-	assert.Equal(t, len(functionType.Results()), 0)
+	assert.Equal(t, 0, len(functionType.Params()))
+	assert.Equal(t, 0, len(functionType.Results()))
 
 	// 1
-	assert.Equal(t, imports[1].Module(), "ns")
-	assert.Equal(t, imports[1].Name(), "global")
+	assert.Equal(t, "ns", imports[1].Module())
+	assert.Equal(t, "global", imports[1].Name())
 
 	type1 := imports[1].Type()
-	assert.Equal(t, type1.Kind(), GLOBAL)
+	assert.Equal(t, GLOBAL, type1.Kind())
 
 	globalType := type1.IntoGlobalType()
-	assert.Equal(t, globalType.ValueType().Kind(), F32)
-	assert.Equal(t, globalType.Mutability(), IMMUTABLE)
+	assert.Equal(t, F32, globalType.ValueType().Kind())
+	assert.Equal(t, IMMUTABLE, globalType.Mutability())
 
 	// 2
-	assert.Equal(t, imports[2].Module(), "ns")
-	assert.Equal(t, imports[2].Name(), "table")
+	assert.Equal(t, "ns", imports[2].Module())
+	assert.Equal(t, "table", imports[2].Name())
 
 	type2 := imports[2].Type()
-	assert.Equal(t, type2.Kind(), TABLE)
+	assert.Equal(t, TABLE, type2.Kind())
 
 	tableType := type2.IntoTableType()
 	tableLimits := tableType.Limits()
-	assert.Equal(t, tableType.ValueType().Kind(), FuncRef)
-	assert.Equal(t, tableLimits.Minimum(), uint32(1))
-	assert.Equal(t, tableLimits.Maximum(), uint32(2))
+	assert.Equal(t, FuncRef, tableType.ValueType().Kind())
+	assert.EqualValues(t, 1, tableLimits.Minimum())
+	assert.EqualValues(t, 2, tableLimits.Maximum())
 
 	// 3
-	assert.Equal(t, imports[3].Module(), "ns")
-	assert.Equal(t, imports[3].Name(), "memory")
+	assert.Equal(t, "ns", imports[3].Module())
+	assert.Equal(t, "memory", imports[3].Name())
 
 	type3 := imports[3].Type()
-	assert.Equal(t, type3.Kind(), MEMORY)
+	assert.Equal(t, MEMORY, type3.Kind())
 
 	memoryType := type3.IntoMemoryType()
 	memoryLimits := memoryType.Limits()
-	assert.Equal(t, memoryLimits.Minimum(), uint32(3))
-	assert.Equal(t, memoryLimits.Maximum(), uint32(4))
+	assert.EqualValues(t, 3, memoryLimits.Minimum())
+	assert.EqualValues(t, 4, memoryLimits.Maximum())
 }
 
 func TestModuleExports(t *testing.T) {
@@ -120,49 +135,51 @@ func TestModuleExports(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	exports := module.Exports()
-	assert.Equal(t, len(exports), 4)
+	exports, release := module.ExportsSafe()
+	defer release(module) // Keep module alive.
+
+	assert.Equal(t, 4, len(exports))
 
 	// 0
-	assert.Equal(t, exports[0].Name(), "function")
+	assert.Equal(t, "function", exports[0].Name())
 
 	type0 := exports[0].Type()
-	assert.Equal(t, type0.Kind(), FUNCTION)
+	assert.Equal(t, FUNCTION, type0.Kind())
 
 	functionType := type0.IntoFunctionType()
-	assert.Equal(t, len(functionType.Params()), 2)
-	assert.Equal(t, len(functionType.Results()), 0)
+	assert.Equal(t, 2, len(functionType.Params()))
+	assert.Equal(t, 0, len(functionType.Results()))
 
 	// 1
-	assert.Equal(t, exports[1].Name(), "global")
+	assert.Equal(t, "global", exports[1].Name())
 
 	type1 := exports[1].Type()
-	assert.Equal(t, type1.Kind(), GLOBAL)
+	assert.Equal(t, GLOBAL, type1.Kind())
 
 	globalType := type1.IntoGlobalType()
-	assert.Equal(t, globalType.ValueType().Kind(), I32)
-	assert.Equal(t, globalType.Mutability(), IMMUTABLE)
+	assert.Equal(t, I32, globalType.ValueType().Kind())
+	assert.Equal(t, IMMUTABLE, globalType.Mutability())
 
 	// 2
-	assert.Equal(t, exports[2].Name(), "table")
+	assert.Equal(t, "table", exports[2].Name())
 
 	type2 := exports[2].Type()
-	assert.Equal(t, type2.Kind(), TABLE)
+	assert.Equal(t, TABLE, type2.Kind())
 
 	tableType := type2.IntoTableType()
 	tableLimits := tableType.Limits()
-	assert.Equal(t, tableType.ValueType().Kind(), FuncRef)
-	assert.Equal(t, tableLimits.Minimum(), uint32(0))
+	assert.Equal(t, FuncRef, tableType.ValueType().Kind())
+	assert.EqualValues(t, 0, tableLimits.Minimum())
 
 	// 3
-	assert.Equal(t, exports[3].Name(), "memory")
+	assert.Equal(t, "memory", exports[3].Name())
 
 	type3 := exports[3].Type()
-	assert.Equal(t, type3.Kind(), MEMORY)
+	assert.Equal(t, MEMORY, type3.Kind())
 
 	memoryType := type3.IntoMemoryType()
 	memoryLimits := memoryType.Limits()
-	assert.Equal(t, memoryLimits.Minimum(), uint32(1))
+	assert.EqualValues(t, 1, memoryLimits.Minimum())
 }
 
 func TestModuleSerialize(t *testing.T) {
@@ -190,16 +207,18 @@ func TestModuleDeserialize(t *testing.T) {
 	moduleAgain, err := DeserializeModule(store, serializedModule)
 	assert.NoError(t, err)
 
+	// Note: We probably should use ExportsSafe (to be safe), but because
+	// moduleAgain is used at the end of the test, moduleAgain is kept alive.
 	exports := moduleAgain.Exports()
-	assert.Equal(t, len(exports), 1)
-	assert.Equal(t, exports[0].Name(), "function")
+	assert.Equal(t, 1, len(exports))
+	assert.Equal(t, "function", exports[0].Name())
 
 	type0 := exports[0].Type()
-	assert.Equal(t, type0.Kind(), FUNCTION)
+	assert.Equal(t, FUNCTION, type0.Kind())
 
 	functionType := type0.IntoFunctionType()
-	assert.Equal(t, len(functionType.Params()), 2)
-	assert.Equal(t, len(functionType.Results()), 0)
+	assert.Equal(t, 2, len(functionType.Params()))
+	assert.Equal(t, 0, len(functionType.Results()))
 
 	_, err = NewInstance(moduleAgain, NewImportObject())
 	assert.NoError(t, err)

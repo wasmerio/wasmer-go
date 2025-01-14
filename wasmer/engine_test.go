@@ -1,21 +1,24 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testEngine(t *testing.T, engine *Engine) {
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("tests.wasm"))
+	module, modrelease, err := NewModuleSafe(store, testGetBytes("tests.wasm"))
 	assert.NoError(t, err)
+	defer modrelease(module)
 
 	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
-	sum, err := instance.Exports.GetFunction("sum")
+	sum, release, err := instance.GetFunctionSafe("sum")
 	assert.NoError(t, err)
+	defer release(instance)
 
 	result, err := sum(37, 5)
 	assert.NoError(t, err)
@@ -43,7 +46,6 @@ func TestEngineWithTarget(t *testing.T) {
 	assert.NoError(t, err)
 
 	cpuFeatures := NewCpuFeatures()
-	assert.NoError(t, err)
 
 	target := NewTarget(triple, cpuFeatures)
 

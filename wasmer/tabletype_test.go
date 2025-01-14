@@ -1,8 +1,9 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTableType(t *testing.T) {
@@ -13,7 +14,7 @@ func TestTableType(t *testing.T) {
 	limits, err := NewLimits(minimum, maximum)
 	assert.NoError(t, err)
 
-	tableType := NewTableType(valueType, limits)
+	tableType := NewTableType(valueType.release(), limits)
 
 	valueTypeAgain := tableType.ValueType()
 	assert.Equal(t, valueTypeAgain.Kind(), I32)
@@ -31,7 +32,7 @@ func TestTableTypeIntoExternTypeAndBack(t *testing.T) {
 	limits, err := NewLimits(minimum, maximum)
 	assert.NoError(t, err)
 
-	tableType := NewTableType(valueType, limits)
+	tableType := NewTableType(valueType.release(), limits)
 	externType := tableType.IntoExternType()
 	assert.Equal(t, externType.Kind(), TABLE)
 

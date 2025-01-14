@@ -1,11 +1,12 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testGetBytes(moduleFileName string) []byte {
@@ -16,7 +17,7 @@ func testGetBytes(moduleFileName string) []byte {
 	return bytes
 }
 
-func testGetInstance(t *testing.T) *Instance {
+func testGetInstance(t *testing.T) (*Instance, func()) {
 	engine := NewEngine()
 	store := NewStore(engine)
 	module, err := NewModule(store, testGetBytes("tests.wasm"))
@@ -25,5 +26,9 @@ func testGetInstance(t *testing.T) *Instance {
 	instance, err := NewInstance(module, NewImportObject())
 	assert.NoError(t, err)
 
-	return instance
+	return instance, func() {
+		runtime.KeepAlive(store)
+		runtime.KeepAlive(module)
+		runtime.KeepAlive(instance)
+	}
 }

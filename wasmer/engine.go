@@ -2,47 +2,39 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
-import "runtime"
 
 // Engine is used by the Store to drive the compilation and the
 // execution of a WebAssembly module.
 type Engine struct {
-	_inner *C.wasm_engine_t
+	CPtrBase[*C.wasm_engine_t]
 }
 
 func newEngine(engine *C.wasm_engine_t) *Engine {
-	self := &Engine{
-		_inner: engine,
-	}
-
-	runtime.SetFinalizer(self, func(self *Engine) {
-		C.wasm_engine_delete(self.inner())
+	self := &Engine{CPtrBase: mkPtr(engine)}
+	self.SetFinalizer(func(v *C.wasm_engine_t) {
+		C.wasm_engine_delete(v)
 	})
-
 	return self
 }
 
 // NewEngine instantiates and returns a new Engine with the default configuration.
 //
-//   engine := NewEngine()
-//
+//	engine := NewEngine()
 func NewEngine() *Engine {
 	return newEngine(C.wasm_engine_new())
 }
 
 // NewEngineWithConfig instantiates and returns a new Engine with the given configuration.
 //
-//   config := NewConfig()
-//   engine := NewEngineWithConfig(config)
-//
+//	config := NewConfig()
+//	engine := NewEngineWithConfig(config)
 func NewEngineWithConfig(config *Config) *Engine {
 	return newEngine(C.wasm_engine_new_with_config(config.inner()))
 }
 
 // NewUniversalEngine instantiates and returns a new Universal engine.
 //
-//   engine := NewUniversalEngine()
-//
+//	engine := NewUniversalEngine()
 func NewUniversalEngine() *Engine {
 	config := NewConfig()
 	config.UseUniversalEngine()
@@ -52,8 +44,7 @@ func NewUniversalEngine() *Engine {
 
 // NewDylibEngine instantiates and returns a new Dylib engine.
 //
-//   engine := NewDylibEngine()
-//
+//	engine := NewDylibEngine()
 func NewDylibEngine() *Engine {
 	config := NewConfig()
 	config.UseDylibEngine()
@@ -62,7 +53,7 @@ func NewDylibEngine() *Engine {
 }
 
 func (self *Engine) inner() *C.wasm_engine_t {
-	return self._inner
+	return self.ptr()
 }
 
 // NewJITEngine is a deprecated function. Please use NewUniversalEngine instead.

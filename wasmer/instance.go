@@ -5,7 +5,7 @@ import "C"
 import "runtime"
 
 type Instance struct {
-	_inner  *C.wasm_instance_t
+	CPtrBase[*C.wasm_instance_t]
 	Exports *Exports
 
 	// without this, imported functions may be freed before execution of an exported function is complete.
@@ -55,9 +55,9 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	}
 
 	self := &Instance{
-		_inner:  instance,
-		Exports: newExports(instance, module),
-		imports: imports,
+		CPtrBase: mkPtr(instance),
+		Exports:  newExports(instance, module),
+		imports:  imports,
 	}
 
 	runtime.SetFinalizer(self, func(self *Instance) {
@@ -68,22 +68,22 @@ func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 }
 
 func (self *Instance) inner() *C.wasm_instance_t {
-	return self._inner
+	return self.ptr()
 }
 
 // GetRemainingPoints exposes wasm meterings remaining gas or points
 func (self *Instance) GetRemainingPoints() uint64 {
-	return uint64(C.wasmer_metering_get_remaining_points(self._inner))
+	return uint64(C.wasmer_metering_get_remaining_points(self.ptr()))
 }
 
 // GetRemainingPoints a bool to determine if the engine has been shutdown from meter exhaustion
 func (self *Instance) MeteringPointsExhausted() bool {
-	return bool(C.wasmer_metering_points_are_exhausted(self._inner))
+	return bool(C.wasmer_metering_points_are_exhausted(self.ptr()))
 }
 
 // SetRemainingPoints imposes a new gas limit on the wasm engine
 func (self *Instance) SetRemainingPoints(newLimit uint64) {
-	C.wasmer_metering_set_remaining_points(self._inner, C.uint64_t(newLimit))
+	C.wasmer_metering_set_remaining_points(self.ptr(), C.uint64_t(newLimit))
 }
 
 // ReleaseFn is a function to release resources
