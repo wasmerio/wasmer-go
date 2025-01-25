@@ -24,25 +24,22 @@ func newEngine(engine *C.wasm_engine_t) *Engine {
 
 // NewEngine instantiates and returns a new Engine with the default configuration.
 //
-//   engine := NewEngine()
-//
+//	engine := NewEngine()
 func NewEngine() *Engine {
 	return newEngine(C.wasm_engine_new())
 }
 
 // NewEngineWithConfig instantiates and returns a new Engine with the given configuration.
 //
-//   config := NewConfig()
-//   engine := NewEngineWithConfig(config)
-//
+//	config := NewConfig()
+//	engine := NewEngineWithConfig(config)
 func NewEngineWithConfig(config *Config) *Engine {
 	return newEngine(C.wasm_engine_new_with_config(config.inner()))
 }
 
 // NewUniversalEngine instantiates and returns a new Universal engine.
 //
-//   engine := NewUniversalEngine()
-//
+//	engine := NewUniversalEngine()
 func NewUniversalEngine() *Engine {
 	config := NewConfig()
 	config.UseUniversalEngine()
@@ -52,8 +49,7 @@ func NewUniversalEngine() *Engine {
 
 // NewDylibEngine instantiates and returns a new Dylib engine.
 //
-//   engine := NewDylibEngine()
-//
+//	engine := NewDylibEngine()
 func NewDylibEngine() *Engine {
 	config := NewConfig()
 	config.UseDylibEngine()

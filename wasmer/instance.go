@@ -28,7 +28,6 @@ type Instance struct {
 func NewInstance(module *Module, imports *ImportObject) (*Instance, error) {
 	var traps *C.wasm_trap_t
 	externs, err := imports.intoInner(module)
-
 	if err != nil {
 		return nil, err
 	}

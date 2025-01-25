@@ -53,6 +53,7 @@ package wasmer
 //     return to_wasi_env_read_inner(wasi_env, buffer, wasi_env_read_stderr);
 // }
 import "C"
+
 import (
 	"reflect"
 	"runtime"
@@ -82,8 +83,8 @@ const (
 
 // String returns the WasiVersion as a string.
 //
-//   WASI_VERSION_SNAPSHOT0.String() //  "wasi_unstable"
-//   WASI_VERSION_SNAPSHOT1.String() // "wasi_snapshot_preview1"
+//	WASI_VERSION_SNAPSHOT0.String() //  "wasi_unstable"
+//	WASI_VERSION_SNAPSHOT1.String() // "wasi_snapshot_preview1"
 func (self WasiVersion) String() string {
 	switch self {
 	case WASI_VERSION_LATEST:
@@ -101,7 +102,7 @@ func (self WasiVersion) String() string {
 // GetWasiVersion returns the WASI version of the given Module if any,
 // WASI_VERSION_INVALID otherwise.
 //
-//     wasiVersion := GetWasiVersion(module)
+//	wasiVersion := GetWasiVersion(module)
 func GetWasiVersion(module *Module) WasiVersion {
 	return WasiVersion(C.wasi_get_wasi_version(module.inner()))
 }
@@ -114,7 +115,7 @@ type WasiStateBuilder struct {
 // NewWasiStateBuilder creates a new WASI state builder, starting by
 // configuring the WASI program name.
 //
-//   wasiStateBuilder := NewWasiStateBuilder("test-program")
+//	wasiStateBuilder := NewWasiStateBuilder("test-program")
 func NewWasiStateBuilder(programName string) *WasiStateBuilder {
 	cProgramName := C.CString(programName)
 	defer C.free(unsafe.Pointer(cProgramName))
@@ -129,8 +130,8 @@ func NewWasiStateBuilder(programName string) *WasiStateBuilder {
 
 // Argument configures a new argument to the WASI module.
 //
-//    wasiStateBuilder := NewWasiStateBuilder("test-program").
-//    	Argument("--foo")
+//	wasiStateBuilder := NewWasiStateBuilder("test-program").
+//		Argument("--foo")
 func (self *WasiStateBuilder) Argument(argument string) *WasiStateBuilder {
 	cArgument := C.CString(argument)
 	defer C.free(unsafe.Pointer(cArgument))
@@ -141,9 +142,9 @@ func (self *WasiStateBuilder) Argument(argument string) *WasiStateBuilder {
 
 // Environment configures a new environment variable for the WASI module.
 //
-//    wasiStateBuilder := NewWasiStateBuilder("test-program").
-//    	Argument("--foo").
-//    	Environment("KEY", "VALUE")
+//	wasiStateBuilder := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("KEY", "VALUE")
 func (self *WasiStateBuilder) Environment(key string, value string) *WasiStateBuilder {
 	cKey := C.CString(key)
 	defer C.free(unsafe.Pointer(cKey))
@@ -161,10 +162,10 @@ func (self *WasiStateBuilder) Environment(key string, value string) *WasiStateBu
 // This opens the given directory at the virtual root /, and allows
 // the WASI module to read and write to the given directory.
 //
-//    wasiStateBuilder := NewWasiStateBuilder("test-program").
-//    	Argument("--foo").
-//    	Environment("KEY", "VALUE").
-//    	PreopenDirectory("bar")
+//	wasiStateBuilder := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("KEY", "VALUE").
+//		PreopenDirectory("bar")
 func (self *WasiStateBuilder) PreopenDirectory(preopenDirectory string) *WasiStateBuilder {
 	cPreopenDirectory := C.CString(preopenDirectory)
 	defer C.free(unsafe.Pointer(cPreopenDirectory))
@@ -177,10 +178,10 @@ func (self *WasiStateBuilder) PreopenDirectory(preopenDirectory string) *WasiSta
 // MapDirectory configures a new directory to pre-open with a
 // different name exposed to the WASI module.
 //
-//    wasiStateBuilder := NewWasiStateBuilder("test-program").
-//    	Argument("--foo").
-//    	Environment("KEY", "VALUE").
-//    	MapDirectory("the_host_current_directory", ".")
+//	wasiStateBuilder := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("KEY", "VALUE").
+//		MapDirectory("the_host_current_directory", ".")
 func (self *WasiStateBuilder) MapDirectory(alias string, directory string) *WasiStateBuilder {
 	cAlias := C.CString(alias)
 	defer C.free(unsafe.Pointer(cAlias))
@@ -203,11 +204,11 @@ func (self *WasiStateBuilder) InheritStdin() *WasiStateBuilder {
 
 // CaptureStdout configures the WASI module to capture its stdout.
 //
-//    wasiStateBuilder := NewWasiStateBuilder("test-program").
-//    	Argument("--foo").
-//    	Environment("KEY", "VALUE").
-//    	MapDirectory("the_host_current_directory", ".")
-//    	CaptureStdout()
+//	wasiStateBuilder := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("KEY", "VALUE").
+//		MapDirectory("the_host_current_directory", ".")
+//		CaptureStdout()
 func (self *WasiStateBuilder) CaptureStdout() *WasiStateBuilder {
 	C.wasi_config_capture_stdout(self.inner())
 
@@ -243,12 +244,12 @@ func (self *WasiStateBuilder) InheritStderr() *WasiStateBuilder {
 // It can return an error if the state builder contains invalid
 // configuration.
 //
-//    wasiEnvironment, err := NewWasiStateBuilder("test-program").
-//    	Argument("--foo").
-//    	Environment("KEY", "VALUE").
-//    	MapDirectory("the_host_current_directory", ".")
-//    	CaptureStdout().
-//      Finalize()
+//	wasiEnvironment, err := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("KEY", "VALUE").
+//		MapDirectory("the_host_current_directory", ".")
+//		CaptureStdout().
+//	  Finalize()
 func (self *WasiStateBuilder) Finalize() (*WasiEnvironment, error) {
 	return newWasiEnvironment(self)
 }
@@ -273,7 +274,6 @@ func newWasiEnvironment(stateBuilder *WasiStateBuilder) (*WasiEnvironment, error
 
 		return environment == nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +295,7 @@ func (self *WasiEnvironment) inner() *C.wasi_env_t {
 
 func buildByteSliceFromCBuffer(buffer *C.char, length int) []byte {
 	var byteSlice []byte
-	var header = (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
+	header := (*reflect.SliceHeader)(unsafe.Pointer(&byteSlice))
 
 	header.Data = uintptr(unsafe.Pointer(buffer))
 	header.Len = length
@@ -307,21 +307,21 @@ func buildByteSliceFromCBuffer(buffer *C.char, length int) []byte {
 // ReadStdout reads the WASI module stdout if captured with
 // WasiStateBuilder.CaptureStdout
 //
-//  wasiEnv, _ := NewWasiStateBuilder("test-program").
-//  	Argument("--foo").
-//  	Environment("ABC", "DEF").
-//  	Environment("X", "ZY").
-//  	MapDirectory("the_host_current_directory", ".").
-//  	CaptureStdout().
-//  	Finalize()
+//	wasiEnv, _ := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("ABC", "DEF").
+//		Environment("X", "ZY").
+//		MapDirectory("the_host_current_directory", ".").
+//		CaptureStdout().
+//		Finalize()
 //
-//  importObject, _ := wasiEnv.GenerateImportObject(store, module)
-//  instance, _ := NewInstance(module, importObject)
-//  start, _ := instance.Exports.GetWasiStartFunction()
+//	importObject, _ := wasiEnv.GenerateImportObject(store, module)
+//	instance, _ := NewInstance(module, importObject)
+//	start, _ := instance.Exports.GetWasiStartFunction()
 //
-//  start()
+//	start()
 //
-//  stdout := string(wasiEnv.ReadStdout())
+//	stdout := string(wasiEnv.ReadStdout())
 func (self *WasiEnvironment) ReadStdout() []byte {
 	var buffer *C.char
 	length := int(C.to_wasi_env_read_stdout(self.inner(), &buffer))
@@ -341,18 +341,18 @@ func (self *WasiEnvironment) ReadStderr() []byte {
 // GenerateImportObject generates an import object, that can be
 // extended and passed to NewInstance.
 //
-//  wasiEnv, _ := NewWasiStateBuilder("test-program").
-//  	Argument("--foo").
-//  	Environment("ABC", "DEF").
-//  	Environment("X", "ZY").
-//  	MapDirectory("the_host_current_directory", ".").
-//  	Finalize()
+//	wasiEnv, _ := NewWasiStateBuilder("test-program").
+//		Argument("--foo").
+//		Environment("ABC", "DEF").
+//		Environment("X", "ZY").
+//		MapDirectory("the_host_current_directory", ".").
+//		Finalize()
 //
-//  importObject, _ := wasiEnv.GenerateImportObject(store, module)
-//  instance, _ := NewInstance(module, importObject)
-//  start, _ := instance.Exports.GetWasiStartFunction()
+//	importObject, _ := wasiEnv.GenerateImportObject(store, module)
+//	instance, _ := NewInstance(module, importObject)
+//	start, _ := instance.Exports.GetWasiStartFunction()
 //
-//  start()
+//	start()
 func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) (*ImportObject, error) {
 	var wasiNamedExterns C.wasmer_named_extern_vec_t
 	C.wasmer_named_extern_vec_new_empty(&wasiNamedExterns)
@@ -360,7 +360,6 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 	err := maybeNewErrorFromWasmer(func() bool {
 		return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
 	})
-
 	if err != nil {
 		return nil, err
 	}

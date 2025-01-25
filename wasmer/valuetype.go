@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"runtime"
 	"unsafe"
@@ -35,12 +36,12 @@ const (
 
 // String returns the ValueKind as a string.
 //
-//   I32.String()     // "i32"
-//   I64.String()     // "i64"
-//   F32.String()     // "f32"
-//   F64.String()     // "f64"
-//   AnyRef.String()  // "anyref"
-//   FuncRef.String() // "funcref"
+//	I32.String()     // "i32"
+//	I64.String()     // "i64"
+//	F32.String()     // "f32"
+//	F64.String()     // "f64"
+//	AnyRef.String()  // "anyref"
+//	FuncRef.String() // "funcref"
 func (self ValueKind) String() string {
 	switch self {
 	case I32:
@@ -61,24 +62,24 @@ func (self ValueKind) String() string {
 
 // IsNumber returns true if the ValueKind is a number type.
 //
-//   I32.IsNumber()     // true
-//   I64.IsNumber()     // true
-//   F32.IsNumber()     // true
-//   F64.IsNumber()     // true
-//   AnyRef.IsNumber()  // false
-//   FuncRef.IsNumber() // false
+//	I32.IsNumber()     // true
+//	I64.IsNumber()     // true
+//	F32.IsNumber()     // true
+//	F64.IsNumber()     // true
+//	AnyRef.IsNumber()  // false
+//	FuncRef.IsNumber() // false
 func (self ValueKind) IsNumber() bool {
 	return bool(C.wasm_valkind_is_num(C.wasm_valkind_t(self)))
 }
 
 // IsReference returns true if the ValueKind is a reference.
 //
-//   I32.IsReference()     // false
-//   I64.IsReference()     // false
-//   F32.IsReference()     // false
-//   F64.IsReference()     // false
-//   AnyRef.IsReference()  // true
-//   FuncRef.IsReference() // true
+//	I32.IsReference()     // false
+//	I64.IsReference()     // false
+//	F32.IsReference()     // false
+//	F64.IsReference()     // false
+//	AnyRef.IsReference()  // true
+//	FuncRef.IsReference() // true
 func (self ValueKind) IsReference() bool {
 	return bool(C.wasm_valkind_is_ref(C.wasm_valkind_t(self)))
 }
@@ -96,7 +97,7 @@ type ValueType struct {
 
 // NewValueType instantiates a new ValueType given a ValueKind.
 //
-//   valueType := NewValueType(I32)
+//	valueType := NewValueType(I32)
 func NewValueType(kind ValueKind) *ValueType {
 	pointer := C.wasm_valtype_new(C.wasm_valkind_t(kind))
 
@@ -121,8 +122,8 @@ func (self *ValueType) inner() *C.wasm_valtype_t {
 
 // Kind returns the ValueType's ValueKind
 //
-//   valueType := NewValueType(I32)
-//   _ = valueType.Kind()
+//	valueType := NewValueType(I32)
+//	_ = valueType.Kind()
 func (self *ValueType) Kind() ValueKind {
 	kind := ValueKind(C.wasm_valtype_kind(self.inner()))
 
@@ -134,15 +135,15 @@ func (self *ValueType) Kind() ValueKind {
 // NewValueTypes instantiates a new ValueType array from a list of
 // ValueKind. Note that this list may be empty.
 //
-//   valueTypes := NewValueTypes(I32, I64, F32)
+//	valueTypes := NewValueTypes(I32, I64, F32)
 //
 // Note:️ NewValueTypes is specifically designed to help you declare
 // function types, e.g. with NewFunctionType:
 //
-//   functionType := NewFunctionType(
-//   	NewValueTypes(), // arguments
-//   	NewValueTypes(I32), // results
-//   )
+//	functionType := NewFunctionType(
+//		NewValueTypes(), // arguments
+//		NewValueTypes(I32), // results
+//	)
 func NewValueTypes(kinds ...ValueKind) []*ValueType {
 	valueTypes := make([]*ValueType, len(kinds))
 

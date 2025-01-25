@@ -17,6 +17,7 @@ package wasmer
 
 import (
 	"fmt"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -45,7 +46,6 @@ func ExampleError() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -56,7 +56,6 @@ func ExampleError() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -69,7 +68,6 @@ func ExampleError() {
 	//
 	// Let's get it.
 	divByZero, err := instance.Exports.GetFunction("div_by_zero")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `div_by_zero` function:", err))
 	}

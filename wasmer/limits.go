@@ -17,7 +17,7 @@ func LimitMaxUnbound() uint32 {
 // Limits classify the size range of resizeable storage associated
 // with memory types and table types.
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/types.html#limits
 type Limits struct {
@@ -26,7 +26,6 @@ type Limits struct {
 
 func newLimits(pointer *C.wasm_limits_t, ownedBy interface{}) *Limits {
 	limits, err := NewLimits(uint32(pointer.min), uint32(pointer.max))
-
 	if err != nil {
 		return nil
 	}

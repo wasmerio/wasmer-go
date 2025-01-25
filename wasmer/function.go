@@ -18,6 +18,7 @@ package wasmer
 //
 // extern void function_environment_finalizer(void *environment);
 import "C"
+
 import (
 	"fmt"
 	"runtime"
@@ -71,17 +72,16 @@ func newFunction(pointer *C.wasm_func_t, environment *functionEnvironment, owned
 // argument) it must receive a Value array as its single argument. At
 // runtime, this array will be empty.  The same applies to the result.
 //
-//   hostFunction := wasmer.NewFunction(
-//   	store,
-//   	wasmer.NewFunctionType(
-//   		wasmer.NewValueTypes(), // zero argument
-//   		wasmer.NewValueTypes(wasmer.I32), // one i32 result
-//   	),
-//   	func(args []wasmer.Value) ([]wasmer.Value, error) {
-//   		return []wasmer.Value{wasmer.NewI32(42)}, nil
-//   	},
-//   )
-//
+//	hostFunction := wasmer.NewFunction(
+//		store,
+//		wasmer.NewFunctionType(
+//			wasmer.NewValueTypes(), // zero argument
+//			wasmer.NewValueTypes(wasmer.I32), // one i32 result
+//		),
+//		func(args []wasmer.Value) ([]wasmer.Value, error) {
+//			return []wasmer.Value{wasmer.NewI32(42)}, nil
+//		},
+//	)
 func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value, error)) *Function {
 	hostFunction := &hostFunction{
 		store:    store,
@@ -107,7 +107,6 @@ func NewFunction(store *Store, ty *FunctionType, function func([]Value) ([]Value
 func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm_val_vec_t) *C.wasm_trap_t {
 	environment := (*functionEnvironment)(env)
 	hostFunction, err := hostFunctionStore.load(environment.hostFunctionStoreIndex)
-
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +114,6 @@ func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm
 	arguments := toValueList(args)
 	function := (hostFunction.function).(func([]Value) ([]Value, error))
 	results, err := (function)(arguments)
-
 	if err != nil {
 		pointer := newWasmTrap(hostFunction.store, err.Error())
 		return pointer
@@ -131,27 +129,27 @@ func function_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm
 // parameter which is an environment. This environment can be
 // anything. It is typed as interface{}.
 //
-//   type MyEnvironment struct {
-//   	foo int32
-//   }
+//	type MyEnvironment struct {
+//		foo int32
+//	}
 //
-//   environment := &MyEnvironment {
-//   	foo: 42,
-//   }
+//	environment := &MyEnvironment {
+//		foo: 42,
+//	}
 //
-//   hostFunction := wasmer.NewFunction(
-//   	store,
-//   	wasmer.NewFunctionType(
-//   		wasmer.NewValueTypes(), // zero argument
-//   		wasmer.NewValueTypes(wasmer.I32), // one i32 result
-//   	),
-//   	environment,
-//   	func(environment interface{}, args []wasmer.Value) ([]wasmer.Value, error) {
-//   		_ := environment.(*MyEnvironment)
+//	hostFunction := wasmer.NewFunction(
+//		store,
+//		wasmer.NewFunctionType(
+//			wasmer.NewValueTypes(), // zero argument
+//			wasmer.NewValueTypes(wasmer.I32), // one i32 result
+//		),
+//		environment,
+//		func(environment interface{}, args []wasmer.Value) ([]wasmer.Value, error) {
+//			_ := environment.(*MyEnvironment)
 //
-//   		return []wasmer.Value{wasmer.NewI32(42)}, nil
-//   	},
-//   )
+//			return []wasmer.Value{wasmer.NewI32(42)}, nil
+//		},
+//	)
 func NewFunctionWithEnvironment(store *Store, ty *FunctionType, userEnvironment interface{}, functionWithEnv func(interface{}, []Value) ([]Value, error)) *Function {
 	hostFunction := &hostFunction{
 		store:           store,
@@ -178,7 +176,6 @@ func NewFunctionWithEnvironment(store *Store, ty *FunctionType, userEnvironment 
 func function_with_environment_trampoline(env unsafe.Pointer, args *C.wasm_val_vec_t, res *C.wasm_val_vec_t) *C.wasm_trap_t {
 	environment := (*functionEnvironment)(env)
 	hostFunction, err := hostFunctionStore.load(environment.hostFunctionStoreIndex)
-
 	if err != nil {
 		panic(err)
 	}
@@ -186,7 +183,6 @@ func function_with_environment_trampoline(env unsafe.Pointer, args *C.wasm_val_v
 	arguments := toValueList(args)
 	function := (hostFunction.function).(func(interface{}, []Value) ([]Value, error))
 	results, err := (function)(hostFunction.userEnvironment, arguments)
-
 	if err != nil {
 		pointer := newWasmTrap(hostFunction.store, err.Error())
 		return pointer
@@ -211,9 +207,8 @@ func (self *Function) ownedBy() interface{} {
 
 // IntoExtern converts the Function into an Extern.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   extern := function.IntoExtern()
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	extern := function.IntoExtern()
 func (self *Function) IntoExtern() *Extern {
 	pointer := C.wasm_func_as_extern(self.inner())
 
@@ -222,9 +217,8 @@ func (self *Function) IntoExtern() *Extern {
 
 // Type returns the Function's FunctionType.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   ty := function.Type()
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	ty := function.Type()
 func (self *Function) Type() *FunctionType {
 	ty := C.wasm_func_type(self.inner())
 
@@ -235,37 +229,33 @@ func (self *Function) Type() *FunctionType {
 
 // ParameterArity returns the number of arguments the Function expects as per its definition.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   arity := function.ParameterArity()
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	arity := function.ParameterArity()
 func (self *Function) ParameterArity() uint {
 	return uint(C.wasm_func_param_arity(self.inner()))
 }
 
 // ParameterArity returns the number of results the Function will return.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   arity := function.ResultArity()
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	arity := function.ResultArity()
 func (self *Function) ResultArity() uint {
 	return uint(C.wasm_func_result_arity(self.inner()))
 }
 
 // Call will call the Function and return its results as native Go values.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   _ = function.Call(1, 2, 3)
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	_ = function.Call(1, 2, 3)
 func (self *Function) Call(parameters ...interface{}) (interface{}, error) {
 	return self.Native()(parameters...)
 }
 
 // Native will turn the Function into a native Go function that can be then called.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   nativeFunction = function.Native()
-//   _ = nativeFunction(1, 2, 3)
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	nativeFunction = function.Native()
+//	_ = nativeFunction(1, 2, 3)
 func (self *Function) Native() NativeFunction {
 	if self.lazyNative != nil {
 		return self.lazyNative
@@ -289,7 +279,6 @@ func (self *Function) Native() NativeFunction {
 
 		for nth, receivedParameter := range receivedParameters {
 			argument, err := fromGoValue(receivedParameter, expectedParameters[nth].Kind())
-
 			if err != nil {
 				return nil, newErrorWith(fmt.Sprintf("Argument %d of the function must of of type `%s`, cannot cast value to this type.", nth+1, err))
 			}

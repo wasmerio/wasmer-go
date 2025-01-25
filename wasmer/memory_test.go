@@ -91,7 +91,6 @@ func TestMemoryData(t *testing.T) {
 	data1[pointer] = 'A'
 	assert.Equal(t, "Aello, World!", string(data1[pointer:pointer+13]))
 	assert.Equal(t, "Aello, World!", string(data2[pointer:pointer+13]))
-
 }
 
 // This test exercises proper memory management.
@@ -106,8 +105,8 @@ func TestMemoryData(t *testing.T) {
 // https://github.com/wasmerio/wasmer-go/issues/391
 // https://github.com/wasmerio/wasmer-go/issues/364
 func TestSumLoop(t *testing.T) {
-	//debug.SetGCPercent(1) -- This also reproduces the issue,
-	//but having explicit runtime.GC call below does that too.
+	// debug.SetGCPercent(1) -- This also reproduces the issue,
+	// but having explicit runtime.GC call below does that too.
 	e := NewEngineWithConfig(NewConfig().UseCraneliftCompiler())
 	s := NewStore(e)
 
@@ -143,7 +142,7 @@ func TestSumLoop(t *testing.T) {
 	n := int32(0)
 	for i := range hi {
 		res, err := sum(n, i+1)
-		//runtime.GC()
+		// runtime.GC()
 		require.NoError(t, err)
 		n = res.(int32)
 	}

@@ -32,6 +32,7 @@ package wasmer
 //     return wasm_module_deserialize(store, &serialized_bytes);
 // }
 import "C"
+
 import (
 	"runtime"
 	"unsafe"
@@ -47,7 +48,7 @@ import (
 // initialization logic in the form of data and element segments or a
 // start function.
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/modules.html#modules
 type Module struct {
@@ -64,13 +65,12 @@ type Module struct {
 // It takes two arguments, the Store and the Wasm module as a byte
 // array of WAT code.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, err := wasmer.NewModule(store, wasmBytes)
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, err := wasmer.NewModule(store, wasmBytes)
 func NewModule(store *Store, bytes []byte) (*Module, error) {
 	wasmBytes, err := Wat2Wasm(string(bytes))
-
 	if err != nil {
 		return nil, err
 	}
@@ -110,15 +110,14 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 // byte array. The function returns an error describing why the bytes
 // are invalid, otherwise it returns nil.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   err := wasmer.ValidateModule(store, wasmBytes)
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	err := wasmer.ValidateModule(store, wasmBytes)
 //
-//   isValid := err != nil
+//	isValid := err != nil
 func ValidateModule(store *Store, bytes []byte) error {
 	wasmBytes, err := Wat2Wasm(string(bytes))
-
 	if err != nil {
 		return err
 	}
@@ -152,11 +151,11 @@ func (self *Module) inner() *C.wasm_module_t {
 //
 // Note:️ This is not part of the standard Wasm C API. It is Wasmer specific.
 //
-//   wasmBytes := []byte(`(module $moduleName)`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, _ := wasmer.NewModule(store, wasmBytes)
-//   name := module.Name()
+//	wasmBytes := []byte(`(module $moduleName)`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, _ := wasmer.NewModule(store, wasmBytes)
+//	name := module.Name()
 func (self *Module) Name() string {
 	var name C.wasm_name_t
 
@@ -171,11 +170,11 @@ func (self *Module) Name() string {
 
 // Imports returns the Module's imports as an ImportType array.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, _ := wasmer.NewModule(store, wasmBytes)
-//   imports := module.Imports()
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, _ := wasmer.NewModule(store, wasmBytes)
+//	imports := module.Imports()
 func (self *Module) Imports() []*ImportType {
 	if nil == self.importTypes {
 		self.importTypes = newImportTypes(self)
@@ -186,11 +185,11 @@ func (self *Module) Imports() []*ImportType {
 
 // Exports returns the Module's exports as an ExportType array.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, _ := wasmer.NewModule(store, wasmBytes)
-//   exports := module.Exports()
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, _ := wasmer.NewModule(store, wasmBytes)
+//	exports := module.Exports()
 func (self *Module) Exports() []*ExportType {
 	if nil == self.exportTypes {
 		self.exportTypes = newExportTypes(self)
@@ -201,11 +200,11 @@ func (self *Module) Exports() []*ExportType {
 
 // Serialize serializes the module and returns the Wasm code as an byte array.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, _ := wasmer.NewModule(store, wasmBytes)
-//   bytes, err := module.Serialize()
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, _ := wasmer.NewModule(store, wasmBytes)
+//	bytes, err := module.Serialize()
 func (self *Module) Serialize() ([]byte, error) {
 	var bytes C.wasm_byte_vec_t
 
@@ -214,7 +213,6 @@ func (self *Module) Serialize() ([]byte, error) {
 
 		return bytes.data == nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -227,13 +225,13 @@ func (self *Module) Serialize() ([]byte, error) {
 
 // DeserializeModule deserializes an byte array to a Module.
 //
-//   wasmBytes := []byte(`...`)
-//   engine := wasmer.NewEngine()
-//   store := wasmer.NewStore(engine)
-//   module, _ := wasmer.NewModule(store, wasmBytes)
-//   bytes, err := module.Serialize()
-//   //...
-//   deserializedModule, err := wasmer.DeserializeModule(store, bytes)
+//	wasmBytes := []byte(`...`)
+//	engine := wasmer.NewEngine()
+//	store := wasmer.NewStore(engine)
+//	module, _ := wasmer.NewModule(store, wasmBytes)
+//	bytes, err := module.Serialize()
+//	//...
+//	deserializedModule, err := wasmer.DeserializeModule(store, bytes)
 func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 	var bytesPtr *C.uint8_t
 	bytesLength := len(bytes)
@@ -252,7 +250,6 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 
 		return self._inner == nil
 	})
-
 	if err != nil {
 		return nil, err
 	}

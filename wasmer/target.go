@@ -23,9 +23,9 @@ func newTarget(target *C.wasmer_target_t) *Target {
 
 // NewTarget creates a new target.
 //
-//  triple, err := NewTriple("aarch64-unknown-linux-gnu")
-//  cpuFeatures := NewCpuFeatures()
-//  target := NewTarget(triple, cpuFeatures)
+//	triple, err := NewTriple("aarch64-unknown-linux-gnu")
+//	cpuFeatures := NewCpuFeatures()
+//	target := NewTarget(triple, cpuFeatures)
 func NewTarget(triple *Triple, cpuFeatures *CpuFeatures) *Target {
 	return newTarget(C.wasmer_target_new(triple.inner(), cpuFeatures.inner()))
 }
@@ -55,7 +55,7 @@ func newTriple(triple *C.wasmer_triple_t) *Triple {
 // NewTriple creates a new triple, otherwise it returns an error
 // specifying why the provided triple isn't valid.
 //
-//   triple, err := NewTriple("aarch64-unknown-linux-gnu")
+//	triple, err := NewTriple("aarch64-unknown-linux-gnu")
 func NewTriple(triple string) (*Triple, error) {
 	cTripleName := newName(triple)
 	defer C.wasm_name_delete(&cTripleName)
@@ -67,7 +67,6 @@ func NewTriple(triple string) (*Triple, error) {
 
 		return cTriple == nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +150,6 @@ func (self *CpuFeatures) Add(feature string) error {
 	err := maybeNewErrorFromWasmer(func() bool {
 		return false == C.wasmer_cpu_features_add(self.inner(), &cFeature)
 	})
-
 	if err != nil {
 		return err
 	}

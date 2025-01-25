@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"fmt"
 	"runtime"
@@ -54,9 +55,8 @@ func (self *Exports) inner() *C.wasm_extern_vec_t {
 // Note: If the name does not refer to an existing export, Get will
 // return an Error.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   extern, error := instance.Exports.Get("an_export")
-//
+//	instance, _ := NewInstance(module, NewImportObject())
+//	extern, error := instance.Exports.Get("an_export")
 func (self *Exports) Get(name string) (*Extern, error) {
 	export, exists := self.exports[name]
 
@@ -75,16 +75,14 @@ func (self *Exports) Get(name string) (*Extern, error) {
 // Note: If the export is not a function, GetRawFunction will return
 // nil as its result.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   exportedFunc, error := instance.Exports.GetRawFunction("an_exported_function")
+//	instance, _ := NewInstance(module, NewImportObject())
+//	exportedFunc, error := instance.Exports.GetRawFunction("an_exported_function")
 //
-//   if error != nil && exportedFunc != nil {
-//       exportedFunc.Call()
-//   }
-//
+//	if error != nil && exportedFunc != nil {
+//	    exportedFunc.Call()
+//	}
 func (self *Exports) GetRawFunction(name string) (*Function, error) {
 	exports, err := self.Get(name)
-
 	if err != nil {
 		return nil, err
 	}
@@ -104,16 +102,14 @@ func (self *Exports) GetRawFunction(name string) (*Function, error) {
 // Note: If the export is not a function, GetFunction will return nil
 // as its result.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   exportedFunc, error := instance.Exports.GetFunction("an_exported_function")
+//	instance, _ := NewInstance(module, NewImportObject())
+//	exportedFunc, error := instance.Exports.GetFunction("an_exported_function")
 //
-//   if error != nil && exportedFunc != nil {
-//       exportedFunc()
-//   }
-//
+//	if error != nil && exportedFunc != nil {
+//	    exportedFunc()
+//	}
 func (self *Exports) GetFunction(name string) (NativeFunction, error) {
 	function, err := self.GetRawFunction(name)
-
 	if err != nil {
 		return nil, err
 	}
@@ -129,12 +125,10 @@ func (self *Exports) GetFunction(name string) (NativeFunction, error) {
 // Note: If the export is not a global, GetGlobal will return nil as a
 // result.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   exportedGlobal, error := instance.Exports.GetGlobal("an_exported_global")
-//
+//	instance, _ := NewInstance(module, NewImportObject())
+//	exportedGlobal, error := instance.Exports.GetGlobal("an_exported_global")
 func (self *Exports) GetGlobal(name string) (*Global, error) {
 	exports, err := self.Get(name)
-
 	if err != nil {
 		return nil, err
 	}
@@ -150,12 +144,10 @@ func (self *Exports) GetGlobal(name string) (*Global, error) {
 // Note: If the export is not a table, GetTable will return nil as a
 // result.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   exportedTable, error := instance.Exports.GetTable("an_exported_table")
-//
+//	instance, _ := NewInstance(module, NewImportObject())
+//	exportedTable, error := instance.Exports.GetTable("an_exported_table")
 func (self *Exports) GetTable(name string) (*Table, error) {
 	exports, err := self.Get(name)
-
 	if err != nil {
 		return nil, err
 	}
@@ -171,12 +163,10 @@ func (self *Exports) GetTable(name string) (*Table, error) {
 // Note: If the export is not a memory, GetMemory will return nil as a
 // result.
 //
-//   instance, _ := NewInstance(module, NewImportObject())
-//   exportedMemory, error := instance.Exports.GetMemory("an_exported_memory")
-//
+//	instance, _ := NewInstance(module, NewImportObject())
+//	exportedMemory, error := instance.Exports.GetMemory("an_exported_memory")
 func (self *Exports) GetMemory(name string) (*Memory, error) {
 	exports, err := self.Get(name)
-
 	if err != nil {
 		return nil, err
 	}

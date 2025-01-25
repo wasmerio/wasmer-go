@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"runtime"
 	"unsafe"
@@ -69,9 +70,9 @@ func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportTyp
 //
 // Note: An extern type is anything implementing IntoExternType: FunctionType, GlobalType, MemoryType, TableType.
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   exportType := NewExportType("a_global", globalType)
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	exportType := NewExportType("a_global", globalType)
 func NewExportType(name string, ty IntoExternType) *ExportType {
 	nameName := newName(name)
 	externType := ty.IntoExternType().inner()
@@ -98,8 +99,8 @@ func (self *ExportType) ownedBy() interface{} {
 
 // Name returns the name of the export type.
 //
-//   exportType := NewExportType("a_global", globalType)
-//   exportType.Name() // "global"
+//	exportType := NewExportType("a_global", globalType)
+//	exportType.Name() // "global"
 func (self *ExportType) Name() string {
 	byteVec := C.wasm_exporttype_name(self.inner())
 	name := C.GoStringN(byteVec.data, C.int(byteVec.size))
@@ -111,8 +112,8 @@ func (self *ExportType) Name() string {
 
 // Type returns the type of the export type.
 //
-//   exportType := NewExportType("a_global", globalType)
-//   exportType.Type() // ExternType
+//	exportType := NewExportType("a_global", globalType)
+//	exportType.Type() // ExternType
 func (self *ExportType) Type() *ExternType {
 	ty := C.wasm_exporttype_type(self.inner())
 

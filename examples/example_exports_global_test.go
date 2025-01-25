@@ -4,8 +4,8 @@
 // This example illustrates how to use exported globals. They come
 // in 2 flavors:
 //
-//   1. Immutable globals (const),
-//   2. Mutable globals.
+//  1. Immutable globals (const),
+//  2. Mutable globals.
 //
 // You can run the example directly by executing in Wasmer root:
 //
@@ -18,6 +18,7 @@ package wasmer
 
 import (
 	"fmt"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -44,7 +45,6 @@ func ExampleGlobal_Set() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -55,7 +55,6 @@ func ExampleGlobal_Set() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -64,13 +63,11 @@ func ExampleGlobal_Set() {
 	//
 	// The Wasm module exports some globals. Let's get them.
 	one, err := instance.Exports.GetGlobal("one")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `one` global:", err))
 	}
 
 	some, err := instance.Exports.GetGlobal("some")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `some` global:", err))
 	}
@@ -91,19 +88,16 @@ func ExampleGlobal_Set() {
 	// We will use an exported function for the `one` global
 	// and the Global API for `some`.
 	getOne, err := instance.Exports.GetFunction("get_one")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `get_one` function:", err))
 	}
 
 	oneValue, err := getOne()
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `get_one` function:", err))
 	}
 
 	someValue, err := some.Get()
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `some` global value:", err))
 	}
@@ -134,7 +128,6 @@ func ExampleGlobal_Set() {
 	//
 	// We will use both for the `some` global.
 	setSome, err := instance.Exports.GetFunction("set_some")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `set_some` function:", err))
 	}

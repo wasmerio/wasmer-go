@@ -18,6 +18,7 @@ package wasmer
 
 import (
 	"fmt"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -43,7 +44,6 @@ func ExampleInstance() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -54,7 +54,6 @@ func ExampleInstance() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -68,14 +67,12 @@ func ExampleInstance() {
 	// as the main focus of this example is to show how to create an instance out
 	// of a Wasm module and have basic interactions with it.
 	addOne, err := instance.Exports.GetFunction("add_one")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `add_one` function:", err))
 	}
 
 	fmt.Println("Calling `add_one` function...")
 	result, err := addOne(1)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `add_one` function:", err))
 	}

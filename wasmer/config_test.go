@@ -69,7 +69,6 @@ func TestConfigForMetering(t *testing.T) {
 }
 
 func TestConfigForMeteringFn(t *testing.T) {
-
 	config := NewConfig().PushMeteringMiddlewarePtr(800000000, getInternalCPointer())
 	engine := NewEngineWithConfig(config)
 	store := NewStore(engine)
@@ -96,13 +95,13 @@ func TestConfig_AllCombinations(t *testing.T) {
 		engineName   string
 		config       *Config
 	}
-	var configs = []Test{}
+	configs := []Test{}
 
 	is_amd64 := runtime.GOARCH == "amd64"
-	//is_aarch64 := runtime.GOARCH == "arm64"
+	// is_aarch64 := runtime.GOARCH == "arm64"
 	is_linux := runtime.GOOS == "linux"
 	is_darwin := runtime.GOOS == "darwin"
-	//is_windows := runtime.GOOS == "windows"
+	// is_windows := runtime.GOOS == "windows"
 	has_universal := IsEngineAvailable(UNIVERSAL)
 	has_dylib := IsEngineAvailable(DYLIB)
 

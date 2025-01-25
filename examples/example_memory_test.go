@@ -2,9 +2,9 @@
 //
 // This example illustrates the basics of the basics of interacting with Wasm module memory:
 //
-//   1. How to load a Wasm modules as bytes
-//   2. How to compile the module
-//   3. How to create an instance of the module
+//  1. How to load a Wasm modules as bytes
+//  2. How to compile the module
+//  3. How to create an instance of the module
 //
 // You can run the example directly by executing in Wasmer root:
 //
@@ -17,8 +17,9 @@ package wasmer
 
 import (
 	"fmt"
-	"github.com/wasmerio/wasmer-go/wasmer"
 	"unsafe"
+
+	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
 func ExampleMemory() {
@@ -51,7 +52,6 @@ func ExampleMemory() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -62,7 +62,6 @@ func ExampleMemory() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -71,25 +70,21 @@ func ExampleMemory() {
 	//
 	// These function will be used later in this example.
 	memSize, err := instance.Exports.GetFunction("mem_size")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `mem_size` function:", err))
 	}
 
 	getAt, err := instance.Exports.GetFunction("get_at")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `get_at` function:", err))
 	}
 
 	setAt, err := instance.Exports.GetFunction("set_at")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `set_at` function:", err))
 	}
 
 	memory, err := instance.Exports.GetMemory("memory")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `memory` memory:", err))
 	}
