@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - 2025-01-25_project-cleanup
 jobs:
   test:
     name: Build and Test
