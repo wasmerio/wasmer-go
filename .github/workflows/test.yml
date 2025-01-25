@@ -4,31 +4,26 @@ on:
   push:
     branches:
       - master
-      - staging
-      - trying
-  schedule:
-    - cron: '0 2 * * *' # To test `wasmer-nightly` with `libwasmer_archive_name`.
-
 jobs:
   test:
     name: Build and Test
 
     strategy:
       matrix:
-        go: [1.14, 1.15]
+        go: [1.14, 1.15, 1.22]
         target:
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
+          - id: "linux-amd64"
+            os: "ubuntu-24.04"
 
           #- id: 'linux-aarch64'
           #  os: ['self-hosted', 'linux', 'ARM64']
 
-          - id: 'darwin-amd64'
-            os: 'macos-latest'
+          - id: "darwin-amd64"
+            os: "macos-latest"
 
-          - id: 'linux-amd64'
-            os: 'ubuntu-18.04'
-            libwasmer_archive_name: 'wasmer-linux-amd64.tar.gz'
+          - id: "linux-amd64"
+            os: "ubuntu-24.04"
+            libwasmer_archive_name: "wasmer-linux-amd64.tar.gz"
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
@@ -66,7 +61,8 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer-nightly/releases/latest | jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
+          libwasmer_url=$(curl -s https://api.github.com/repos/wasmerio/wasmer/releases/latest | \
+            jq --raw-output '.assets[] | select(.name == "${{ matrix.target.libwasmer_archive_name }}") | .browser_download_url')
           mkdir -p libwasmer
           curl -L $libwasmer_url > release.tar.gz
           tar xzvf release.tar.gz -C libwasmer
@@ -78,6 +74,7 @@ jobs:
         shell: bash
         run: |
           just examples
+
 # Skipped for now because of Github banning the API request from actions.
 # You can find more info in this PR: https://github.com/wasmerio/wasmer-go/pull/118#issuecomment-588487544
 #       - name: Test bazel build
