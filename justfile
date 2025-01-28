@@ -3,13 +3,13 @@ test *ARGS:
 	#!/usr/bin/env bash
 	cd wasmer
 	# Run the tests.
-	GODEBUG=cgocheck=2 go test -v {{ARGS}}
+	go test -v {{ARGS}}
 
 examples:
 	#!/usr/bin/env bash
 	cd examples
 	# Run the examples.
-	GODEBUG=cgocheck=2 go test -v
+	go test -v
 
 # Preview the documentation (needs `godoc`, see `go get -v golang.org/x/tools/cmd/godoc`).
 preview-doc ADDRESS="0.0.0.0" PORT="9090":
