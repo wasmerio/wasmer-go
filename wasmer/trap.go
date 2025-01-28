@@ -66,7 +66,7 @@ func trapWithFinalizer(trap *Trap, ownedBy interface{}) *Trap {
 	return trap
 }
 
-// Creates a new trap with a message.
+// NewTrap with a message.
 //
 //	engine := wasmer.NewEngine()
 //	store := wasmer.NewStore(engine)

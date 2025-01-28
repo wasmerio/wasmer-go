@@ -75,7 +75,7 @@ func (self *Instance) GetRemainingPoints() uint64 {
 	return uint64(C.wasmer_metering_get_remaining_points(self._inner))
 }
 
-// GetRemainingPoints a bool to determine if the engine has been shutdown from meter exhaustion
+// MeteringPointsExhausted is a bool which determines if the engine has been shutdown from meter exhaustion
 func (self *Instance) MeteringPointsExhausted() bool {
 	return bool(C.wasmer_metering_points_are_exhausted(self._inner))
 }
@@ -126,7 +126,7 @@ func (self *Instance) GetFunctionSafe(name string) (NativeFunction, ReleaseFn[*I
 	return fn, keepAlive, nil
 }
 
-// Force to close the Instance.
+// Close the instance
 //
 // A runtime finalizer is registered on the Instance, but it is
 // possible to force the destruction of the Instance by calling Close

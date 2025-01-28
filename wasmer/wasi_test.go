@@ -38,6 +38,7 @@ func TestWasiWithCapturedStdout(t *testing.T) {
 	assert.NoError(t, err)
 
 	importObject, err := wasiEnv.GenerateImportObject(store, module)
+	assert.NoError(t, err)
 
 	instance, err := NewInstance(module, importObject)
 	assert.NoError(t, err)

@@ -41,7 +41,7 @@ func (self *Store) inner() *C.wasm_store_t {
 	return self._inner
 }
 
-// Force to close the Store.
+// Close the store forcingly
 //
 // A runtime finalizer is registered on the Store, but it is possible
 // to force the destruction of the Store by calling Close manually.

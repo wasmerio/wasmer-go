@@ -88,7 +88,7 @@ func (self *ImportObject) ContainsNamespace(name string) bool {
 func (self *ImportObject) Register(namespaceName string, namespace map[string]IntoExtern) {
 	_, exists := self.externs[namespaceName]
 
-	if exists == false {
+	if !exists {
 		self.externs[namespaceName] = namespace
 	} else {
 		for key, value := range namespace {

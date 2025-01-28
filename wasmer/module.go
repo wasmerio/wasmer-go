@@ -130,6 +130,7 @@ func ValidateModule(store *Store, bytes []byte) error {
 	}
 
 	err2 := maybeNewErrorFromWasmer(func() bool {
+		//lint:ignore S1002 simplifying this expression breaks compilation
 		return false == C.to_wasm_module_validate(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength))
 	})
 
@@ -261,7 +262,7 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 	return self, nil
 }
 
-// Force to close the Module.
+// Close the module forcefully
 //
 // A runtime finalizer is registered on the Module, but it is possible
 // to force the destruction of the Module by calling Close manually.

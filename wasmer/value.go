@@ -28,7 +28,7 @@ import (
 	"unsafe"
 )
 
-// Value; WebAssembly computations manipulate values of basic value types:
+// Value with WebAssembly computations manipulate values of basic value types:
 //
 // • Integer (32 or 64 bit width),
 //
@@ -210,21 +210,21 @@ func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
 
 		of := (*int32)(unsafe.Pointer(&output.of))
 
-		switch value.(type) {
+		switch typed := value.(type) {
 		case int8:
-			*of = int32(value.(int8))
+			*of = int32(typed)
 		case uint8:
-			*of = int32(value.(uint8))
+			*of = int32(typed)
 		case int16:
-			*of = int32(value.(int16))
+			*of = int32(typed)
 		case uint16:
-			*of = int32(value.(uint16))
+			*of = int32(typed)
 		case int32:
-			*of = value.(int32)
+			*of = typed
 		case int:
-			*of = int32(value.(int))
+			*of = int32(typed)
 		case uint:
-			*of = int32(value.(uint))
+			*of = int32(typed)
 		default:
 			return output, newErrorWith("i32")
 		}
@@ -233,25 +233,25 @@ func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
 
 		of := (*int64)(unsafe.Pointer(&output.of))
 
-		switch value.(type) {
+		switch typed := value.(type) {
 		case int8:
-			*of = int64(value.(int8))
+			*of = int64(typed)
 		case uint8:
-			*of = int64(value.(uint8))
+			*of = int64(typed)
 		case int16:
-			*of = int64(value.(int16))
+			*of = int64(typed)
 		case uint16:
-			*of = int64(value.(uint16))
+			*of = int64(typed)
 		case int32:
-			*of = int64(value.(int32))
+			*of = int64(typed)
 		case uint32:
-			*of = int64(value.(int64))
+			*of = int64(typed)
 		case int64:
-			*of = value.(int64)
+			*of = typed
 		case int:
-			*of = int64(value.(int))
+			*of = int64(typed)
 		case uint:
-			*of = int64(value.(uint))
+			*of = int64(typed)
 		default:
 			return output, newErrorWith("i64")
 		}
@@ -260,9 +260,9 @@ func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
 
 		of := (*float32)(unsafe.Pointer(&output.of))
 
-		switch value.(type) {
+		switch typed := value.(type) {
 		case float32:
-			*of = value.(float32)
+			*of = typed
 		default:
 			return output, newErrorWith("f32")
 		}
@@ -271,11 +271,11 @@ func fromGoValue(value interface{}, kind ValueKind) (C.wasm_val_t, error) {
 
 		of := (*float64)(unsafe.Pointer(&output.of))
 
-		switch value.(type) {
+		switch typed := value.(type) {
 		case float32:
-			*of = float64(value.(float32))
+			*of = float64(typed)
 		case float64:
-			*of = value.(float64)
+			*of = typed
 		default:
 			return output, newErrorWith("f64")
 		}

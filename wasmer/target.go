@@ -34,7 +34,7 @@ func (self *Target) inner() *C.wasmer_target_t {
 	return self._inner
 }
 
-// Triple; historically such things had three fields, though they have
+// Triple with historically such things had three fields, though they have
 // added additional fields over time.
 type Triple struct {
 	_inner *C.wasmer_triple_t
@@ -148,6 +148,7 @@ func (self *CpuFeatures) Add(feature string) error {
 	defer C.wasm_name_delete(&cFeature)
 
 	err := maybeNewErrorFromWasmer(func() bool {
+		//lint:ignore S1002 simplifying this expression breaks compilation
 		return false == C.wasmer_cpu_features_add(self.inner(), &cFeature)
 	})
 	if err != nil {

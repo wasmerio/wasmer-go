@@ -60,7 +60,7 @@ func (self *Exports) inner() *C.wasm_extern_vec_t {
 func (self *Exports) Get(name string) (*Extern, error) {
 	export, exists := self.exports[name]
 
-	if exists == false {
+	if !exists {
 		return nil, newErrorWith(fmt.Sprintf("Export `%s` does not exist", name))
 	}
 
@@ -186,7 +186,7 @@ func (self *Exports) GetWasiStartFunction() (NativeFunction, error) {
 	return newFunction(start, nil, nil).Native(), nil
 }
 
-// Force to close the Exports.
+// Close the Exports
 //
 // A runtime finalizer is registered on the Exports, but it is
 // possible to force the destruction of the Exports by calling Close

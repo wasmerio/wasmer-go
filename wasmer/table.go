@@ -15,7 +15,7 @@ func (self *TableSize) ToUint32() uint32 {
 	return uint32(C.wasm_table_size_t(*self))
 }
 
-// A table instance is the runtime representation of a table. It holds
+// Table is the runtime representation of a table. It holds
 // a vector of function elements and an optional maximum size, if one
 // was specified in the table type at the table’s definition site.
 //

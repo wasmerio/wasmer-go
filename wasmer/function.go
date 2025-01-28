@@ -235,7 +235,7 @@ func (self *Function) ParameterArity() uint {
 	return uint(C.wasm_func_param_arity(self.inner()))
 }
 
-// ParameterArity returns the number of results the Function will return.
+// ResultArity returns the number of results the Function will return.
 //
 //	function, _ := instance.Exports.GetFunction("exported_function")
 //	arity := function.ResultArity()

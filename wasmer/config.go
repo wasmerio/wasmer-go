@@ -19,7 +19,7 @@ const (
 	SINGLEPASS = CompilerKind(C.SINGLEPASS)
 )
 
-// Strings returns the CompilerKind as a string.
+// String returns the CompilerKind as a string.
 //
 //	CRANELIFT.String() // "cranelift"
 //	LLVM.String() // "llvm"
@@ -62,7 +62,7 @@ const (
 	NATIVE = DYLIB
 )
 
-// Strings returns the EngineKind as a string.
+// String returns the EngineKind as a string.
 //
 //	JIT.String() // "jit"
 //	NATIVE.String() // "native"
@@ -105,7 +105,7 @@ func (self *Config) inner() *C.wasm_config_t {
 	return self._inner
 }
 
-// UseNativeEngine sets the engine to Universal in the configuration.
+// UseUniversalEngine sets the engine to Universal in the configuration.
 //
 //	config := NewConfig()
 //	config.UseUniversalEngine()
@@ -269,7 +269,7 @@ func (self *Config) UseSinglepassCompiler() *Config {
 	return self
 }
 
-// Use a specific target for doing cross-compilation.
+// UseTarget for doing cross-compilation.
 //
 //	triple, _ := NewTriple("aarch64-unknown-linux-gnu")
 //	cpuFeatures := NewCpuFeatures()

@@ -80,7 +80,7 @@ func (self *Memory) Size() Pages {
 	return Pages(C.wasm_memory_size(self.inner()))
 }
 
-// Size returns the Memory's size as a number of bytes.
+// DataSize as a number of bytes.
 //
 //	memory, _ := instance.Exports.GetMemory("exported_memory")
 //	size := memory.DataSize()

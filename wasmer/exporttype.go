@@ -122,7 +122,7 @@ func (self *ExportType) Type() *ExternType {
 	return newExternType(ty, self.ownedBy())
 }
 
-// Force to close the ExportType.
+// Close the ExportType
 //
 // A runtime finalizer is registered on the ExportType, but it is
 // possible to force the destruction of the ExportType by calling

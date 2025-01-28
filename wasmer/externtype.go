@@ -4,7 +4,7 @@ package wasmer
 import "C"
 import "runtime"
 
-// Represents the kind of an Extern.
+// ExternKind representation
 type ExternKind C.wasm_externkind_t
 
 const (

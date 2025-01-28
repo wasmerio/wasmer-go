@@ -358,6 +358,7 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 	C.wasmer_named_extern_vec_new_empty(&wasiNamedExterns)
 
 	err := maybeNewErrorFromWasmer(func() bool {
+		//lint:ignore S1002 simplifying this expression breaks compilation
 		return false == C.wasi_get_unordered_imports(store.inner(), module.inner(), self.inner(), &wasiNamedExterns)
 	})
 	if err != nil {
@@ -380,7 +381,7 @@ func (self *WasiEnvironment) GenerateImportObject(store *Store, module *Module) 
 
 		_, exists := importObject.externs[module]
 
-		if exists == false {
+		if !exists {
 			importObject.externs[module] = make(map[string]IntoExtern)
 		}
 

@@ -145,7 +145,7 @@ func (self *ImportType) Type() *ExternType {
 	return newExternType(ty, self.ownedBy())
 }
 
-// Force to close the ImportType.
+// Close the ImportType
 //
 // A runtime finalizer is registered on the ImportType, but it is
 // possible to force the destruction of the ImportType by calling
