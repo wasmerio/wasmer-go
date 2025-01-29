@@ -1,4 +1,4 @@
-name: Build and Test
+name: Code QA
 
 on:
   pull_request:
@@ -7,10 +7,70 @@ on:
   push:
     branches:
       - master
+
 jobs:
+  staticcheck:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Staticcheck
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2024.1.1
+          staticcheck ./...
+  gofumpt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Gofumpt
+        run: |
+          go install mvdan.cc/gofumpt@v0.7.0
+          output=$(gofumpt -l .)
+          if [ ! -z "$output" ]; then echo "$output" && exit 1; fi
+        shell: bash
+
+  govulncheck:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Vulnerabilities
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  govet:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Vet
+        run: |
+          go vet ./...
+
   test:
     name: Build and Test
-
     strategy:
       matrix:
         go: [1.21, 1.22]
@@ -30,7 +90,6 @@ jobs:
       fail-fast: true
 
     runs-on: ${{ matrix.target.os }}
-
     steps:
       - name: Check out code
         uses: actions/checkout@v2
