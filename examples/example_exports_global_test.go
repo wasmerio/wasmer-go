@@ -115,7 +115,6 @@ func ExampleGlobal_Set() {
 	}
 
 	oneValue, err = getOne()
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `get_one` function:", err))
 	}
@@ -133,13 +132,11 @@ func ExampleGlobal_Set() {
 	}
 
 	_, err = setSome(float32(21.0))
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `set_some` function:", err))
 	}
 
 	someValue, err = some.Get()
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `some` global value:", err))
 	}
@@ -147,13 +144,11 @@ func ExampleGlobal_Set() {
 	fmt.Printf("`some` value after `set_some`: %.1f\n", someValue)
 
 	err = some.Set(float32(42.0), wasmer.F32)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to set the `some` global value:", err))
 	}
 
 	someValue, err = some.Get()
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the `some` global value:", err))
 	}

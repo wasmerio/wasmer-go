@@ -132,13 +132,11 @@ func ExampleMemory() {
 	memAddr := 0x2220
 	val := 0xFEFEFFE
 	_, err = setAt(memAddr, val)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `set_at` function:", err))
 	}
 
 	result, err = getAt(memAddr)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `get_at` function:", err))
 	}
@@ -151,13 +149,11 @@ func ExampleMemory() {
 	memAddr = (pageSize * 2) - int(unsafe.Sizeof(val))
 	val = 0xFEA09
 	_, err = setAt(memAddr, val)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `set_at` function:", err))
 	}
 
 	result, err = getAt(memAddr)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `get_at` function:", err))
 	}

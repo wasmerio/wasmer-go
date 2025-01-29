@@ -87,7 +87,6 @@ func ExampleFunction() {
 	// statically typed Rust values of type `i32` and `i32`. The
 	// result, in this case particular case, in a unit of type `i32`.
 	result, err = sumNative(3, 4)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `sum` function natively:", err))
 	}
