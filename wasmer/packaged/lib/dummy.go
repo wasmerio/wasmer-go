@@ -1,4 +1,4 @@
-// See https://github.com/golang/go/issues/26366.
+// Package lib is create for vendoring reasons, see: https://github.com/golang/go/issues/26366.
 package lib
 
 import (

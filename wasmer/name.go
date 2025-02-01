@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"runtime"
 )

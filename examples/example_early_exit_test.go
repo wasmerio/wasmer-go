@@ -59,7 +59,6 @@ func ExampleFunction_Call() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -80,7 +79,6 @@ func ExampleFunction_Call() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -90,7 +88,6 @@ func ExampleFunction_Call() {
 	// Get the `run` function which we'll use as our entrypoint.
 	fmt.Println("Calling `run` function...")
 	run, err := instance.Exports.GetFunction("run")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `run` function:", err))
 	}

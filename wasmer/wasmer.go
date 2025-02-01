@@ -1,7 +1,7 @@
 // Package wasmer is a complete and mature WebAssembly runtime for Go
 // based on Wasmer (https://github.com/wasmerio/wasmer).
 //
-// Features
+// # Features
 //
 // • Easy to use: The wasmer API mimics the standard WebAssembly API,
 //
@@ -9,7 +9,7 @@
 //
 // • Safe: All calls to WebAssembly will be fast, but more importantly, complete safe and sandboxed.
 //
-// Quick Introduction
+// # Quick Introduction
 //
 // The wasmer Go package brings the required API to execute WebAssembly
 // modules. In a nutshell, wasmer compiles the WebAssembly module into
@@ -42,7 +42,7 @@
 // • LLVM: Slow compilation times, very fast execution times (close to
 // native). Ideal for production.
 //
-// WebAssembly C API standard
+// # WebAssembly C API standard
 //
 // Wasmer —the runtime— is written in Rust; C and C++ bindings
 // exist. This Go package relies on the so-called wasm_c_api,
@@ -56,7 +56,7 @@
 // package commits to keep a semantic versioning over the API,
 // regardless what happens with the C API.
 //
-// Examples
+// # Examples
 //
 // The very basic example is the following
 //

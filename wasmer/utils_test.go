@@ -1,11 +1,12 @@
 package wasmer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testGetBytes(moduleFileName string) []byte {

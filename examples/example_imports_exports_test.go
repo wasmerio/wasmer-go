@@ -42,7 +42,6 @@ func ExampleExtern() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to compile module:", err))
 	}
@@ -114,7 +113,6 @@ func ExampleExtern() {
 	// Let's get them.
 	fmt.Println("Getting the exported function...")
 	function, err := instance.Exports.GetFunction("guest_function")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the exported function:", err))
 	}
@@ -123,7 +121,6 @@ func ExampleExtern() {
 
 	fmt.Println("Getting the exported global...")
 	global, err := instance.Exports.GetGlobal("guest_global")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the exported global:", err))
 	}
@@ -132,7 +129,6 @@ func ExampleExtern() {
 
 	fmt.Println("Getting the exported memory...")
 	memory, err := instance.Exports.GetMemory("guest_memory")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the exported memory:", err))
 	}
@@ -141,7 +137,6 @@ func ExampleExtern() {
 
 	fmt.Println("Getting the exported table...")
 	table, err := instance.Exports.GetTable("guest_table")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to get the exported table:", err))
 	}

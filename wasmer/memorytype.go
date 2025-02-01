@@ -6,10 +6,9 @@ import "runtime"
 
 // MemoryType classifies linear memories and their size range.
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/types.html#memory-types
-//
 type MemoryType struct {
 	_inner   *C.wasm_memorytype_t
 	_ownedBy interface{}
@@ -29,9 +28,8 @@ func newMemoryType(pointer *C.wasm_memorytype_t, ownedBy interface{}) *MemoryTyp
 
 // NewMemoryType instantiates a new MemoryType given some Limits.
 //
-//   limits := NewLimits(1, 4)
-//   memoryType := NewMemoryType(limits)
-//
+//	limits := NewLimits(1, 4)
+//	memoryType := NewMemoryType(limits)
 func NewMemoryType(limits *Limits) *MemoryType {
 	pointer := C.wasm_memorytype_new(limits.inner())
 
@@ -52,10 +50,9 @@ func (self *MemoryType) ownedBy() interface{} {
 
 // Limits returns the MemoryType's Limits.
 //
-//   limits := NewLimits(1, 4)
-//   memoryType := NewMemoryType(limits)
-//   _ = memoryType.Limits()
-//
+//	limits := NewLimits(1, 4)
+//	memoryType := NewMemoryType(limits)
+//	_ = memoryType.Limits()
 func (self *MemoryType) Limits() *Limits {
 	limits := newLimits(C.wasm_memorytype_limits(self.inner()), self.ownedBy())
 
@@ -66,10 +63,9 @@ func (self *MemoryType) Limits() *Limits {
 
 // IntoExternType converts the MemoryType into an ExternType.
 //
-//   limits := NewLimits(1, 4)
-//   memoryType := NewMemoryType(limits)
-//   externType = memoryType.IntoExternType()
-//
+//	limits := NewLimits(1, 4)
+//	memoryType := NewMemoryType(limits)
+//	externType = memoryType.IntoExternType()
 func (self *MemoryType) IntoExternType() *ExternType {
 	pointer := C.wasm_memorytype_as_externtype_const(self.inner())
 

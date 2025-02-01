@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"runtime"
 	"unsafe"
@@ -72,10 +73,9 @@ func newImportType(pointer *C.wasm_importtype_t, ownedBy interface{}) *ImportTyp
 // Note:️ An extern type is anything implementing IntoExternType:
 // FunctionType, GlobalType, MemoryType, TableType.
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   importType := NewImportType("ns", "host_global", globalType)
-//
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	importType := NewImportType("ns", "host_global", globalType)
 func NewImportType(module string, name string, ty IntoExternType) *ImportType {
 	moduleName := newName(module)
 	nameName := newName(name)
@@ -103,11 +103,10 @@ func (self *ImportType) ownedBy() interface{} {
 
 // Module returns the ImportType's module name (or namespace).
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   importType := NewImportType("ns", "host_global", globalType)
-//   _ = importType.Module()
-//
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	importType := NewImportType("ns", "host_global", globalType)
+//	_ = importType.Module()
 func (self *ImportType) Module() string {
 	byteVec := C.wasm_importtype_module(self.inner())
 	module := C.GoStringN(byteVec.data, C.int(byteVec.size))
@@ -119,11 +118,10 @@ func (self *ImportType) Module() string {
 
 // Name returns the ImportType's name.
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   importType := NewImportType("ns", "host_global", globalType)
-//   _ = importType.Name()
-//
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	importType := NewImportType("ns", "host_global", globalType)
+//	_ = importType.Name()
 func (self *ImportType) Name() string {
 	byteVec := C.wasm_importtype_name(self.inner())
 	name := C.GoStringN(byteVec.data, C.int(byteVec.size))
@@ -135,11 +133,10 @@ func (self *ImportType) Name() string {
 
 // Type returns the ImportType's type as an ExternType.
 //
-//   valueType := NewValueType(I32)
-//   globalType := NewGlobalType(valueType, CONST)
-//   importType := NewImportType("ns", "host_global", globalType)
-//   _ = importType.Type()
-//
+//	valueType := NewValueType(I32)
+//	globalType := NewGlobalType(valueType, CONST)
+//	importType := NewImportType("ns", "host_global", globalType)
+//	_ = importType.Type()
 func (self *ImportType) Type() *ExternType {
 	ty := C.wasm_importtype_type(self.inner())
 
@@ -148,7 +145,7 @@ func (self *ImportType) Type() *ExternType {
 	return newExternType(ty, self.ownedBy())
 }
 
-// Force to close the ImportType.
+// Close the ImportType
 //
 // A runtime finalizer is registered on the ImportType, but it is
 // possible to force the destruction of the ImportType by calling

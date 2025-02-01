@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"runtime"
 	"unsafe"
@@ -19,16 +20,16 @@ func newErrorWith(message string) *Error {
 }
 
 func _newErrorFromWasmer() *Error {
-	var errorLength = C.wasmer_last_error_length()
+	errorLength := C.wasmer_last_error_length()
 
 	if errorLength == 0 {
 		return newErrorWith("(no error from Wasmer)")
 	}
 
-	var errorMessage = make([]C.char, errorLength)
-	var errorMessagePointer = (*C.char)(unsafe.Pointer(&errorMessage[0]))
+	errorMessage := make([]C.char, errorLength)
+	errorMessagePointer := (*C.char)(unsafe.Pointer(&errorMessage[0]))
 
-	var errorResult = C.wasmer_last_error_message(errorMessagePointer, errorLength)
+	errorResult := C.wasmer_last_error_message(errorMessagePointer, errorLength)
 
 	if errorResult == -1 {
 		return newErrorWith("(failed to read last error from Wasmer)")
@@ -55,7 +56,7 @@ func (error *Error) Error() string {
 
 // TrapError represents a trap produced during Wasm execution.
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/intro/overview.html#trap
 type TrapError struct {

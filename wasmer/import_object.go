@@ -2,6 +2,7 @@ package wasmer
 
 // #include <wasmer.h>
 import "C"
+
 import (
 	"fmt"
 	"unsafe"
@@ -15,8 +16,7 @@ type ImportObject struct {
 
 // NewImportObject instantiates a new empty ImportObject.
 //
-//   imports := NewImportObject()
-//
+//	imports := NewImportObject()
 func NewImportObject() *ImportObject {
 	return &ImportObject{
 		externs: make(map[string]map[string]IntoExtern),
@@ -52,9 +52,8 @@ func (self *ImportObject) intoInner(module *Module) (*C.wasm_extern_vec_t, error
 
 // ContainsNamespace returns true if the ImportObject contains the given namespace (or module name)
 //
-//   imports := NewImportObject()
-//   _ = imports.ContainsNamespace("env") // false
-//
+//	imports := NewImportObject()
+//	_ = imports.ContainsNamespace("env") // false
 func (self *ImportObject) ContainsNamespace(name string) bool {
 	_, exists := self.externs[name]
 
@@ -67,30 +66,29 @@ func (self *ImportObject) ContainsNamespace(name string) bool {
 //
 // Note:️ An extern is anything implementing IntoExtern: Function, Global, Memory, Table.
 //
-//   imports := NewImportObject()
-//   importObject.Register(
-//   	"env",
-//   	map[string]wasmer.IntoExtern{
-//   		"host_function": hostFunction,
-//   		"host_global": hostGlobal,
-//   	},
-//  )
+//	 imports := NewImportObject()
+//	 importObject.Register(
+//	 	"env",
+//	 	map[string]wasmer.IntoExtern{
+//	 		"host_function": hostFunction,
+//	 		"host_global": hostGlobal,
+//	 	},
+//	)
 //
 // Note:️ The namespace (or module name) may be empty:
 //
-//   imports := NewImportObject()
-//   importObject.Register(
-//   	"",
-//   	map[string]wasmer.IntoExtern{
-//    		"host_function": hostFunction,
-//   		"host_global": hostGlobal,
-//   	},
-//   )
-//
+//	imports := NewImportObject()
+//	importObject.Register(
+//		"",
+//		map[string]wasmer.IntoExtern{
+//	 		"host_function": hostFunction,
+//			"host_global": hostGlobal,
+//		},
+//	)
 func (self *ImportObject) Register(namespaceName string, namespace map[string]IntoExtern) {
 	_, exists := self.externs[namespaceName]
 
-	if exists == false {
+	if !exists {
 		self.externs[namespaceName] = namespace
 	} else {
 		for key, value := range namespace {

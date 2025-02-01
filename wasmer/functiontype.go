@@ -8,7 +8,7 @@ import "runtime"
 // vector of parameters to a vector of results. They are also used to
 // classify the inputs and outputs of instructions.
 //
-// See also
+// # See also
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/types.html#function-types
 type FunctionType struct {
@@ -31,10 +31,9 @@ func newFunctionType(pointer *C.wasm_functype_t, ownedBy interface{}) *FunctionT
 // NewFunctionType instantiates a new FunctionType from two ValueType
 // arrays: the parameters and the results.
 //
-//   params := wasmer.NewValueTypes()
-//   results := wasmer.NewValueTypes(wasmer.I32)
-//   functionType := wasmer.NewFunctionType(params, results)
-//
+//	params := wasmer.NewValueTypes()
+//	results := wasmer.NewValueTypes(wasmer.I32)
+//	functionType := wasmer.NewFunctionType(params, results)
 func NewFunctionType(params []*ValueType, results []*ValueType) *FunctionType {
 	paramsAsValueTypeVec := toValueTypeVec(params)
 	resultsAsValueTypeVec := toValueTypeVec(results)
@@ -59,11 +58,10 @@ func (self *FunctionType) ownedBy() interface{} {
 // Params returns the parameters definitions from the FunctionType as
 // a ValueType array
 //
-//   params := wasmer.NewValueTypes()
-//   results := wasmer.NewValueTypes(wasmer.I32)
-//   functionType := wasmer.NewFunctionType(params, results)
-//   paramsValueTypes = functionType.Params()
-//
+//	params := wasmer.NewValueTypes()
+//	results := wasmer.NewValueTypes(wasmer.I32)
+//	functionType := wasmer.NewFunctionType(params, results)
+//	paramsValueTypes = functionType.Params()
 func (self *FunctionType) Params() []*ValueType {
 	return toValueTypeList(C.wasm_functype_params(self.inner()), self.ownedBy())
 }
@@ -71,21 +69,19 @@ func (self *FunctionType) Params() []*ValueType {
 // Results returns the results definitions from the FunctionType as a
 // ValueType array
 //
-//   params := wasmer.NewValueTypes()
-//   results := wasmer.NewValueTypes(wasmer.I32)
-//   functionType := wasmer.NewFunctionType(params, results)
-//   resultsValueTypes = functionType.Results()
-//
+//	params := wasmer.NewValueTypes()
+//	results := wasmer.NewValueTypes(wasmer.I32)
+//	functionType := wasmer.NewFunctionType(params, results)
+//	resultsValueTypes = functionType.Results()
 func (self *FunctionType) Results() []*ValueType {
 	return toValueTypeList(C.wasm_functype_results(self.inner()), self.ownedBy())
 }
 
 // IntoExternType converts the FunctionType into an ExternType.
 //
-//   function, _ := instance.Exports.GetFunction("exported_function")
-//   functionType := function.Type()
-//   externType = functionType.IntoExternType()
-//
+//	function, _ := instance.Exports.GetFunction("exported_function")
+//	functionType := function.Type()
+//	externType = functionType.IntoExternType()
 func (self *FunctionType) IntoExternType() *ExternType {
 	pointer := C.wasm_functype_as_externtype_const(self.inner())
 

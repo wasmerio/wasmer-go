@@ -19,6 +19,7 @@ package wasmer
 
 import (
 	"fmt"
+
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
 
@@ -44,7 +45,6 @@ func ExampleFunction() {
 
 	fmt.Println("Compiling module...")
 	module, err := wasmer.NewModule(store, wasmBytes)
-
 	if err != nil {
 		fmt.Println("Failed to compile module:", err)
 	}
@@ -55,7 +55,6 @@ func ExampleFunction() {
 	fmt.Println("Instantiating module...")
 	// Let's instantiate the Wasm module.
 	instance, err := wasmer.NewInstance(module, importObject)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to instantiate the module:", err))
 	}
@@ -65,7 +64,6 @@ func ExampleFunction() {
 	// The Wasm module exports a function called `sum`. Let's get
 	// it.
 	sum, err := instance.Exports.GetRawFunction("sum")
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to retrieve the `sum` function:", err))
 	}
@@ -73,7 +71,6 @@ func ExampleFunction() {
 	fmt.Println("Calling `sum` function...")
 	// Let's call the `sum` exported function.
 	result, err := sum.Call(1, 2)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `sum` function:", err))
 	}
@@ -90,7 +87,6 @@ func ExampleFunction() {
 	// statically typed Rust values of type `i32` and `i32`. The
 	// result, in this case particular case, in a unit of type `i32`.
 	result, err = sumNative(3, 4)
-
 	if err != nil {
 		panic(fmt.Sprintln("Failed to call the `sum` function natively:", err))
 	}
