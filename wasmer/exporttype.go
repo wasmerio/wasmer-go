@@ -50,16 +50,16 @@ func (self *exportTypes) close() {
 
 // ExportType is a descriptor for an exported WebAssembly value.
 type ExportType struct {
-	_inner   *C.wasm_exporttype_t
+	CPtrBase[*C.wasm_exporttype_t]
 	_ownedBy interface{}
 }
 
 func newExportType(pointer *C.wasm_exporttype_t, ownedBy interface{}) *ExportType {
-	exportType := &ExportType{_inner: pointer, _ownedBy: ownedBy}
+	exportType := &ExportType{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(exportType, func(self *ExportType) {
-			self.Close()
+		exportType.SetFinalizer(func(v *C.wasm_exporttype_t) {
+			C.wasm_exporttype_delete(v)
 		})
 	}
 
@@ -86,7 +86,7 @@ func NewExportType(name string, ty IntoExternType) *ExportType {
 }
 
 func (self *ExportType) inner() *C.wasm_exporttype_t {
-	return self._inner
+	return self.ptr()
 }
 
 func (self *ExportType) ownedBy() interface{} {

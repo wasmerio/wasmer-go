@@ -25,8 +25,10 @@ func TestWasiGetVersion(t *testing.T) {
 func TestWasiWithCapturedStdout(t *testing.T) {
 	engine := NewEngine()
 	store := NewStore(engine)
-	module, err := NewModule(store, testGetBytes("wasi.wasm"))
+	module, moddone, err := NewModuleSafe(store, testGetBytes("wasi.wasm"))
+
 	assert.NoError(t, err)
+	defer moddone(module)
 
 	wasiEnv, err := NewWasiStateBuilder("test-program").
 		Argument("--foo").

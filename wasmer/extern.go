@@ -7,7 +7,7 @@ import "runtime"
 // Extern is the runtime representation of an entity that can be
 // imported or exported.
 type Extern struct {
-	_inner   *C.wasm_extern_t
+	CPtrBase[*C.wasm_extern_t]
 	_ownedBy interface{}
 }
 
@@ -18,11 +18,11 @@ type IntoExtern interface {
 }
 
 func newExtern(pointer *C.wasm_extern_t, ownedBy interface{}) *Extern {
-	extern := &Extern{_inner: pointer, _ownedBy: ownedBy}
+	extern := &Extern{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(extern, func(extern *Extern) {
-			C.wasm_extern_delete(extern.inner())
+		extern.SetFinalizer(func(v *C.wasm_extern_t) {
+			C.wasm_extern_delete(v)
 		})
 	}
 
@@ -30,7 +30,7 @@ func newExtern(pointer *C.wasm_extern_t, ownedBy interface{}) *Extern {
 }
 
 func (self *Extern) inner() *C.wasm_extern_t {
-	return self._inner
+	return self.ptr()
 }
 
 func (self *Extern) ownedBy() interface{} {

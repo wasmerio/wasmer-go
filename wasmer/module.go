@@ -52,8 +52,9 @@ import (
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/modules.html#modules
 type Module struct {
-	_inner *C.wasm_module_t
-	store  *Store
+	CPtrBase[*C.wasm_module_t]
+
+	store *Store
 	// Stored if computed to avoid further reallocations.
 	importTypes *importTypes
 	// Stored if computed to avoid further reallocations.
@@ -86,11 +87,13 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 
 	err2 := maybeNewErrorFromWasmer(func() bool {
 		self = &Module{
-			_inner: C.to_wasm_module_new(store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
-			store:  store,
+			CPtrBase: mkPtr(C.to_wasm_module_new(
+				store.inner(), wasmBytesPtr, C.size_t(wasmBytesLength)),
+			),
+			store: store,
 		}
 
-		return self._inner == nil
+		return self.ptr() == nil
 	})
 
 	if err2 != nil {
@@ -102,6 +105,24 @@ func NewModule(store *Store, bytes []byte) (*Module, error) {
 	})
 
 	return self, nil
+}
+
+// NewModuleSafe is the same as NewModule but returns a release method.
+//
+// This is done so that the following code is less error prone:
+//
+//	mod, err := NewModule(...)
+//	inst, err := NewInstance(mod, ...)  // Last use of module here.
+//
+// GC may kick in immediately after the call to NewInstance, and that will
+// cause crashes when instance is used.
+func NewModuleSafe(store *Store, bytes []byte) (*Module, ReleaseFn[*Module], error) {
+	module, err := NewModule(store, bytes)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return module, keepAlive, nil
 }
 
 // ValidateModule validates a new Module against the given Store.
@@ -145,7 +166,7 @@ func ValidateModule(store *Store, bytes []byte) error {
 }
 
 func (self *Module) inner() *C.wasm_module_t {
-	return self._inner
+	return self.ptr()
 }
 
 // Name returns the Module's name.
@@ -184,6 +205,28 @@ func (self *Module) Imports() []*ImportType {
 	return self.importTypes.importTypes
 }
 
+// ImportsSafe is the same as Imports method but returns a release
+// method that should be invoked with self as the argument.
+//
+// This is necessary because the following code is not safe:
+//
+//	module := NewModule()
+//	imports := module.Imports()  // This is the last time `module` is used
+//	// Use imports
+//	if len(imports) > 0 { ...}
+//
+// Module finalizer may run at any point after the last use of module.
+// As a result, the underlying C memory may be collected by GC.
+// To avoid this, use ImportsSafe:
+//
+//	module := NewModule()
+//	imports, release := module.ImportsSafe()
+//	defer release(module)
+//	// Use imports
+func (self *Module) ImportsSafe() ([]*ImportType, ReleaseFn[*Module]) {
+	return self.Imports(), keepAlive
+}
+
 // Exports returns the Module's exports as an ExportType array.
 //
 //	wasmBytes := []byte(`...`)
@@ -197,6 +240,12 @@ func (self *Module) Exports() []*ExportType {
 	}
 
 	return self.exportTypes.exportTypes
+}
+
+// ExportsSafe is similar to Exports method but returns a release function
+// to ensure the Module is not garbage collected.
+func (self *Module) ExportsSafe() ([]*ExportType, ReleaseFn[*Module]) {
+	return self.Exports(), keepAlive
 }
 
 // Serialize serializes the module and returns the Wasm code as an byte array.
@@ -245,18 +294,20 @@ func DeserializeModule(store *Store, bytes []byte) (*Module, error) {
 
 	err := maybeNewErrorFromWasmer(func() bool {
 		self = &Module{
-			_inner: C.to_wasm_module_deserialize(store.inner(), bytesPtr, C.size_t(bytesLength)),
-			store:  store,
+			CPtrBase: mkPtr(C.to_wasm_module_deserialize(
+				store.inner(), bytesPtr, C.size_t(bytesLength)),
+			),
+			store: store,
 		}
 
-		return self._inner == nil
+		return self.ptr() == nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	runtime.SetFinalizer(self, func(self *Module) {
-		C.wasm_module_delete(self.inner())
+	self.SetFinalizer(func(v *C.wasm_module_t) {
+		C.wasm_module_delete(v)
 	})
 
 	return self, nil

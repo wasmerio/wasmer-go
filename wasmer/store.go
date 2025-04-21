@@ -16,7 +16,7 @@ import "runtime"
 //
 // Specification: https://webassembly.github.io/spec/core/exec/runtime.html#store
 type Store struct {
-	_inner *C.wasm_store_t
+	CPtrBase[*C.wasm_store_t]
 	Engine *Engine
 }
 
@@ -26,19 +26,17 @@ type Store struct {
 //	store := NewStore(engine)
 func NewStore(engine *Engine) *Store {
 	self := &Store{
-		_inner: C.wasm_store_new(engine.inner()),
-		Engine: engine,
+		CPtrBase: mkPtr(C.wasm_store_new(engine.inner())),
+		Engine:   engine,
 	}
-
-	runtime.SetFinalizer(self, func(self *Store) {
-		self.Close()
+	self.SetFinalizer(func(self *C.wasm_store_t) {
+		C.wasm_store_delete(self)
 	})
-
 	return self
 }
 
 func (self *Store) inner() *C.wasm_store_t {
-	return self._inner
+	return self.ptr()
 }
 
 // Close the store forcingly

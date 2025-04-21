@@ -87,22 +87,18 @@ func IsEngineAvailable(engine EngineKind) bool {
 
 // Config holds the compiler and the Engine used by the Store.
 type Config struct {
-	_inner *C.wasm_config_t
+	CPtrBase[*C.wasm_config_t]
 }
 
 // NewConfig instantiates and returns a new Config.
 //
 //	config := NewConfig()
 func NewConfig() *Config {
-	config := C.wasm_config_new()
-
-	return &Config{
-		_inner: config,
-	}
+	return &Config{CPtrBase: mkPtr(C.wasm_config_new())}
 }
 
 func (self *Config) inner() *C.wasm_config_t {
-	return self._inner
+	return self.ptr()
 }
 
 // UseUniversalEngine sets the engine to Universal in the configuration.
@@ -190,7 +186,9 @@ func metering_delegate(op C.wasmer_parser_operator_t) C.uint64_t {
 //			I32Add: 	4,
 //		 }
 //	  config.PushMeteringMiddleware(7865444, opmap)
-func (self *Config) PushMeteringMiddleware(maxGasUsageAllowed uint64, opMap map[Opcode]uint32) *Config {
+func (self *Config) PushMeteringMiddleware(
+	maxGasUsageAllowed uint64, opMap map[Opcode]uint32,
+) *Config {
 	if opCodeMap == nil {
 		// REVIEW only allowing this to be set once
 		opCodeMap = opMap
@@ -278,7 +276,7 @@ func (self *Config) UseSinglepassCompiler() *Config {
 //	config := NewConfig()
 //	config.UseTarget(target)
 func (self *Config) UseTarget(target *Target) *Config {
-	C.wasm_config_set_target(self.inner(), target.inner())
+	C.wasm_config_set_target(self.inner(), target.release())
 
 	return self
 }

@@ -91,7 +91,7 @@ func (self ValueKind) inner() C.wasm_valkind_t {
 // ValueType classifies the individual values that WebAssembly code
 // can compute with and the values that a variable accepts.
 type ValueType struct {
-	_inner   *C.wasm_valtype_t
+	CPtrBase[*C.wasm_valtype_t]
 	_ownedBy interface{}
 }
 
@@ -100,16 +100,15 @@ type ValueType struct {
 //	valueType := NewValueType(I32)
 func NewValueType(kind ValueKind) *ValueType {
 	pointer := C.wasm_valtype_new(C.wasm_valkind_t(kind))
-
 	return newValueType(pointer, nil)
 }
 
 func newValueType(pointer *C.wasm_valtype_t, ownedBy interface{}) *ValueType {
-	valueType := &ValueType{_inner: pointer, _ownedBy: ownedBy}
+	valueType := &ValueType{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(valueType, func(valueType *ValueType) {
-			C.wasm_valtype_delete(valueType.inner())
+		valueType.SetFinalizer(func(v *C.wasm_valtype_t) {
+			C.wasm_valtype_delete(v)
 		})
 	}
 
@@ -117,7 +116,7 @@ func newValueType(pointer *C.wasm_valtype_t, ownedBy interface{}) *ValueType {
 }
 
 func (self *ValueType) inner() *C.wasm_valtype_t {
-	return self._inner
+	return self.ptr()
 }
 
 // Kind returns the ValueType's ValueKind

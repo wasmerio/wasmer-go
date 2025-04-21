@@ -13,16 +13,17 @@ import (
 //
 // https://webassembly.github.io/spec/core/syntax/modules.html#globals
 type Global struct {
-	_inner   *C.wasm_global_t
+	CPtrBase[*C.wasm_global_t]
+	typ      *GlobalType
 	_ownedBy interface{}
 }
 
 func newGlobal(pointer *C.wasm_global_t, ownedBy interface{}) *Global {
-	global := &Global{_inner: pointer, _ownedBy: ownedBy}
+	global := &Global{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(global, func(global *Global) {
-			C.wasm_global_delete(global.inner())
+		global.SetFinalizer(func(v *C.wasm_global_t) {
+			C.wasm_global_delete(v)
 		})
 	}
 
@@ -47,7 +48,7 @@ func NewGlobal(store *Store, ty *GlobalType, value Value) *Global {
 }
 
 func (self *Global) inner() *C.wasm_global_t {
-	return self._inner
+	return self.ptr()
 }
 
 func (self *Global) ownedBy() interface{} {
@@ -73,11 +74,15 @@ func (self *Global) IntoExtern() *Extern {
 //	global, _ := instance.Exports.GetGlobal("exported_global")
 //	ty := global.Type()
 func (self *Global) Type() *GlobalType {
-	ty := C.wasm_global_type(self.inner())
+	defer runtime.KeepAlive(self)
 
-	runtime.KeepAlive(self)
+	if self.typ == nil {
+		ptr := self.inner()
+		ty := C.wasm_global_type(ptr)
+		self.typ = newGlobalType(ty, self.ownedBy())
+	}
 
-	return newGlobalType(ty, self.ownedBy())
+	return self.typ
 }
 
 // Set sets the Global's value.

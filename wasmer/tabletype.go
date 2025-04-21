@@ -10,16 +10,16 @@ import "runtime"
 //
 // Specification: https://webassembly.github.io/spec/core/syntax/types.html#table-types
 type TableType struct {
-	_inner   *C.wasm_tabletype_t
+	CPtrBase[*C.wasm_tabletype_t]
 	_ownedBy interface{}
 }
 
 func newTableType(pointer *C.wasm_tabletype_t, ownedBy interface{}) *TableType {
-	tableType := &TableType{_inner: pointer, _ownedBy: ownedBy}
+	tableType := &TableType{CPtrBase: mkPtr(pointer), _ownedBy: ownedBy}
 
 	if ownedBy == nil {
-		runtime.SetFinalizer(tableType, func(tableType *TableType) {
-			C.wasm_tabletype_delete(tableType.inner())
+		tableType.SetFinalizer(func(v *C.wasm_tabletype_t) {
+			C.wasm_tabletype_delete(v)
 		})
 	}
 
@@ -33,13 +33,12 @@ func newTableType(pointer *C.wasm_tabletype_t, ownedBy interface{}) *TableType {
 //	tableType := NewTableType(valueType, limits)
 //	_ = tableType.IntoExternType()
 func NewTableType(valueType *ValueType, limits *Limits) *TableType {
-	pointer := C.wasm_tabletype_new(valueType.inner(), limits.inner())
-
+	pointer := C.wasm_tabletype_new(valueType.release(), limits.inner())
 	return newTableType(pointer, nil)
 }
 
 func (self *TableType) inner() *C.wasm_tabletype_t {
-	return self._inner
+	return self.ptr()
 }
 
 func (self *TableType) ownedBy() interface{} {
