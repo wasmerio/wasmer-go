@@ -27,7 +27,16 @@ func newTarget(target *C.wasmer_target_t) *Target {
 //	cpuFeatures := NewCpuFeatures()
 //	target := NewTarget(triple, cpuFeatures)
 func NewTarget(triple *Triple, cpuFeatures *CpuFeatures) *Target {
-	return newTarget(C.wasmer_target_new(triple.inner(), cpuFeatures.inner()))
+	target := newTarget(C.wasmer_target_new(triple.inner(), cpuFeatures.inner()))
+
+	// `wasmer_target_new` takes ownership of `triple` and
+	// `cpuFeatures`, so they must not be deleted by their finalizers.
+	runtime.SetFinalizer(triple, nil)
+	triple._inner = nil
+	runtime.SetFinalizer(cpuFeatures, nil)
+	cpuFeatures._inner = nil
+
+	return target
 }
 
 func (self *Target) inner() *C.wasmer_target_t {
@@ -63,7 +72,7 @@ func NewTriple(triple string) (*Triple, error) {
 	var cTriple *C.wasmer_triple_t
 
 	err := maybeNewErrorFromWasmer(func() bool {
-		cTriple := C.wasmer_triple_new(&cTripleName)
+		cTriple = C.wasmer_triple_new(&cTripleName)
 
 		return cTriple == nil
 	})

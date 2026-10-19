@@ -3,7 +3,10 @@ package wasmer
 // #include <wasmer.h>
 // extern uint64_t metering_delegate(enum wasmer_parser_operator_t op);
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 // CompilerKind represents the possible compiler types.
 type CompilerKind C.wasmer_compiler_t
@@ -279,6 +282,11 @@ func (self *Config) UseSinglepassCompiler() *Config {
 //	config.UseTarget(target)
 func (self *Config) UseTarget(target *Target) *Config {
 	C.wasm_config_set_target(self.inner(), target.inner())
+
+	// `wasm_config_set_target` takes ownership of `target`, so it
+	// must not be deleted by its finalizer.
+	runtime.SetFinalizer(target, nil)
+	target._inner = nil
 
 	return self
 }
