@@ -5,12 +5,16 @@ import "C"
 
 import (
 	"runtime"
+	"unsafe"
 )
 
 func newName(str string) C.wasm_name_t {
 	var name C.wasm_name_t
 
-	C.wasm_name_new_from_string(&name, C.CString(str))
+	cStr := C.CString(str)
+	defer C.free(unsafe.Pointer(cStr))
+
+	C.wasm_name_new_from_string(&name, cStr)
 
 	runtime.KeepAlive(str)
 
